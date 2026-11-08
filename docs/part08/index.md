@@ -1,5 +1,35 @@
 # 第8部 JPAを理解して使い分ける
 
+<!-- part-intro:start -->
+<div class="video-card">
+  <video controls preload="metadata" poster="../assets/videos/part08-intro.jpg">
+    <source src="../assets/videos/part08-intro.mp4" type="video/mp4">
+  </video>
+  <p class="video-caption">▶ 第8部でやること（約1分）</p>
+  <p class="video-credit">音声：VOICEVOX:冥鳴ひまり</p>
+</div>
+
+??? note "字幕全文"
+    第8部はJPAを理解して使い分ける部です。
+    本線とは別の実験で動きを観察します。
+    QuickVoteはここまで、JdbcClientとSQLで書いてきました。
+    でも現場でよく見るのはJPAのコードです。
+    SQLを書かないので、何が実行されているのか見えません。
+    第39章はJPAが肩代わりすること。
+    永続コンテキストの中で変更すると、saveなしでもUPDATEが出ます。
+    第40章はN+1。
+    一覧でSQLが101本流れる事故を数えて直します。
+    fetch joinやDTOで、SQLを3本以下に減らします。
+    LazyInitializationExceptionも、わざと起こして読みます。
+    第41章はSQLとJPAの使い分け。
+    同じ処理を並べて選び方を決めます。
+    AIが書いたJPAコードの罠を5つ見つけます。
+    この部が終わると、JPAが何をして何を隠すか説明できます。
+    SQLが何本流れるかを数えて確かめられます。
+    QuickVote本線は、JdbcClientのままです。
+    JPAは発行されるSQLを数えて使う。
+<!-- part-intro:end -->
+
 QuickVote の本線は、ここまでずっと JdbcClient と SQL で書いてきました。この部では、日本の現場でいちばんよく出会うもう1つの方式、JPA（Hibernate）を、本線とは別の実験プロジェクト `code/jpa-lab/` で動かして学びます。
 
 目的は JPA に乗り換えることではありません。JPA が何を肩代わりして何を隠すのかを、発行される SQL を数えて理解し、AI が書いた JPA コードを読み、レビューし、直せるようになることです。

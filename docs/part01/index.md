@@ -1,5 +1,40 @@
 # 第1部 TypeScript脳で読むJava
 
+<!-- part-intro:start -->
+<div class="video-card">
+  <video controls preload="metadata" poster="../assets/videos/part01-intro.jpg">
+    <source src="../assets/videos/part01-intro.mp4" type="video/mp4">
+  </video>
+  <p class="video-caption">▶ 第1部でやること（約1分）</p>
+  <p class="video-credit">音声：VOICEVOX:冥鳴ひまり</p>
+</div>
+
+??? note "字幕全文"
+    第1部はTypeScript脳で読むJavaです。
+    TypeScriptの知識に違いだけを足します。
+    TypeScriptなら読めても、Javaは知らない書き方だらけです。
+    型の考え方も例外の扱いも、少しずつ違います。
+    第2章はJavaが動くまで。
+    javacで.classを作り、JVMで動かします。
+    第3章は型の世界。
+    Javaの型は形ではなく、名前で決まります。
+    第4章はデータの形。
+    record、enum、sealedで投票の状態を型にします。
+    switchの書き漏れはコンパイルエラーになります。
+    第5章はnullと例外。
+    NPEを起こして読み方を覚えます。
+    第6章はコレクションとStream。
+    mapやfilterとの対応で読めるようにします。
+    第7章は値の落とし穴。
+    得票率の合計が100%にならない事故を直します。
+    第8章はJUnit。Springなしで最初のテストを書きます。
+    第9章はスレッド。
+    共有した値を、同時に書き換えると壊れることがあります。
+    この部が終わると、投票の状態と得票率を素のJavaで書けます。
+    テストで確かめることもできます。
+    JavaはTypeScriptとの違いで読む。
+<!-- part-intro:end -->
+
 Springを学ぶ前に、**Javaそのものを読める状態**にします。ただし、Javaの文法を最初から順に教えることはしません。TypeScriptを12年読み書きしてきた経験の上に、Javaの考え方を差分として足していきます。
 
 ## この部でできるようになること

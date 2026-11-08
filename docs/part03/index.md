@@ -1,5 +1,37 @@
 # 第3部 PostgreSQLに正しく保存する
 
+<!-- part-intro:start -->
+<div class="video-card">
+  <video controls preload="metadata" poster="../assets/videos/part03-intro.jpg">
+    <source src="../assets/videos/part03-intro.mp4" type="video/mp4">
+  </video>
+  <p class="video-caption">▶ 第3部でやること（約1分）</p>
+  <p class="video-credit">音声：VOICEVOX:冥鳴ひまり</p>
+</div>
+
+??? note "字幕全文"
+    第3部はPostgreSQLに正しく保存します。
+    いまのQuickVoteは、データがメモリ上にあります。
+    再起動すると、投票も票も全部消えます。
+    第17章はDBの起動とFlyway。
+    Docker Composeで、PostgreSQLを起動し、テーブルの形をコードで育てます。
+    適用済みのファイルを書き換えると、起動に失敗します。
+    第18章は制約の設計。
+    ER図を描き、制約を1つずつ破ってみます。
+    アプリのifに加えて、DBの制約を最後の守りにします。
+    第19章はJdbcClient。
+    SQLを書いて、SQLインジェクションを実際に通します。
+    第20章は検索とインデックス。
+    EXPLAIN ANALYZEで速さを測ります。
+    第21章は実PostgreSQLでテスト。
+    H2で通っても、安心できない理由をH2で失敗させて確かめます。
+    この部が終わると、再起動してもデータが残ります。
+    本物のPostgreSQLに対するテストもそろいます。
+    ただ、保存できるだけで、まだ守られてはいません。
+    途中で失敗すると片方だけ残り同時に来ると上限も超えます。
+    保存するだけでなく、約束をDBに置く。
+<!-- part-intro:end -->
+
 第2部の QuickVote は、再起動すると全部消えるアプリでした。この部では、投票・選択肢・参加者・票を PostgreSQL に保存します。
 
 保存するだけでは終わりません。テーブルの形を Flyway でコードとして育て、守りたい約束を制約として DB に置きます。SQL は `JdbcClient` で書き、データが増えたときの速さを実測し、本物の DB でテストします。第2部で約束した「Repository の中身だけを入れ替える」が、ここで実現します。

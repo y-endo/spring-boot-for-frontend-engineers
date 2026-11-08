@@ -70,10 +70,20 @@ def wrap_jp(text: str, width: int = 26) -> str:
     if len(text) <= width:
         return text
     best = len(text) // 2
+    found = False
     for i in range(len(text) // 2, 0, -1):
         if text[i - 1] in "、。，！？）」":
             best = i
+            found = True
             break
+    if not found:
+        # 前半に句読点が無いとき、後半で中央に最も近い句読点を使う（語の途中で折れるのを防ぐ）
+        def vis(t):  # 半角は全角の約0.6幅として数える
+            return sum(0.6 if ord(c) < 0x80 else 1.0 for c in t)
+        for i in range(len(text) // 2 + 1, len(text)):
+            if text[i - 1] in "、。，！？）」" and vis(text[:i]) <= width and vis(text[i:]) <= width:
+                best = i
+                break
     return text[:best] + r"\N" + text[best:]
 
 
@@ -164,9 +174,14 @@ def main(script_path: str):
                     "-c:v", "libx264", "-preset", "slow", "-crf", "22", "-pix_fmt", "yuv420p",
                     "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", "-shortest",
                     str(out)], check=True)
-    # サムネイル（中盤の1コマ）
-    subprocess.run([FFMPEG, "-y", "-hide_banner", "-loglevel", "error", "-ss", f"{total*0.45:.2f}",
-                    "-i", str(out), "-frames:v", "1", "-q:v", "3", str(OUT_DIR / f"{vid}.jpg")], check=True)
+    # サムネイル。poster_sec があればその秒の字幕なしのコマ、なければ中盤の1コマ
+    if "poster_sec" in spec:
+        frame = frames_dir / f"f_{int(spec['poster_sec'] * FPS) + 1:04d}.jpg"
+        subprocess.run([FFMPEG, "-y", "-hide_banner", "-loglevel", "error",
+                        "-i", str(frame), "-q:v", "3", str(OUT_DIR / f"{vid}.jpg")], check=True)
+    else:
+        subprocess.run([FFMPEG, "-y", "-hide_banner", "-loglevel", "error", "-ss", f"{total*0.45:.2f}",
+                        "-i", str(out), "-frames:v", "1", "-q:v", "3", str(OUT_DIR / f"{vid}.jpg")], check=True)
     print(f"完成: {out}（{total:.1f}秒）")
 
 

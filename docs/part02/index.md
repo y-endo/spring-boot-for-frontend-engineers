@@ -1,5 +1,41 @@
 # 第2部 Spring Bootの心臓部
 
+<!-- part-intro:start -->
+<div class="video-card">
+  <video controls preload="metadata" poster="../assets/videos/part02-intro.jpg">
+    <source src="../assets/videos/part02-intro.mp4" type="video/mp4">
+  </video>
+  <p class="video-caption">▶ 第2部でやること（約1分）</p>
+  <p class="video-credit">音声：VOICEVOX:冥鳴ひまり</p>
+</div>
+
+??? note "字幕全文"
+    第2部はSpring Bootの心臓部です。
+    仕組みを動くアプリで追っていきます。
+    第1部でJavaは読めるようになりました。
+    でも、java -jarの1行で、サーバーが立つ仕組みが見えません。
+    リクエストがどこを通って返るのかも分かりません。
+    第10章はSpring Bootの全体像。
+    自動構成が条件付きの設定だと確かめます。
+    第11章はDIコンテナ。
+    Beanは起動時に配線されて、全員で共有されます。
+    第12章はリクエストの旅。
+    1つのスレッドが最後まで運びます。
+    第13章はAPIの契約。
+    DTOとJSONの境界で、守られないものを実験で見ます。
+    第14章は入力検証とエラー。
+    検証を3層に分けて、エラーを同じ形で返します。
+    第15章は設定と秘密。
+    足りなければ起動時に落とし秘密はGitに入れません。
+    第16章はAPIのテスト。
+    WebMvcTestと、SpringBootTestを使い分けます。
+    この部が終わると、QuickVoteが動きます。
+    投票を作り、参加し、選択肢を足して、投票できます。
+    ただしデータはメモリ上だけです。
+    守りは第3部から足していきます。
+    Spring Bootの動きはログとテストで追える。
+<!-- part-intro:end -->
+
 Java の文法が読めるようになったら、次は Spring Boot です。この部では、`java -jar` 1行でサーバーが立つ仕組みから、リクエストが通る道、JSON の境界、エラーの設計、設定、テストまでを、実際に動くアプリで追います。
 
 ここで作る QuickVote は、まだ DB を使いません。投票・選択肢・参加者・票は、メモリ上の `ConcurrentHashMap` に持たせます。それでも API の形、エラーの形、クラスの名前は完成形（`code/quickvote/`）と揃えてあるので、第3部で DB に置き換えるときに変わるのは Repository の中身だけです。
