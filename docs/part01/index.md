@@ -1,7 +1,5 @@
 # 第1部 TypeScript脳で読むJava
 
-![第1部の扉絵：2つの言語をつなぐ橋](../assets/illustrations/part01.webp)
-
 Springを学ぶ前に、**Javaそのものを読める状態**にします。ただし、Javaの文法を最初から順に教えることはしません。TypeScriptを12年読み書きしてきたあなたの頭に、Javaの考え方を**差分として**載せます。
 
 ## この部でできるようになること

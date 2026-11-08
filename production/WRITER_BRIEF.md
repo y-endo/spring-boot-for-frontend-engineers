@@ -31,7 +31,7 @@
 - 「予測カード」「この時点の保証」「壊してみる」「現場ではこうする」を適宜使う。
 - 章末に「まとめ3点セット」（一言で言うと／現場でこう聞かれる／自分のサービスならどこに当たるか）と演習（確認・応用・説明。解答は `??? success "解答"`）。
 - 部の最後の章の後ろ（または部の index.md）に「第N部のチェックリスト」（can-do文、`- [ ]`、10〜15項目）。
-- 部の扉 `docs/partNN/index.md`：扉絵 `![...](../assets/illustrations/partNN.webp)`、この部で何ができるようになるか、アプリの到達状態、各章へのカードリンク（`<div class="grid cards" markdown>`）。手本は `docs/part01/index.md`。
+- 部の扉 `docs/partNN/index.md`：部の導入動画、この部で何ができるようになるか、アプリの到達状態、各章へのカードリンク（`<div class="grid cards" markdown>`）。手本は `docs/part01/index.md`。
 - 動画がある章は ASSETS.md の形式で埋め込み、直後に「動画の要点」を箇条書き3〜5行で書く。
 - 挿絵は ASSETS.md の一覧にあるものだけ使う。技術図は自分で SVG（`docs/assets/diagrams/chNN-*.svg`）か Mermaid で作る。
 - 特定の実在サービスには一切触れない。

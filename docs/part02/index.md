@@ -1,7 +1,5 @@
 # 第2部 Spring Bootの心臓部
 
-![第2部の扉絵：配線されたSpring Bootの心臓部](../assets/illustrations/part02.webp)
-
 Java の文法が読めるようになったら、次は **Spring Boot** です。この部では、`java -jar` 1行でサーバーが立つ仕組みから、リクエストが通る道、JSON の境界、エラーの設計、設定、テストまでを、**実際に動くアプリ**で追います。
 
 ここで作る QuickVote は、まだ DB を使いません。メモリ上の `ConcurrentHashMap` に、投票・選択肢・参加者・票を持ちます。それでも、**API の形、エラーの形、クラスの名前**は、完成形（`code/quickvote/`）と揃えてあります。第3部で DB に置き換えるとき、変わるのは Repository の中身だけです。

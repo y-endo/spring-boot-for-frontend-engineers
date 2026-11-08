@@ -31,7 +31,7 @@ body { font-feature-settings: "palt" 1; }
 .md-typeset mark { background: linear-gradient(transparent 55%, rgba(255, 196, 0, 0.55) 55%); color: inherit; padding: 0 0.1em; }
 
 /* コードブロック */
-.md-typeset pre > code { font-size: 0.8rem; line-height: 1.65; }
+.md-typeset pre > code { font-size: 0.7rem; line-height: 1.65; }
 .md-typeset code { border-radius: 4px; }
 
 /* 表 */

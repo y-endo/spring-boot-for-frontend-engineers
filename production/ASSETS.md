@@ -6,7 +6,6 @@
 
 | ファイル名 | 内容 | 主に使う章 |
 | --- | --- | --- |
-| `part00.webp`〜`part10.webp` | 各部の扉イラスト | 各部の index.md |
 | `quickvote-scene.webp` | 会議室でスマホから投票し、画面の棒グラフが伸びる場面 | 00 |
 | `duck-license.webp` | 鴨の免許証（名前的型付けの例え） | 03 |
 | `shop-staff.webp` | 1人の超高速店員（Node）と、客ごとに付く店員たち（Java） | 09 |
