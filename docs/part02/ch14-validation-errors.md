@@ -16,9 +16,9 @@
 
 React のフォームで、タイトルが空なら送信ボタンを無効にしています。それなのに、サーバーでも「タイトルが空ならエラー」を作る必要があるのでしょうか。
 
-あります。`curl` を使えば、画面を通らずに、**どんなリクエストでも送れる**からです。ブラウザの開発者ツールでも、悪意のあるスクリプトでも、壊れたクライアントでも同じです。第13章で見たとおり、JSON の境界では、型も値も守られません。
+あります。`curl` を使えば画面を通らずにどんなリクエストでも送れるからです。ブラウザの開発者ツールでも、悪意のあるスクリプトでも、壊れたクライアントでも同じです。第13章で見たとおり、JSON の境界では型も値も守られません。
 
-**サーバーは、届いたものを疑う。** 検証は、画面のためではなく、**サーバー自身の約束を守るため**のものです。この章では、(1) どう検証するか (2) 失敗したとき、どんな形で返すか、を決めます。エラーの形は、**クライアントが機械的に読める**ことが大事です。
+サーバーは、届いたものを疑います。検証は画面のためではなく、サーバー自身の約束を守るために行います。この章では、どう検証するかと、失敗したときにどんな形で返すかを決めます。エラーの形は、クライアントが機械的に読めることが大事です。
 
 ## 2. 検証の3層：どこで何を守るか
 
@@ -36,17 +36,15 @@ flowchart LR
 
 | 層 | 守るもの | 例（QuickVote） | 失敗したとき |
 | --- | --- | --- | --- |
-| ① Bean Validation | **リクエスト1件だけ見て分かる**形式・長さ・範囲 | タイトルは空でない／100文字まで、`closesInMinutes` は 5〜10080、初期の選択肢は10個まで | 400 `VALIDATION_FAILED` |
-| ② 業務ルール（Service） | **今の状態を見ないと分からない**条件 | 満員（`POLL_FULL`）、選択肢の上限（`OPTION_LIMIT_REACHED`）、締切後（`POLL_CLOSED`）、権限 | 403 / 404 / 409 など。`code` で細かく区別 |
-| ③ DB制約 | どんな経路でも守りたい**最後の砦** | UNIQUE（1人1票）、CHECK、外部キー（第18章） | 通常は起きない。起きたら**想定外**（500、または 409 に翻訳） |
+| ① Bean Validation | リクエスト1件だけ見て分かる形式・長さ・範囲 | タイトルは空でない／100文字まで、`closesInMinutes` は 5〜10080、初期の選択肢は10個まで | 400 `VALIDATION_FAILED` |
+| ② 業務ルール（Service） | 今の状態を見ないと分からない条件 | 満員（`POLL_FULL`）、選択肢の上限（`OPTION_LIMIT_REACHED`）、締切後（`POLL_CLOSED`）、権限 | 403 / 404 / 409 など。`code` で細かく区別 |
+| ③ DB制約 | どんな経路でも守りたい最後の砦 | UNIQUE（1人1票）、CHECK、外部キー（第18章） | 通常は起きない。起きたら想定外（500、または 409 に翻訳） |
 
-大事な原則は3つです。
+3つの層には、それぞれ次のような役割があります。
 
-1. **①は①で止める**：形式がおかしい入力は、Service にも DB にも届かせない（第12章のログで確認したとおり、`@Valid` は Controller の前で止める）
-2. **②は、②でしか守れない**：「あと1人入れるか」は、リクエストを見ても分かりません。今の人数を数える必要があります（第4部で、同時実行でも守れるようにします）
-3. **③は、アプリの `if` をすり抜けたときの保険**：アプリの検証を信用しすぎず、DB にも制約を置く（第18章）
+①の層は、形式がおかしい入力をそこで止めます。Service にも DB にも届かせません（第12章のログで確認したとおり、`@Valid` は Controller の前で止まります）。②の層でしか守れないものもあります。「あと1人入れるか」はリクエストを見ても分からず、今の人数を数える必要があるからです（同時実行でも守れるようにする方法は、第4部で扱います）。③の層は、アプリの `if` をすり抜けたときの保険です。アプリの検証を信用しすぎず、DB にも制約を置きます（第18章）。
 
-「1つの層だけ」で守ろうとしないこと。**AI が書く検証は、①だけで終わっていることがよくあります**。
+1つの層だけで守ろうとしてはいけません。AI が書く検証は、①だけで終わっていることがよくあります。
 
 ## 3. Bean Validation：注釈で書く検証
 
@@ -67,17 +65,17 @@ public ResponseEntity<PollDetail> create(VisitorPrincipal visitor, @Valid @Reque
 ```
 
 !!! note "用語：Bean Validation"
-    Java の検証の標準仕様（`jakarta.validation.*`）です。DTO に注釈を付けて「この項目は空でない」「この範囲」と宣言すると、`@Valid` のついた引数に対して自動で検査されます。Spring Boot では `spring-boot-starter-validation` を足すと、実装（Hibernate Validator）が付いてきます。パッケージは `jakarta.validation.*`（`javax.validation.*` は古い世代）。
+    Java の検証の標準仕様（`jakarta.validation.*`）です。DTO に注釈を付けて「この項目は空でない」「この範囲」と宣言すると、`@Valid` のついた引数に対して自動で検査されます。Spring Boot では `spring-boot-starter-validation` を足すと、実装（Hibernate Validator）が付いてきます。パッケージは `jakarta.validation.*` です（`javax.validation.*` は古い世代のものです）。
 
 | 注釈 | 意味 | 注意 |
 | --- | --- | --- |
 | `@NotNull` | `null` でない | 空文字は通る |
 | `@NotBlank` | `null`・空文字・空白だけ、でない | 文字列用 |
-| `@Size(max = n)` | 文字列の長さ／コレクションの要素数 | 文字列では**UTF-16 の `char` 数**（4 節） |
+| `@Size(max = n)` | 文字列の長さ／コレクションの要素数 | 文字列では UTF-16 の `char` 数（3 節の「文字数を数える」） |
 | `@Min` / `@Max` | 数値の範囲 | |
-| `List<@NotBlank String>` | **要素ごと**の検証 | 型引数に付ける |
+| `List<@NotBlank String>` | 要素ごとの検証 | 型引数に付ける |
 
-`options[1]` のように、**どの要素が悪いか**まで、エラーに出ます（`PollControllerValidationTest` で確認済み）。
+`options[1]` のように、どの要素が悪いかまでエラーに出ます（`PollControllerValidationTest` で確認済み）。
 
 ### `@Valid` を付け忘れると、何も検証されない
 
@@ -95,16 +93,16 @@ String withoutValid(@RequestBody CreatePollRequest request) { ... }   // @Valid 
 
 | エンドポイント | 結果 |
 | --- | --- |
-| `/with-valid` | **400**（Controller の前で止まる） |
-| `/without-valid` | **200**（`reached: ` と、空のタイトルのまま Controller に届く） |
+| `/with-valid` | 400（Controller の前で止まる） |
+| `/without-valid` | 200（`reached: ` と、空のタイトルのまま Controller に届く） |
 
-**注釈を書いても、`@Valid` が無ければ飾りです。エラーも警告も出ません。** AI が生成した Controller で、`@Valid` が抜けていないか、DTO に注釈があるのに受け側に `@Valid` が無い、を最初に確認してください。
+注釈を書いても、`@Valid` が無ければ飾りにすぎず、エラーも警告も出ません。AI が生成した Controller では、`@Valid` が抜けていないか、DTO に注釈があるのに受け側に `@Valid` が無いか、を最初に確認してください。
 
 ### 文字数を数える：`@Size` は UTF-16 で数える
 
-第7章で、「文字数」と「バイト数」と「`char` の数」は別物だと学びました。ここで影響します。`@Size(max = 100)` は **`String#length()`（UTF-16 の `char` の数）**を数えるので、絵文字のように `char` 2個で1文字のものは、**2として数えられます**。「100文字まで」の仕様に `@Size(max = 100)` を使うと、絵文字だけのタイトルは**51文字で弾かれます**。
+第7章で、「文字数」と「バイト数」と「`char` の数」は別物だと学びました。ここでその違いが影響します。`@Size(max = 100)` は `String#length()`（UTF-16 の `char` の数）を数えるので、絵文字のように `char` 2個で1文字になるものは2として数えられます。「100文字まで」の仕様に `@Size(max = 100)` を使うと、絵文字だけのタイトルは51文字で弾かれます。
 
-そこで QuickVote は、**人間が数える文字（コードポイント）で数える制約**を自作しています。
+そこで QuickVote は、人間が数える文字（コードポイント）で数える制約を自作しています。
 
 ```java title="src/main/java/com/example/quickvote/common/BoundedTextValidator.java（抜粋）"
 @Override
@@ -118,7 +116,7 @@ public boolean isValid(String value, ConstraintValidatorContext context) {
 ```
 
 1. `null` は検証しない。必須かどうかは `@NotBlank` に任せる（役割を分ける）
-2. **コードポイント数**（人間が数える文字）で上限を判定
+2. コードポイント数（人間が数える文字）で上限を判定
 3. UTF-8 でのバイト数でも上限を判定（保険）
 
 テストで、仕様どおりに動くことを確かめます。
@@ -130,14 +128,14 @@ assertThat(post("/api/polls", json("😀".repeat(101), List.of())).exchange())
         .hasStatus(HttpStatus.BAD_REQUEST);                  // 101文字は 400
 ```
 
-「文字数の定義」は、**仕様として決める**必要があります。QuickVote では「コードポイント数」と決めました（結合文字を含む絵文字の見た目の数とは、さらに違う数え方になりますが、実用上は十分です）。
+文字数の定義は、仕様として決める必要があります。QuickVote では「コードポイント数」と決めました。結合文字を含む絵文字の見た目の数とは、さらに違う数え方になりますが、実用上は十分です。
 
 ## 4. エラーの形：ProblemDetail（RFC 9457）
 
-検証に失敗したとき、どんな形で返しますか。ここを**決めておかない**と、エラーごとに形がバラバラになり、クライアントが読めなくなります。
+検証に失敗したとき、どんな形で返しますか。ここを決めておかないと、エラーごとに形がばらばらになり、クライアントが読めなくなります。
 
 !!! note "用語：ProblemDetail（RFC 9457）"
-    HTTP API のエラーを表す、標準の JSON の形です（旧 RFC 7807）。Content-Type は `application/problem+json`。決まった項目は `type`、`title`、`status`、`detail`、`instance` で、**独自の項目（拡張）を足せます**。Spring は `ProblemDetail` クラスで対応しています。
+    HTTP API のエラーを表す、標準の JSON の形です（旧 RFC 7807）。Content-Type は `application/problem+json` です。決まった項目は `type`、`title`、`status`、`detail`、`instance` で、独自の項目（拡張）を足せます。Spring は `ProblemDetail` クラスで対応しています。
 
 QuickVote の実際の応答を見ます。タイトルが空白、締切が3分、選択肢が11個のリクエストです。
 
@@ -166,21 +164,21 @@ curl -s -X POST localhost:18012/api/polls -H 'X-Visitor-Id: 1' -H 'Content-Type:
 | `status` | HTTP ステータスの数字（ヘッダーと同じ） | クライアントの分岐 |
 | `title` | ステータスの名前（`Bad Request`） | 人 |
 | `detail` | 今回の問題の説明 | 人 |
-| `instance` | この問題の発生を指す識別子。QuickVote では**相関ID**（`urn:request-id:...`） | 問い合わせ・ログ検索 |
-| **`code`**（拡張） | **機械判定用の名前**（`VALIDATION_FAILED`、`POLL_FULL` など） | **クライアントのプログラム** |
+| `instance` | この問題の発生を指す識別子。QuickVote では相関ID（`urn:request-id:...`） | 問い合わせ・ログ検索 |
+| `code`（拡張） | 機械判定用の名前（`VALIDATION_FAILED`、`POLL_FULL` など） | クライアントのプログラム |
 | `errors`（拡張） | どの項目がなぜ悪いか | 画面の項目ごとのエラー表示 |
 
 !!! tip "フロントエンドで例えると"
-    React で API エラーを扱うとき、`if (res.status === 409)` だけでは足りません。409 には「満員」「選択肢が上限」「締切後」があり、**画面に出す文言も、次の操作も違う**からです。QuickVote は **HTTP ステータス＝粗い分類、`code`＝細かい理由** と役割を分けています。`message`（人間向けの文）は、言語や表現が変わる可能性があるので、**プログラムは `code` と `field` で判断する**のが約束です。
+    React で API エラーを扱うとき、`if (res.status === 409)` だけでは足りません。409 には「満員」「選択肢が上限」「締切後」があり、画面に出す文言も次の操作も違うからです。QuickVote では、HTTP ステータスを粗い分類、`code` を細かい理由として役割を分けています。`message`（人間向けの文）は言語や表現が変わる可能性があるので、プログラムは `code` と `field` で判断する約束です。
 
-実際、同じコードでも、検証メッセージの**言語は JVM の既定ロケールで変わりました**（jar を起動したときは日本語、Maven のテストでは英語）。メッセージの文字列に頼ったコードは、環境で壊れます。
+実際、同じコードでも、検証メッセージの言語は JVM の既定ロケールで変わりました（jar を起動したときは日本語、Maven のテストでは英語）。メッセージの文字列に頼ったコードは、環境が変わると壊れます。
 
 !!! warning "エラー応答に、入力値を含めない"
-    `errors` に出しているのは、**項目名とメッセージだけ**で、入力値そのものは含めません。選択肢の本文やタイトルが、ログ収集ツールや第三者の画面に残るのを避けるためです（`PollControllerValidationTest` の「検証エラーの応答には入力値を含めない」が確かめています）。`instance` も、リクエストのパスではなく相関IDにしてあります（パスに招待トークンが含まれる API があるため。第33章）。
+    `errors` に出しているのは項目名とメッセージだけで、入力値そのものは含めません。選択肢の本文やタイトルが、ログ収集ツールや第三者の画面に残るのを避けるためです（`PollControllerValidationTest` の「検証エラーの応答には入力値を含めない」が確かめています）。`instance` も、リクエストのパスではなく相関IDにしてあります。パスに招待トークンが含まれる API があるためです（第33章）。
 
 ## 5. `@RestControllerAdvice`：エラーの出口を1か所に
 
-エラーを返す処理を、Controller のあちこちに書くと、形がバラバラになります。QuickVote は、**例外を投げて、出口を1か所にまとめる**設計です。
+エラーを返す処理を Controller のあちこちに書くと、形がばらばらになります。そこで QuickVote は、例外を投げて、エラーの出口を1か所にまとめています。
 
 ```mermaid
 flowchart LR
@@ -204,7 +202,7 @@ public enum ErrorCode {
     // ... HOST_ONLY, MEMBER_OPTIONS_DISABLED, OPTION_NOT_FOUND, JOIN_CODE_NOT_FOUND, OPTION_LIMIT_REACHED
 ```
 
-Service は、判定に失敗したら**例外を投げる**だけです。
+Service は、判定に失敗したら例外を投げるだけです。
 
 ```java title="VoteService.java（抜粋）"
 if (poll.isClosedAt(now)) {
@@ -213,7 +211,7 @@ if (poll.isClosedAt(now)) {
 ```
 
 !!! note "用語：@RestControllerAdvice"
-    すべての Controller に共通の「例外の受け皿」を作るクラスの目印です。`@ExceptionHandler(例外の型)` を付けたメソッドが、その例外を受けて、HTTP 応答に変換します。第12章の地図では、「例外が起きたら Controller の外へ飛び出し、ここで受ける」場所です。
+    すべての Controller に共通の「例外の受け皿」を作るクラスの目印です。`@ExceptionHandler(例外の型)` を付けたメソッドが、その例外を受けて HTTP 応答に変換します。第12章の地図で言えば、例外が起きたときに Controller の外へ抜けて、最後に受け止められる場所です。
 
 ### 受け皿：`ProblemDetailAdvice`
 
@@ -241,30 +239,30 @@ public class ProblemDetailAdvice extends ResponseEntityExceptionHandler {       
     }
 ```
 
-1. `ResponseEntityExceptionHandler` を**継承**すると、Spring MVC 自身が投げる例外（JSON が壊れている、メソッド違い、存在しないパス、パスの値の型違い…）が、**すべて ProblemDetail になります**。継承しないと、これらは Boot 既定の別の形で返ります
+1. `ResponseEntityExceptionHandler` を継承すると、Spring MVC 自身が投げる例外（JSON が壊れている、メソッド違い、存在しないパス、パスの値の型違いなど）が、すべて ProblemDetail になる。継承しないと、これらは Boot 既定の別の形で返る
 2. 想定している業務エラーを受ける
 3. 独自の項目 `code` を足す
-4. **それ以外の全部**（想定外）
-5. 例外は**ここで1回だけ**ログに出す。スタックトレース付き。メッセージに入力値を連結しない
-6. 応答には、**例外のメッセージもスタックトレースも載せず**、決まった文言だけ返す
+4. それ以外の全部（想定外）を受ける
+5. 例外はここで1回だけログに出す。スタックトレース付きで、メッセージに入力値を連結しない
+6. 応答には例外のメッセージもスタックトレースも載せず、決まった文言だけを返す
 
-`ResponseEntityExceptionHandler` の継承のおかげで、第12章で見た「存在しないパス」の 404 や、`GET /api/join`（POST 専用に GET）の応答まで、同じ形で返ります。
+`ResponseEntityExceptionHandler` を継承しているので、第12章で見た「存在しないパス」の 404 や、`GET /api/join`（POST 専用の API に GET を送ったとき）の応答まで、同じ形で返ります。
 
 ```text
 GET /api/join  → 405  Allow: POST  {"detail":"Method 'GET' is not supported.","status":405,"title":"Method Not Allowed","code":"METHOD_NOT_ALLOWED", ...}
 GET /api/polls/abc → 400  {"detail":"Failed to convert 'pollId' with value: 'abc'","status":400,"code":"BAD_REQUEST", ...}
 ```
 
-`code` は、Spring MVC 由来のものには **HTTP ステータスの名前**（`METHOD_NOT_ALLOWED`、`BAD_REQUEST`）を入れる決めです。
+Spring MVC 由来の例外では、`code` に HTTP ステータスの名前（`METHOD_NOT_ALLOWED`、`BAD_REQUEST`）を入れる決めです。
 
 !!! warning "バージョン注意：Boot 4 の ProblemDetail まわり"
-    - HTTP ステータス `422` の定数は、Spring Framework 7 では `HttpStatus.UNPROCESSABLE_CONTENT` です。古い記事の `UNPROCESSABLE_ENTITY` は**非推奨**です（RFC の名称変更に合わせたもの）
+    - HTTP ステータス `422` の定数は、Spring Framework 7 では `HttpStatus.UNPROCESSABLE_CONTENT` です。古い記事の `UNPROCESSABLE_ENTITY` は非推奨です（RFC の名称変更に合わせたもの）
     - Boot 自身にも `spring.mvc.problemdetails.enabled=true` という設定があり、有効にすると標準の例外が ProblemDetail になります。`--debug` のレポートで、既定では無効（Negative matches）と分かります。QuickVote は `ResponseEntityExceptionHandler` を継承した自前の Advice を使うので、この設定は使いません（併用の必要がなく、`code` などの独自項目を足せるため）
     - メソッド引数に直接付けた検証（`@RequestHeader` に付けた制約など）の失敗は、Spring Framework 6.1 以降 `HandlerMethodValidationException` で表れます。QuickVote の Advice はこれも処理しています
 
 ### 想定外の例外：スタックトレースを外に出さない
 
-「想定外の例外（バグ）」を、`e.getMessage()` や `e.toString()` で返す実装は、AI が出しがちです。
+想定外の例外（バグ）を `e.getMessage()` や `e.toString()` で返す実装は、AI が出しがちです。
 
 ```java
 // 悪い例：よく見る形
@@ -274,7 +272,7 @@ ResponseEntity<String> handle(Exception e) {
 }
 ```
 
-`NullPointerException` なら `Cannot invoke "...Repo.find()" because "this.repo" is null` のように、**クラス名・メソッド名・内部の構造**が外に出ます。SQL の例外なら、**テーブル名や列名、制約名、入力値**まで出ることがあります。攻撃者にとっては、内部を知る手がかりです。
+`NullPointerException` なら `Cannot invoke "...Repo.find()" because "this.repo" is null` のように、クラス名・メソッド名・内部の構造が外に出ます。SQL の例外なら、テーブル名や列名、制約名、入力値まで出ることがあります。攻撃者にとっては、内部を知る手がかりになります。
 
 QuickVote の `PollControllerValidationTest` は、これを確かめています。
 
@@ -289,16 +287,16 @@ assertThat(result).bodyText().doesNotContain("secret-detail").doesNotContain("Il
         .doesNotContain("at com.example");
 ```
 
-応答は `INTERNAL_ERROR` と決まった文言だけ。原因はサーバーのログにだけ残り、利用者に見せる `instance`（相関ID）で突き合わせます。
+応答は `INTERNAL_ERROR` と決まった文言だけです。原因はサーバーのログにだけ残り、利用者に見せる `instance`（相関ID）で突き合わせます。
 
 !!! danger "本番で事故になるパターン：例外を握りつぶす／二重に出す"
-    - `catch (Exception e) { return null; }` は、**エラーを消す**。呼び出し側は、成功したと思って進みます（第5章）
-    - 例外を `catch` してログに出し、さらに `throw` すると、**同じ例外がログに複数回出ます**。出す場所は決めて、**1回だけ**にします（QuickVote は `ProblemDetailAdvice` だけ）
-    - ログのメッセージに入力値を連結しない（`"失敗: " + label`）。選択肢の本文は、ログに残さない約束です（第43章）
+    - `catch (Exception e) { return null; }` はエラーを消してしまいます。呼び出し側は成功したと思って先へ進みます（第5章）
+    - 例外を `catch` してログに出し、さらに `throw` すると、同じ例外がログに何度も出ます。出す場所を決めて1回だけにします（QuickVote は `ProblemDetailAdvice` だけです）
+    - ログのメッセージに入力値を連結しません（`"失敗: " + label`）。選択肢の本文はログに残さない約束です（第43章）
 
 ## 6. ステータスの選び方
 
-QuickVote は、HTTP ステータスと `code` を使い分けます。選ぶ手順を、フローチャートにします。
+QuickVote は、HTTP ステータスと `code` を使い分けます。選ぶ手順をフローチャートにします。
 
 ```mermaid
 flowchart TD
@@ -319,23 +317,25 @@ flowchart TD
 
 | ステータス | 意味 | QuickVote の例 | 見分けるコツ |
 | --- | --- | --- | --- |
-| **400** | リクエストが**壊れている／形式違反** | 空のタイトル、JSON の構文エラー、範囲外の `closesInMinutes` | **同じ入力は、いつ送っても必ず失敗**する |
-| **401** | 誰か分からない | 訪問者ヘッダーがない | 識別（第6部） |
-| **403** | 誰か分かるが、**許されない** | MEMBER が主催者専用の操作、選択肢の追加が許可されていない | 参加者だと分かっているので、存在を隠さなくてよい |
-| **404** | **存在しない**。または存在を知らせない | 存在しない投票／**参加していない投票（同じ404）** | 「存在しない」と「参加していない」を**区別させない** |
-| **409** | **今の状態**と衝突 | 満員、選択肢が上限、締切後 | **状態が変われば成功しうる** |
-| **422** | 形は正しいが、**意味として受け入れられない** | 同じ `Idempotency-Key` なのに内容が違う（第27章） | 400 との違いは次で説明 |
-| **500** | サーバーの想定外 | バグ、依存先の障害 | `INTERNAL_ERROR`。詳細は出さない |
+| 400 | リクエストが壊れている／形式違反 | 空のタイトル、JSON の構文エラー、範囲外の `closesInMinutes` | 同じ入力は、いつ送っても必ず失敗する |
+| 401 | 誰か分からない | 訪問者ヘッダーがない | 識別（第6部） |
+| 403 | 誰か分かるが、許されない | MEMBER が主催者専用の操作、選択肢の追加が許可されていない | 参加者だと分かっているので、存在を隠さなくてよい |
+| 404 | 存在しない。または存在を知らせない | 存在しない投票／参加していない投票（同じ404） | 「存在しない」と「参加していない」を区別させない |
+| 409 | 今の状態と衝突 | 満員、選択肢が上限、締切後 | 状態が変われば成功しうる |
+| 422 | 形は正しいが、意味として受け入れられない | 同じ `Idempotency-Key` なのに内容が違う（第27章） | 400 との違いは次で説明 |
+| 500 | サーバーの想定外 | バグ、依存先の障害 | `INTERNAL_ERROR`。詳細は出さない |
 
 ### 400 と 422、404 と 403、409 の線引き
 
-迷う3か所を整理します。
+迷いやすいのは次の3か所です。
 
-- **400 か 409 か**：同じリクエストが、別の時刻や別の状態なら成功するか。**成功しうるなら 409**（満員は、誰かが抜ければ入れる）、**絶対に成功しないなら 400**（空のタイトルは、何回送っても同じ）
-- **404 か 403 か**：**存在を知られてよいか**。QuickVote は、非参加者に投票の存在を教えない仕様なので 404。参加者に対して「それはできません」と言うのは 403
-- **400 か 422 か**：多くのAPIは 400 だけで済ませます。QuickVote は 400 を「形式」、422 を「形は正しいが意味が合わない」に分け、**422 は第27章（冪等性）でだけ使います**。第2部のラボでは、締切の範囲（5〜10080分）を Bean Validation の範囲検査にしたので 400 です。**どこまで細かく分けるかも、API 契約として決める**ことです
+400 か 409 かは、同じリクエストが別の時刻や別の状態なら成功するかどうかで決めます。成功しうるなら 409 です（満員は、誰かが抜ければ入れます）。何度送っても絶対に成功しないなら 400 です（空のタイトルは、何回送っても同じです）。
 
-「存在しない投票」と「参加していない投票」が、`code` も `detail` も同じであることは、`QuickVoteFlowTest` で確かめています。**差が出ると、存在を探る攻撃に使われる**ためです（第30章）。
+404 か 403 かは、存在を知られてよいかどうかで決めます。QuickVote は非参加者に投票の存在を教えない仕様なので 404 です。参加者に対して「それはできません」と言うときは 403 です。
+
+400 か 422 かは、API ごとの方針しだいです。多くの API は 400 だけで済ませます。QuickVote は、400 を「形式」、422 を「形は正しいが意味が合わない」と分け、422 は第27章（冪等性）でだけ使います。第2部のラボでは、締切の範囲（5〜10080分）を Bean Validation の範囲検査にしたので 400 です。どこまで細かく分けるかも、API 契約として決めることです。
+
+「存在しない投票」と「参加していない投票」の `code` と `detail` が同じであることは、`QuickVoteFlowTest` で確かめています。差が出ると、存在を探る攻撃に使われるためです（第30章）。
 
 ## 7. 動かしてみる：すべてのエラーが同じ形で返る
 
@@ -385,7 +385,7 @@ flowchart TD
     {"detail":"参加コードが見つかりません。","status":404,"title":"Not Found","code":"JOIN_CODE_NOT_FOUND", ...}
     ```
 
-どれも `application/problem+json`、`status`・`code`・`instance` が揃っています。クライアント側は、**1つのエラー処理**で全部を扱えます。
+どれも `application/problem+json` で、`status`・`code`・`instance` が揃っています。そのためクライアント側は、1つのエラー処理で全部を扱えます。
 
 ```ts
 // クライアント側：1つの関数で全エラーを扱える
@@ -435,14 +435,14 @@ if (!res.ok) {
     `POST /api/polls` に `{"title":"t","closesInMinutes":4}` を送ります。(a) ステータス (b) `code` (c) `errors[0].field` を答えてください。実行して確かめます。
 
 ??? success "解答"
-    (a) 400 (b) `VALIDATION_FAILED` (c) `closesInMinutes`（`@Min(5)` に違反）。Service に届く前に止まるので、`PollService.create` は呼ばれません。
+    (a) 400 (b) `VALIDATION_FAILED` (c) `closesInMinutes`（`@Min(5)` に違反）です。Service に届く前に止まるので、`PollService.create` は呼ばれません。
 
 ??? question "確認問題2：どの層か"
     次の4つの条件を、「Bean Validation／Service／DB制約」のどれで守るのが適切か、答えてください。
     (a) タイトルが空でない (b) 1人が同じ投票に2票入れない (c) 参加者が50人以下 (d) 参加コードが8文字
 
 ??? success "解答"
-    (a) Bean Validation（`@NotBlank`）。(b) Service の上書きの扱い（`VoteRepository.upsert`）と、**DB制約**（UNIQUE）の両方。完成形では UNIQUE が最後の砦（第18章）。(c) Service（今の人数を数える）。DB制約では守れない複数行の条件で、同時実行では第4部のロックが必要。(d) 入力の形式なので Bean Validation（`@Size`）。加えて、形式違いは存在しないコードとして 404 にしている（`JoinCodeGenerator.isWellFormed`）。
+    (a) Bean Validation（`@NotBlank`）です。(b) Service の上書きの扱い（`VoteRepository.upsert`）と DB制約（UNIQUE）の両方で守ります。完成形では UNIQUE が最後の砦です（第18章）。(c) Service です（今の人数を数えます）。複数行にまたがる条件は DB制約では守れず、同時実行では第4部のロックが必要です。(d) 入力の形式なので Bean Validation（`@Size`）です。加えて、形式の違うコードは存在しないコードとして 404 にしています（`JoinCodeGenerator.isWellFormed`）。
 
 ??? question "確認問題3：読解"
     次の応答を返した API の問題点を、2つ挙げてください。
@@ -451,13 +451,13 @@ if (!res.ok) {
     ```
 
 ??? success "解答"
-    (1) 内部の事情（DB の種類、テーブルの制約名、列名、内部ID `3` と `17`）が外に出ている。想定外の例外は `INTERNAL_ERROR` と決まった文言だけにする。(2) ProblemDetail ではなく独自の形で、`code` も `status` もない。クライアントが機械的に判定できない。また、この例外自体、アプリの「1人1票」の処理（`upsert`）が正しく書かれていれば起きないはずで、起きたなら**バグか想定外**として、500 ＋ ログ1回で扱う（DB 制約に当たる場合の翻訳は第19章）。
+    (1) 内部の事情（DB の種類、テーブルの制約名、列名、内部ID `3` と `17`）が外に出ています。想定外の例外は `INTERNAL_ERROR` と決まった文言だけにします。(2) ProblemDetail ではなく独自の形で、`code` も `status` もないので、クライアントが機械的に判定できません。また、この例外自体、アプリの「1人1票」の処理（`upsert`）が正しく書かれていれば起きないはずです。起きたならバグか想定外として、500 ＋ ログ1回で扱います（DB 制約に当たる場合の翻訳は第19章）。
 
 ??? question "応用：エラーコードを足す"
-    「投票を削除できるのは、主催者だけ」という仕様で、MEMBER が削除しようとしたとき、どの `code`・ステータスで返しますか。また、その人が**そもそも参加していない**場合はどうしますか。
+    「投票を削除できるのは、主催者だけ」という仕様で、MEMBER が削除しようとしたとき、どの `code`・ステータスで返しますか。また、その人がそもそも参加していない場合はどうしますか。
 
 ??? success "解答"
-    MEMBER は参加者だと分かっているので、`HOST_ONLY`（403）。参加していない人には、投票の存在を漏らさないよう `POLL_NOT_FOUND`（404）。`ParticipantService.requireHost` がこの順（参加者かの確認 → 主催者かの確認）で判定しています。
+    MEMBER は参加者だと分かっているので、`HOST_ONLY`（403）で返します。参加していない人には、投票の存在を漏らさないよう `POLL_NOT_FOUND`（404）で返します。`ParticipantService.requireHost` が、この順（参加者かの確認、主催者かの確認）で判定しています。
 
 ??? question "説明問題：現場でこう聞かれる"
     「エラーは `{"error": "..."}` のように文字列だけ返せば十分では？ なぜ `code` を別に持つのですか？」200字程度で答えてください。

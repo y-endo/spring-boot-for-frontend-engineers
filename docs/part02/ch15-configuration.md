@@ -14,17 +14,13 @@
 
 ## 1. 問いかけ：本番だけ違う値は、どこに書くのか
 
-開発では `localhost` のDB、本番では別のDB。開発ではCookieのSecureをオフ、本番ではオン。テストでは時間を進めたい。こういう**環境ごとに変わる値**を、コードの中に直接書いたら、どうなるでしょうか。
+開発では `localhost` のDB、本番では別のDBを使います。CookieのSecureは開発ではオフ、本番ではオンです。テストでは時間を進めたいこともあります。このように環境ごとに変わる値をコードの中に直接書くと、値を変えるたびにビルドし直して配り直すことになります。本番のパスワードが Git の履歴に残りますし、開発の値のまま本番に出す事故も起こりえます。
 
-- 値を変えるたびに、**ビルドし直し**て、配り直す
-- 本番のパスワードが、**Git の履歴に残る**
-- 「開発の値のまま本番に出した」事故が起きる
-
-フロントエンドでも、`.env` と `process.env.XXX`（Vite なら `import.meta.env`）で同じ問題に向き合ってきたはずです。Spring Boot の設定の仕組みは、それをもう少し整理したものです。この章では、**設定を型で読み、間違いを起動時に見つけ、秘密を Git に入れない**までを扱います。
+フロントエンドでも、`.env` と `process.env.XXX`（Vite なら `import.meta.env`）で同じ問題に向き合ってきたはずです。Spring Boot の設定の仕組みは、それをもう少し整理したものです。この章では、設定を型で読み、間違いを起動時に見つけ、秘密を Git に入れないところまでを扱います。
 
 ## 2. 設定の置き場所と優先順位
 
-Spring Boot は、**複数の場所から設定を集めて**、1つの設定に重ねます（外側の「Environment」と呼ばれます）。主な場所は次のとおりです。**上にあるほど優先されます**。
+Spring Boot は、複数の場所から設定を集めて1つに重ねます（重ねたものは「Environment」と呼ばれます）。主な場所は次のとおりで、上にあるほど優先されます。
 
 | 優先度 | 場所 | 例 |
 | --- | --- | --- |
@@ -34,7 +30,7 @@ Spring Boot は、**複数の場所から設定を集めて**、1つの設定に
 | 低 | 共通のファイル | `application.yaml` |
 | 最下 | コードの既定値 | `@DefaultValue("3")` |
 
-上のほうが、下を**上書き**します。実際に確かめます。`dev` プロファイルの `application-dev.yaml` には `members: 3` と書いてあります。
+上にある設定が、下にある設定を上書きします。実際に確かめます。`dev` プロファイルの `application-dev.yaml` には `members: 3` と書いてあります。
 
 ```bash
 # yaml だけ（members=3）
@@ -51,9 +47,9 @@ QUICKVOTE_DEMO_MEMBERS=5 java -jar target/quickvote-0.0.1-SNAPSHOT.jar --spring.
 ```
 
 !!! tip "フロントエンドで例えると"
-    `.env`、`.env.local`、`.env.production` を重ねる Vite や Next.js の仕組みに近いものです。違いは、**ビルド時ではなく起動時に読む**こと。同じ jar を、環境変数だけ変えて、開発・検証・本番に使い回せます（ビルドし直さない）。
+    `.env`、`.env.local`、`.env.production` を重ねる Vite や Next.js の仕組みに近いものです。違いは、ビルド時ではなく起動時に読むことです。同じ jar を、環境変数だけ変えて開発・検証・本番に使い回せます（ビルドし直しません）。
 
-**この優先順位があるので、本番の運用では「jar（と中の yaml）は同じまま、環境変数で値を渡す」**形を取ります。
+この優先順位があるので、本番の運用では jar（と中の yaml）を同じままにして、環境変数で値を渡す形を取ります。
 
 ### 設定ファイルを分ける
 
@@ -93,7 +89,7 @@ quickvote:
     secure: true
 ```
 
-**本番の差分は、最小限にする**のがコツです。共通部分は `application.yaml` に置き、`prod` には「本番だけ違う値」だけを書きます。
+本番との差分は最小限にします。共通部分は `application.yaml` に置き、`prod` には本番だけ違う値を書きます。
 
 ## 3. 型のある設定：`@ConfigurationProperties`
 
@@ -131,14 +127,14 @@ quickvote:
 
 | | `@Value` | `@ConfigurationProperties` |
 | --- | --- | --- |
-| 型 | 1つずつ。文字列で名前を書く | **クラス（`record`）にまとまる** |
-| 検証 | 自分で書く | **Bean Validation が使える**（`@Validated`） |
+| 型 | 1つずつ。文字列で名前を書く | クラス（`record`）にまとまる |
+| 検証 | 自分で書く | Bean Validation が使える（`@Validated`） |
 | 既定値 | 文字列の中（`:3`） | `@DefaultValue` |
 | IDE の補完 | 弱い | 効く |
 | 使い回し | 値を使う場所ごとに書く | 設定クラスをコンストラクタで受け取る |
 | 設定の一覧性 | 散らばる | 1か所に集まる |
 
-使う側は、普通の Bean として**コンストラクタで受け取る**だけです。
+使う側は、普通の Bean としてコンストラクタで受け取るだけです。
 
 ```java title="src/main/java/com/example/quickvote/poll/DemoDataLoader.java（抜粋）"
 public DemoDataLoader(PollService pollService, JoinService joinService, QuickVoteProperties properties) {
@@ -154,7 +150,7 @@ public DemoDataLoader(PollService pollService, JoinService joinService, QuickVot
 
 ### 名前の対応（relaxed binding）
 
-`quickvote.stand-in-auth.header` と書く yaml のキーが、Java の `standInAuth().header()` に対応するのは、**名前の規則を柔らかく読む**（relaxed binding）からです。環境変数の名前でも読めます。`ConfigurationTest` で確かめた対応です。
+yaml の `quickvote.stand-in-auth.header` というキーが Java の `standInAuth().header()` に対応するのは、Spring Boot が名前の規則を柔らかく読む（relaxed binding）からです。環境変数の名前でも読めます。`ConfigurationTest` で確かめた対応は次のとおりです。
 
 | 書く場所 | 書き方 | 同じ項目 |
 | --- | --- | --- |
@@ -163,11 +159,11 @@ public DemoDataLoader(PollService pollService, JoinService joinService, QuickVot
 | 環境変数 | `QUICKVOTE_STANDINAUTH_HEADER`（大文字、`_` 区切り、ハイフンなし） | ✓ |
 | 環境変数 | `QUICKVOTE_DEMO_MEMBERS` | `quickvote.demo.members` |
 
-**環境変数にするときは、`.` を `_`、小文字を大文字にして、ハイフンを取る**と覚えます。
+環境変数にするときは、`.` を `_` に、小文字を大文字に変え、ハイフンを取ります。
 
 ### 仕様と設定を分ける
 
-何でも設定にすればよい、ではありません。QuickVote は、**設定にしない値**を決めています。
+何でも設定にすればよいわけではありません。QuickVote には、あえて設定にしない値があります。
 
 ```java title="src/main/java/com/example/quickvote/poll/PollRules.java（抜粋）"
 /** QuickVote の仕様上の上限・期間。設定ではなくコードに置く（運用で気軽に変えてよい値ではないため）。 */
@@ -178,17 +174,17 @@ public static final int MAX_OPTIONS = 10;
 | | 設定（`QuickVoteProperties`） | 仕様（`PollRules`） |
 | --- | --- | --- |
 | 例 | 開発用の見本データ、Cookie の `Secure`、レート制限の回数、SSE の間隔 | 参加者は50人、選択肢は10個、タイトルは100文字 |
-| 変える人・場面 | 運用（環境ごと、障害時） | 仕様変更（コードの変更・テスト・DBの制約と**一緒に**） |
+| 変える人・場面 | 運用（環境ごと、障害時） | 仕様変更（コードの変更・テスト・DBの制約と一緒に） |
 | 変えるとき | 再起動で足りる | コード、テスト、DBの制約、ドキュメントを揃えて直す |
 
-「50人」を環境変数で気軽に変えられるようにすると、DB の制約・テスト・画面の表示と**食い違う**事故になります。**設定にするのは、環境ごとに変えてよい値だけ**です。
+「50人」を環境変数で気軽に変えられるようにすると、DB の制約・テスト・画面の表示と食い違う事故になります。設定にするのは、環境ごとに変えてよい値だけです。
 
 ## 4. 起動時に落とす（fail fast）
 
-設定が間違っていたら、**起動のときに落とす**。これが原則です。
+設定が間違っていたら、起動のときに落とすのが原則です。
 
 !!! note "用語：fail fast"
-    間違いを、**できるだけ早い段階で、大きな音を立てて**失敗させる設計です。起動時に分かれば、デプロイの時点で気づけます。実行時まで分からないと、本番で、最初にその設定を使ったリクエストが失敗します（深夜に）。
+    間違いを、できるだけ早い段階で、はっきりと失敗させる設計です。起動時に分かれば、デプロイの時点で気づけます。実行時まで分からないと、その設定を最初に使ったリクエストが本番で失敗します（それが深夜になることもあります）。
 
 ### 範囲外の値
 
@@ -215,7 +211,7 @@ Action:
 Update your application's configuration
 ```
 
-環境変数（`QUICKVOTE_DEMO_MEMBERS=99`）で渡しても、同じエラーで落ちます。どの**キー**に、どの**値**を入れて、なぜ駄目か、が1画面で読めます。
+環境変数（`QUICKVOTE_DEMO_MEMBERS=99`）で渡しても、同じエラーで落ちます。どのキーにどの値を入れて、なぜ駄目なのかが1画面で読めます。
 
 ### 型が違う値
 
@@ -234,14 +230,14 @@ Failed to bind properties under 'quickvote.demo.members' to int:
     Reason: failed to convert java.lang.String to ... int (caused by java.lang.NumberFormatException: For input string: ...)
 ```
 
-`Origin:` に、**値がどこから来たか**（`commandLineArgs`）まで書かれています。環境変数と yaml のどちらが勝っているのか分からなくなったとき、この情報が役に立ちます。
+`Origin:` には、値がどこから来たか（`commandLineArgs`）まで書かれています。環境変数と yaml のどちらが勝っているのか分からなくなったときに役立ちます。
 
 !!! tip "AIが生成した設定クラスで見るところ"
-    `@ConfigurationProperties` に `@Validated` が付いているか、必須の値に検証（`@NotBlank` など）があるか、範囲に制約（`@Min`、`@Max`）があるか。**検証がない設定クラスは、間違った値が通ってしまいます**。
+    `@ConfigurationProperties` に `@Validated` が付いているか、必須の値に検証（`@NotBlank` など）があるか、範囲に制約（`@Min`、`@Max`）があるかを確かめます。検証がない設定クラスは、間違った値をそのまま通します。
 
 ## 5. 罠：設定のミスは、黙って通ることがある
 
-起動時に落ちるのは、**型が合わない・範囲外**のような、検査される間違いです。次の2つは、**エラーにならず通ります**。実験で確かめました（`ConfigurationTest`）。
+起動時に落ちるのは、型が合わない、範囲外といった、検査される種類の間違いです。次の2つはエラーにならずに通ります。どちらも `ConfigurationTest` で確かめました。
 
 ### 罠①：設定キーのタイポは、黙って無視される
 
@@ -253,21 +249,21 @@ runner.withPropertyValues("quickvote.stand-in-auth.heder=X-Typo").run(ctx -> {
 });
 ```
 
-**知らないキーは、無視されます**。タイポは、設定が効かない形で現れます。しかも、`@DefaultValue` があるので、**エラーも出ない**。「設定したのに効かない」の原因の多くは、綴りです。
+知らないキーは無視されます。タイポは「設定が効かない」という形で現れ、`@DefaultValue` があるのでエラーも出ません。設定したのに効かないときは、まず綴りを疑います。
 
 !!! warning "バージョン注意：古い記事のキーは、無視される"
-    Boot 3 までの記事に出てくる設定キーが、Boot 4 では**存在しない**ことがあります。たとえば `spring.jackson.datetime.write-dates-as-timestamps` は Boot 4 のメタデータにありません（Jackson 3 では日時の既定が ISO 8601 文字列で、設定の必要がない）。**無視されるので、エラーにもならず、書いたつもりのまま効いていない**状態になります。キーが本当にあるか、IDE の補完（`application.yaml` で Ctrl+Space）か公式ドキュメントで確かめます。
+    Boot 3 までの記事に出てくる設定キーが、Boot 4 には存在しないことがあります。たとえば `spring.jackson.datetime.write-dates-as-timestamps` は Boot 4 のメタデータにありません（Jackson 3 では日時の既定が ISO 8601 文字列なので、設定の必要がありません）。存在しないキーは無視されるので、エラーにもならず、書いたつもりのまま効いていない状態になります。キーが本当にあるかどうかは、IDE の補完（`application.yaml` で Ctrl+Space）か公式ドキュメントで確かめます。
 
 ### 罠②：環境変数の置き忘れ
 
-yaml に `header: ${QV_HEADER}` と書き、環境変数 `QV_HEADER` を渡し忘れるとどうなるでしょうか。`@Value` なら起動時に「Could not resolve placeholder」で落ちます。しかし `@ConfigurationProperties` では、**展開できなかった `${...}` が、文字列のまま設定値になります**。
+yaml に `header: ${QV_HEADER}` と書き、環境変数 `QV_HEADER` を渡し忘れるとどうなるでしょうか。`@Value` なら、起動時に「Could not resolve placeholder」で落ちます。しかし `@ConfigurationProperties` では、展開できなかった `${...}` が文字列のまま設定値になります。
 
 ```java
 runner.withPropertyValues("quickvote.stand-in-auth.header=${QV_HEADER_UNSET}")   // 環境変数が無い
 // 検証がなければ、header は "${QV_HEADER_UNSET}" という文字列のまま束縛され、起動に成功する
 ```
 
-この実験では、検証を付ける前は、環境変数がなくても**そのまま起動しました**。対策は、**値の形を検証する**ことです。QuickVote では `@Pattern(regexp = "[A-Za-z0-9-]+")` を付けたので、置き忘れると起動時に落ちます。
+この実験では、検証を付ける前は、環境変数がなくてもそのまま起動しました。対策は値の形を検証することです。QuickVote では `@Pattern(regexp = "[A-Za-z0-9-]+")` を付けたので、置き忘れると起動時に落ちます。
 
 ```text
 Binding to target com.example.quickvote.common.QuickVoteProperties failed:
@@ -277,16 +273,16 @@ Binding to target com.example.quickvote.common.QuickVoteProperties failed:
     Reason: 正規表現 "[A-Za-z0-9-]+" にマッチさせてください
 ```
 
-DB のパスワード（`spring.datasource.password=${DB_PASSWORD}`）のように、**形式を検証しにくい秘密**では、置き忘れた値が「そのまま」使われ、**最初の接続の失敗**として表れます。置き忘れに気づける仕組み（起動時の接続確認、CI でのチェック）が要ります。
+DB のパスワード（`spring.datasource.password=${DB_PASSWORD}`）のように形式を検証しにくい秘密では、置き忘れた値がそのまま使われ、最初の接続の失敗として表に出ます。置き忘れに気づける仕組み（起動時の接続確認、CI でのチェックなど）が必要です。
 
 ## 6. プロファイル：環境ごとの切り替え
 
 ### プロファイルとは
 
 !!! note "用語：プロファイル（profile）"
-    アプリの**動作モードの名前**です（`dev`、`test`、`prod` など）。有効にすると、(1) `application-{名前}.yaml` が上に重なり、(2) `@Profile("名前")` を付けた Bean が有効になります。
+    アプリの動作モードの名前です（`dev`、`test`、`prod` など）。有効にすると、`application-{名前}.yaml` が上に重なり、`@Profile("名前")` を付けた Bean が有効になります。
 
-有効にする方法は、次のとおりです（コマンドライン引数が環境変数より優先されます）。
+有効にする方法は次のとおりです（コマンドライン引数が環境変数より優先されます）。
 
 | 方法 | 例 |
 | --- | --- |
@@ -295,7 +291,7 @@ DB のパスワード（`spring.datasource.password=${DB_PASSWORD}`）のよう�
 | Maven から起動 | `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev` |
 | テスト | `@ActiveProfiles("dev")`（`DevProfileTest`） |
 
-QuickVote の `DemoDataLoader` は、プロファイルではなく**設定値が `true` のときだけ**有効になります。
+QuickVote の `DemoDataLoader` は、プロファイルではなく、設定値が `true` のときだけ有効になります。
 
 ```java title="src/main/java/com/example/quickvote/poll/DemoDataLoader.java（抜粋）"
 @Component
@@ -303,7 +299,7 @@ QuickVote の `DemoDataLoader` は、プロファイルではなく**設定値�
 public class DemoDataLoader implements ApplicationRunner { ... }
 ```
 
-`@ConditionalOnProperty` は、第10章で読んだ**自動構成と同じ「条件付き」の仕組み**です。`dev` プロファイルの yaml が `seed: true` を設定するので、`dev` のときだけ見本データが作られます。2つのテストで確かめています。
+`@ConditionalOnProperty` は、第10章で読んだ自動構成と同じ「条件付き」の仕組みです。`dev` プロファイルの yaml が `seed: true` を設定するので、`dev` のときだけ見本データが作られます。2つのテストで確かめています。
 
 | テスト | 結果 |
 | --- | --- |
@@ -317,30 +313,30 @@ public class DemoDataLoader implements ApplicationRunner { ... }
 | コード内で `if (profile == "prod")` と分岐 | テストできない。環境ごとに動作が変わる | 設定値（`quickvote.xxx`）を読む |
 | プロファイルの種類が増える（`dev`、`dev2`、`staging-a`…） | 組み合わせが爆発し、何が有効か分からない | 設定値の差だけで表す |
 | テスト専用の挙動を本番コードに残す | 本番で意図せず有効になる | テストのコード側（`src/test`）に置く |
-| `prod` で認証や検証を**緩める**分岐 | 本番だけ安全でないという最悪の逆転 | 緩めるのは `dev` 側。本番が既定で安全 |
+| `prod` で認証や検証を緩める分岐 | 本番だけ安全でないという最悪の逆転 | 緩めるのは `dev` 側。本番が既定で安全 |
 
-「**プロファイルは、値を切り替えるもの**。ロジックを切り替えるものではない」と覚えます。
+プロファイルが切り替えるのは値であって、ロジックではありません。
 
 !!! warning "この時点の保証"
-    `dev` プロファイルの見本データは、**開発専用**です。本番に `dev` を有効にして出すと、固定の訪問者ID（1〜）で作られた投票が作られます。プロファイルは `prod` の起動で必ず指定する、起動スクリプトや Dockerfile（第42章）で固定する、などの運用で守ります。
+    `dev` プロファイルの見本データは開発専用です。本番に `dev` を有効にして出すと、固定の訪問者ID（1〜）で作られた投票が作られます。`prod` を必ず指定して起動する、起動スクリプトや Dockerfile（第42章）で固定する、などの運用で守ります。
 
 ## 7. 秘密：Git に入れない
 
-**秘密**とは、漏れたら悪用される値です（DB のパスワード、API キー、トークン署名用の鍵、暗号化キー）。
+秘密とは、漏れたら悪用される値です（DB のパスワード、API キー、トークン署名用の鍵、暗号化キー）。
 
 ### 原則
 
-1. **Git に入れない**：`application.yaml` に書いたら、履歴に残ります。**消しても履歴から取り出せます**。一度入れたら、**その秘密を無効にして作り直す**（パスワードの変更）しかありません
-2. **コードにも書かない**：`private static final String API_KEY = "sk-..."`
-3. **環境ごとに別の値**：開発の秘密が、本番にも通用してはいけません
-4. **ログに出さない**：設定の値をログに出さない（第43章）。起動時に「Using generated security password」のようなパスワードを出さない設定（完成形の `UserDetailsServiceAutoConfiguration` の除外）も、同じ理由です
+1. Git に入れない：`application.yaml` に書くと履歴に残り、消しても履歴から取り出せます。一度入れたら、その秘密を無効にして作り直す（パスワードを変更する）しかありません
+2. コードにも書かない：`private static final String API_KEY = "sk-..."`
+3. 環境ごとに別の値にする：開発の秘密が本番にも通用してはいけません
+4. ログに出さない：設定の値をログに出しません（第43章）。起動時に「Using generated security password」のようなパスワードを出さない設定（完成形の `UserDetailsServiceAutoConfiguration` の除外）も、同じ理由です
 
 ### 渡し方
 
 | 方法 | 使いどころ |
 | --- | --- |
-| **環境変数** | 本番の基本。`SPRING_DATASOURCE_PASSWORD` のように、Boot のキーに対応した名前で渡せる（relaxed binding） |
-| yaml に `${変数名}` と書いて展開 | キー名と環境変数名を分けたいとき。**置き忘れの罠に注意**（5 節） |
+| 環境変数 | 本番の基本。`SPRING_DATASOURCE_PASSWORD` のように、Boot のキーに対応した名前で渡せる（relaxed binding） |
+| yaml に `${変数名}` と書いて展開 | キー名と環境変数名を分けたいとき。置き忘れの罠に注意（5 節） |
 | Git 管理外のファイルを読む | 開発用。`.gitignore` に入れておく |
 | 秘密管理サービス（クラウドの Secret Manager など） | 本番の運用が成熟したとき |
 
@@ -360,8 +356,8 @@ secrets.yaml
 ```
 
 !!! danger "本番で事故になるパターン：秘密を Git に入れた"
-    「テスト用だから」と、本番と同じパスワードを `application.yaml` に書いて push した。履歴を消しても、**フォークやクローンに残る**。公開リポジトリなら、数分で自動スキャンに見つかります。
-    すでに入れてしまったら、(1) 履歴の消去ではなく、**秘密を無効化して再発行する**ことが先 (2) その後で、履歴の掃除を検討する。AI は、サンプルとして `password: postgres` のような値を書き込むことがあります。それが**本物の値と同じ**にならないよう、レビューで確認してください。
+    「テスト用だから」と、本番と同じパスワードを `application.yaml` に書いて push してしまうことがあります。履歴を消しても、フォークやクローンに残ります。公開リポジトリなら、数分で自動スキャンに見つかります。
+    すでに入れてしまったときは、履歴を消すよりも先に、秘密を無効化して再発行します。履歴の掃除はその後に検討します。AI は、サンプルとして `password: postgres` のような値を書き込むことがあります。それが本物の値と同じにならないよう、レビューで確認してください。
 
 ## 8. 現場で：AIが書いた設定のレビュー
 
@@ -383,7 +379,7 @@ secrets.yaml
 
 !!! abstract "この章の3点セット"
     **① 一言で言うと**
-    設定は、コマンドライン引数 > 環境変数 > プロファイル別 yaml > 共通 yaml > コードの既定値、の優先順位で重なり、`@ConfigurationProperties`（`record` ＋ `@Validated`）で型のある設定として読み、間違いは起動時に落とす。環境ごとに変えてよい値だけを設定にし、秘密は Git に入れず環境変数などで渡す。
+    設定は、コマンドライン引数 > 環境変数 > プロファイル別 yaml > 共通 yaml > コードの既定値、の優先順位で重なる。`@ConfigurationProperties`（`record` ＋ `@Validated`）で型のある設定として読み、間違いは起動時に落とす。環境ごとに変えてよい値だけを設定にし、秘密は Git に入れず環境変数などで渡す。
 
     **② 現場でこう聞かれる**
     「本番のDBのパスワードは、どこに置きますか？ `application-prod.yaml` に書いてもいいですか？」
@@ -404,20 +400,20 @@ secrets.yaml
     `application.yaml` に `quickvote.demo.memebrs: 10`（綴りの間違い）と書いて起動しました。何が起きますか。気づくために、何をしますか。
 
 ??? success "解答"
-    エラーなく起動し、`members` は既定値（3）のままです。知らないキーは無視されるためです。気づく方法は、(1) IDE の補完でキー名を確かめる (2) 起動後の値を確認する（ログ、テスト）(3) 重要な設定は、値が既定値のままだと困るなら必須にする（`@NotNull` にして `@DefaultValue` を付けない）、などです。`@ConfigurationProperties(ignoreUnknownFields = false)` で、未知のキーを起動時エラーにする方法もあります（その prefix の下のタイポに限ります）。
+    エラーなく起動し、`members` は既定値（3）のままです。知らないキーは無視されるためです。気づく方法には、IDE の補完でキー名を確かめる、起動後の値をログやテストで確認する、既定値のままだと困る重要な設定は必須にする（`@NotNull` にして `@DefaultValue` を付けない）、などがあります。`@ConfigurationProperties(ignoreUnknownFields = false)` で、未知のキーを起動時エラーにする方法もあります（その prefix の下のタイポに限ります）。
 
 ??? question "確認問題3：どこに置くか"
     次の値を、「設定」「仕様（コード）」「秘密」に分類してください。
     (a) 参加者の上限50人 (b) DB のパスワード (c) 訪問者 Cookie の `Secure` 属性 (d) SSE のハートビート間隔
 
 ??? success "解答"
-    (a) 仕様（コード、`PollRules`）。DB制約・テスト・画面と一緒に変える。(b) 秘密（環境変数など。Git に入れない）。(c) 設定（開発は false、本番は true。`quickvote.visitor-cookie.secure`）。(d) 設定（運用で調整してよい。`quickvote.sse.heartbeat-interval`）。
+    (a) 仕様（コード、`PollRules`）です。DB制約・テスト・画面と一緒に変えます。(b) 秘密です（環境変数などで渡し、Git に入れません）。(c) 設定です（開発は false、本番は true。`quickvote.visitor-cookie.secure`）。(d) 設定です（運用で調整してよい。`quickvote.sse.heartbeat-interval`）。
 
 ??? question "応用：設定を足す"
     「見本の投票のタイトル」を設定にしてください（`quickvote.demo.title`、既定 `ランチどこ行く？`、空文字は不可）。(1) `QuickVoteProperties.Demo` の変更 (2) `DemoDataLoader` の変更 (3) 空文字を指定したときの挙動、を答えてください。
 
 ??? success "解答"
-    (1) `Demo` に `@DefaultValue("ランチどこ行く？") @NotBlank String title` を追加。(2) `DemoDataLoader` の `new CreatePollRequest("ランチどこ行く？", ...)` を `properties.demo().title()` に変える。(3) `--quickvote.demo.title=` のように空にすると、`@NotBlank` に違反して起動時に `APPLICATION FAILED TO START`（`Property: quickvote.demo.title`）で落ちる。`ConfigurationTest` に、同じ形のテストを足せます。
+    (1) `Demo` に `@DefaultValue("ランチどこ行く？") @NotBlank String title` を追加します。(2) `DemoDataLoader` の `new CreatePollRequest("ランチどこ行く？", ...)` を `properties.demo().title()` に変えます。(3) `--quickvote.demo.title=` のように空にすると、`@NotBlank` に違反して、起動時に `APPLICATION FAILED TO START`（`Property: quickvote.demo.title`）で落ちます。`ConfigurationTest` に、同じ形のテストを足せます。
 
 ??? question "説明問題：現場でこう聞かれる"
     「設定が間違っていたら、起動してから最初のリクエストで落ちるより、起動時に落ちるほうがいいのですか？」200字程度で答えてください。

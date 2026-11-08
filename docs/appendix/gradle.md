@@ -4,18 +4,16 @@
 
 この付録でできるようになること
 
-- QuickVote の `pom.xml` を、Gradle の `build.gradle.kts` に**要素ごとに**読み替えられる
+- QuickVote の `pom.xml` を、Gradle の `build.gradle.kts` に要素ごとに読み替えられる
 - `./mvnw` のコマンドを `./gradlew` のコマンドに置き換えられる
 - 現場で Gradle のプロジェクトに出会っても、依存・テスト・jar 作成の場所が分かる
 
 </div>
 
-この教材は Maven で進めます。Gradle は、Android 開発や、新しめの Spring プロジェクトで出会う確率が高いビルドツールです。**書けなくてよいので、読めるようになる**のが目標です。
+この教材は Maven で進めますが、Gradle も Android 開発や新しめの Spring プロジェクトでよく使われるビルドツールで、現場で出会う可能性があります。この付録の目標は、Gradle を書けるようになることではなく、読めるようになることです。
 
 !!! note "確認したこと"
-    - Spring Initializr（Spring Boot 4.1.2、Java 25、Gradle - Kotlin）で、QuickVote と同じ依存のプロジェクトを取得し、`./gradlew build -x test` が成功しました（Gradle 9.8.2）
-    - QuickVote の `pom.xml` を `build.gradle.kts` に移したものに QuickVote の `src` を載せて、`bootJar`・速いテスト42件・統合テスト1クラス（7件）が成功しました
-    - 実験は `code/labs/appendix-gradle/` にあります
+    Spring Initializr（Spring Boot 4.1.2、Java 25、Gradle - Kotlin）で QuickVote と同じ依存のプロジェクトを取得し、`./gradlew build -x test` が成功しました（Gradle 9.8.2）。また、QuickVote の `pom.xml` を `build.gradle.kts` に移したものに QuickVote の `src` を載せ、`bootJar`、速いテスト42件、統合テスト1クラス（7件）が成功することも確かめました。実験は `code/labs/appendix-gradle/` にあります。
 
 ## 1. 全体像：同じ仕事を、XMLかKotlinで書く
 
@@ -26,9 +24,9 @@
 | ラッパー | `mvnw` / `mvnw.cmd` | `gradlew` / `gradlew.bat` ＋ `gradle/wrapper/` |
 | 生成物の置き場 | `target/` | `build/` |
 | ローカルキャッシュ | `~/.m2` | `~/.gradle` |
-| 考え方 | **フェーズ**（`test` → `package` → `verify`）を順に進む | **タスク**の依存グラフ（`build` は `check` と `assemble` に依存） |
+| 考え方 | フェーズ（`test` → `package` → `verify`）を順に進む | タスクの依存グラフ（`build` は `check` と `assemble` に依存） |
 
-TypeScriptの読者向けに言い換えると、`pom.xml` は `package.json` に近い「データ」で、`build.gradle.kts` は `vite.config.ts` に近い「コードで書く設定」です。どちらも `npm` に当たる依存解決を担います。
+TypeScript に置き換えると、`pom.xml` は `package.json` に近い「データ」で、`build.gradle.kts` は `vite.config.ts` に近い「コードで書く設定」です。どちらも、`npm` に当たる依存の解決まで受け持ちます。
 
 ## 2. QuickVote の pom.xml を移す
 
@@ -77,11 +75,11 @@ TypeScriptの読者向けに言い換えると、`pom.xml` は `package.json` �
 
 | Maven | Gradle | 解説 |
 | --- | --- | --- |
-| `<parent>` の `spring-boot-starter-parent` | `id("org.springframework.boot")` ＋ `io.spring.dependency-management` | 依存の**版を決める役**（BOM）。Gradleでは2つのプラグインが担う |
+| `<parent>` の `spring-boot-starter-parent` | `id("org.springframework.boot")` ＋ `io.spring.dependency-management` | 依存の版を決める役（BOM）。Gradle では2つのプラグインで受け持つ |
 | `<groupId>` `<version>` | `group` `version` | |
 | `<artifactId>` | `settings.gradle.kts` の `rootProject.name = "quickvote"` | |
-| `<java.version>25</java.version>` | `java.toolchain.languageVersion = 25` | Gradle は**ツールチェーン**でJDKを指定する。手元のJDKを自動検出 |
-| （暗黙の Maven Central） | `repositories { mavenCentral() }` | 取得元を**明示する** |
+| `<java.version>25</java.version>` | `java.toolchain.languageVersion = 25` | Gradle は「ツールチェーン」で JDK を指定する。手元の JDK を自動で検出する |
+| （暗黙の Maven Central） | `repositories { mavenCentral() }` | 取得元を明示する |
 
 ### 2.2 依存
 
@@ -116,24 +114,24 @@ TypeScriptの読者向けに言い換えると、`pom.xml` は `package.json` �
     }
     ```
 
-1依存が**1行**に収まります。`groupId:artifactId` をコロンでつなぎ、版は書きません（BOM が決める点はMavenと同じです）。
+Gradle では1つの依存が1行に収まります。`groupId:artifactId` をコロンでつなぎ、版は書きません（BOM が決める点は Maven と同じです）。
 
 | Maven の `<scope>` | Gradle の構成 | 意味 |
 | --- | --- | --- |
 | `compile`（既定） | `implementation` | コンパイルにも実行にも使う |
-| `runtime` | `runtimeOnly` | 実行時だけ。コードから直接参照しない（例：JDBCドライバ） |
+| `runtime` | `runtimeOnly` | 実行時だけ。コードから直接参照しない（例：JDBC ドライバ） |
 | `test` | `testImplementation` | テストだけ |
 | `provided` | `compileOnly` | コンパイル時だけ |
 | `runtime` ＋ `<optional>true</optional>` | `developmentOnly` | 開発時の実行だけ。jar には入らない |
 
 !!! warning "QuickVote の PostgreSQL ドライバ"
-    Initializr は PostgreSQL ドライバを `runtimeOnly` で出力します。QuickVote はコードから `PGConnection` を直接使う（LISTEN/NOTIFY）ので、`pom.xml` で compile スコープに変えています。Gradle でも **`implementation("org.postgresql:postgresql")`** に変えます。こうした「Initializr の既定から手で変えた箇所」は、移すとき必ず確認します。
+    Initializr は PostgreSQL ドライバを `runtimeOnly` で出力します。ところが QuickVote はコードから `PGConnection` を直接使う（LISTEN/NOTIFY）ため、`pom.xml` では compile スコープに変えてあります。Gradle でも同じく `implementation("org.postgresql:postgresql")` に変えなければなりません。このように Initializr の既定から手で変えた箇所は、移すときに必ず確認します。
 
-`testRuntimeOnly("org.junit.platform:junit-platform-launcher")` は、Gradle で JUnit 6 を動かすために Initializr が足す行です。Mavenには対応する行がありません。
+`testRuntimeOnly("org.junit.platform:junit-platform-launcher")` は、Gradle で JUnit 6 を動かすために Initializr が足す行です。Maven には対応する行がありません。
 
 ### 2.3 テストとjar
 
-QuickVote の `pom.xml` は、`*Test` を surefire で、`*IT` を failsafe で動かします。Gradle には failsafe 相当が無いので、**テスト用のタスクをもう1つ作ります**。
+QuickVote の `pom.xml` は、`*Test` を surefire で、`*IT` を failsafe で動かします。Gradle には failsafe に当たるものが無いので、テスト用のタスクをもう1つ作ります。
 
 === "pom.xml"
 
@@ -180,7 +178,7 @@ QuickVote の `pom.xml` は、`*Test` を surefire で、`*IT` を failsafe で�
 | failsafe（`*IT`） | `integrationTest` タスクを自作 | `verify` ではなく `check` に組み込む |
 
 !!! note "Kotlin DSL の書き方の注意"
-    `val x by tasks.registering(Test::class) { … }` と書いた古い形は、Gradle 9.8.2 では非推奨の警告が出ました（`tasks.register<Test>("名前") { … }` に置き換えると消えます）。AIが出す Gradle のコードは、この種の古さを含みやすいです。
+    `val x by tasks.registering(Test::class) { … }` と書いた古い形は、Gradle 9.8.2 では非推奨の警告が出ました（`tasks.register<Test>("名前") { … }` に置き換えると消えます）。AI が出す Gradle のコードには、この種の古い書き方が含まれやすい傾向があります。
 
 ## 3. コマンドの対訳
 
@@ -198,7 +196,7 @@ QuickVote の `pom.xml` は、`*Test` を surefire で、`*IT` を failsafe で�
 | 特定の依存の経路 | `./mvnw dependency:tree -Dincludes=…` | `./gradlew dependencyInsight --dependency jackson-databind --configuration runtimeClasspath` |
 | 設定・タスクを確認する | `./mvnw help:effective-pom`（親POMを展開した設定） | `./gradlew tasks` |
 
-Windows では `./gradlew` を `.\gradlew.bat` に読み替えます。**`-x test` の意味は「`test` タスクを実行しない」**です。`build -x test` と書くと、QuickVote のように `integrationTest` を `check` に組み込んでいる場合は、`integrationTest` が動きます。Dockerなしで確かめるときは `-x test -x integrationTest` と書きます。
+Windows では `./gradlew` を `.\gradlew.bat` に読み替えます。`-x test` は「`test` タスクを実行しない」という意味で、`integrationTest` までは止めません。QuickVote のように `integrationTest` を `check` に組み込んでいると、`build -x test` でも `integrationTest` が動きます。Docker なしで確かめるときは `-x test -x integrationTest` と書きます。
 
 ```text
 $ ./gradlew build -x test -x integrationTest
@@ -208,7 +206,7 @@ quickvote-0.0.1-SNAPSHOT-plain.jar   ← 依存を含まない普通のjar
 quickvote.jar                        ← 実行できるjar（bootJar）
 ```
 
-`-plain.jar` は、Maven では見ない成果物です。実行は `java -jar build/libs/quickvote.jar` です（Dockerfile が参照するのはこちら）。
+`-plain.jar` は Maven では見ない成果物です。実行するのは `java -jar build/libs/quickvote.jar` で、Dockerfile が参照するのもこちらです。
 
 ## 4. ラッパーとファイル構成
 
@@ -223,30 +221,26 @@ quickvote/
 └── src/…                       ← Mavenと同じ構成
 ```
 
-- ✅ `src/main/java`・`src/test/java`・`src/main/resources` の配置は、Mavenと**同じ**です。ソースは移さなくて構いません
-- `gradle-wrapper.properties` の `distributionUrl` が、プロジェクトが使う Gradle の版を固定します。初回の `./gradlew` はその版をダウンロードします
-- `.gradle/` と `build/` は `.gitignore` に入れます（Initializr が生成する `.gitignore` に入っています）
+`src/main/java`、`src/test/java`、`src/main/resources` の配置は Maven と同じなので、ソースを移す必要はありません。プロジェクトが使う Gradle の版は `gradle-wrapper.properties` の `distributionUrl` で固定され、初回の `./gradlew` がその版をダウンロードします。`.gradle/` と `build/` は `.gitignore` に入れます（Initializr が生成する `.gitignore` には入っています）。
 
 ## 5. Maven と違って戸惑う点
 
 | 点 | 内容 |
 | --- | --- |
-| **デーモン** | 2回目以降が速いのは、バックグラウンドの Gradle デーモンが残るため。止めるには `./gradlew --stop` |
-| **設定がコード** | `build.gradle.kts` の間違いは、Kotlinのコンパイルエラーとして出る。XMLの閉じ忘れとは別種のエラー |
-| **Groovy版もある** | `build.gradle`（Groovy DSL）は `implementation 'a:b'` とクォートで書く。Kotlin版は `implementation("a:b")`。**AIの出力はどちらも出る**ので、拡張子で見分ける |
-| **依存の解決順** | Maven は「近い宣言が勝つ」、Gradle は「最も高い版が勝つ」が基本。ただし Spring Boot のプラグインが BOM で揃える |
-| **増分ビルド** | 変更のないタスクは `UP-TO-DATE` と表示されて飛ばされる |
+| デーモン | 2回目以降が速いのは、バックグラウンドの Gradle デーモンが残るため。止めるには `./gradlew --stop` |
+| 設定がコード | `build.gradle.kts` の間違いは、Kotlin のコンパイルエラーとして出る。XML の閉じ忘れとは種類の違うエラー |
+| Groovy 版もある | `build.gradle`（Groovy DSL）は `implementation 'a:b'` とクォートで書く。Kotlin 版は `implementation("a:b")`。AI の出力にはどちらの形も出るので、拡張子で見分ける |
+| 依存の解決順 | Maven は「近い宣言が勝つ」、Gradle は「最も高い版が勝つ」が基本。ただし Spring Boot のプラグインが BOM で版を揃える |
+| 増分ビルド | 変更のないタスクは `UP-TO-DATE` と表示されて飛ばされる |
 
 ## 6. どちらを使うか
 
-- **本教材は Maven**です。`pom.xml` が「データ」として読めること、BOM（親POM）が版を決める仕組みが素直に見えることが理由です
-- Gradle が優れる場面：ビルドが複雑で、タスクの依存を細かく書きたいとき。Android や Kotlin のプロジェクト
-- どちらも**同じ jar ができ、同じ Spring Boot が動きます**。ビルドツールの差は、アプリの挙動に影響しません
+この教材が Maven を選んだのは、`pom.xml` が「データ」として読めることと、BOM（親 POM）が版を決める仕組みが素直に見えることが理由です。Gradle が向くのは、ビルドが複雑でタスクの依存を細かく書きたいときや、Android・Kotlin のプロジェクトです。どちらを使っても同じ jar ができ、同じ Spring Boot が動くので、ビルドツールの違いがアプリの挙動に影響することはありません。
 
 ## 7. 演習
 
 ??? question "確認問題1：スコープの読み替え"
-    次の Maven の依存を、Gradle の1行に書いてください。
+    次の Maven の依存を、Gradle の1行で書いてください。
     ```xml
     <dependency>
         <groupId>org.testcontainers</groupId>
@@ -256,7 +250,7 @@ quickvote/
     ```
 
 ??? success "解答"
-    `testImplementation("org.testcontainers:testcontainers-postgresql")`。版は Spring Boot の BOM が決めるので書きません。
+    `testImplementation("org.testcontainers:testcontainers-postgresql")` です。版は Spring Boot の BOM が決めるので書きません。
 
 ??? question "確認問題2：jar 名"
     Gradle で `./gradlew bootJar` を実行したら、`quickvote-0.0.1-SNAPSHOT.jar` ができました。Dockerfile が期待する `quickvote.jar` にするには？
@@ -274,4 +268,4 @@ quickvote/
     「このプロジェクトは Gradle ですが、教材は Maven でした。何から読めばいいですか？」200字程度で答えてください。
 
 ??? success "解答"
-    例：まず `build.gradle.kts` の `dependencies` ブロックを読みます。`implementation` が Maven の compile スコープ、`testImplementation` が test スコープに当たり、版は書かれていません（BOMが決めています）。次に、`tasks` ブロックでテストと jar の設定を確認します。`src/` の構成は Maven と同じなので、アプリのコードの読み方は変わりません。
+    例：まず `build.gradle.kts` の `dependencies` ブロックを読みます。`implementation` が Maven の compile スコープ、`testImplementation` が test スコープに当たり、版は BOM が決めるので書かれていません。次に `tasks` ブロックで、テストと jar の設定を確認します。`src/` の構成は Maven と同じなので、アプリのコードの読み方は変わりません。

@@ -11,15 +11,15 @@
 
 </div>
 
-この章は**読解の章**です。前半は、同じ処理を2つの方式で読み比べます。後半は、AIが書きそうなJPAコードを**レビューする**演習です。書くより、読む量が多くなります。
+この章は読解の章です。前半では同じ処理を2つの方式で読み比べ、後半では、AIが書きそうなJPAコードをレビューする演習をします。書くより読む量が多くなります。
 
 ## 1. 問いかけ：QuickVote を JPA で書き直すべきか
 
-第3部から第7部まで、QuickVote は JdbcClient で書いてきました。日本の現場では、JPAで書かれたコードに出会う可能性が高くなります。そこで素朴な疑問が出ます。
+第3部から第7部まで、QuickVote は JdbcClient で書いてきました。ところが日本の現場では、JPAで書かれたコードに出会う可能性が高く、次のような疑問が出てきます。
 
 > 「QuickVote も、JPAで書いたほうが楽なのでは？」
 
-答えを先に言うと、**処理によって違います**。この章では、QuickVote の代表的な3つのユースケースを、JdbcClient（本線の実コード）と JPA（jpa-lab で実際に動かしたもの）で並べて、判断の材料を揃えます。
+答えを先に言うと、処理によって違います。この章では、QuickVote の代表的な3つのユースケースを、JdbcClient（本線の実コード）と JPA（jpa-lab で実際に動かしたもの）で並べて、判断の材料を揃えます。
 
 | ユースケース | 本線の実装（第何章） | この章で見る点 |
 | --- | --- | --- |
@@ -59,7 +59,7 @@
     List<OptionCount> findWithVoteCounts(@Param("pollId") Long pollId);
     ```
 
-JPA 版の `@Query` は、SQLではなく **JPQL**（Jakarta Persistence Query Language）です。テーブルではなく **Entity** に対して書きます（`options` ではなく `Option`、`o.poll.id` のようにフィールドをたどる）。同じ投票1件を、両方で実行した結果は一致しました。
+JPA 版の `@Query` は SQL ではなく JPQL（Jakarta Persistence Query Language）で、テーブルではなく Entity に対して書きます（`options` ではなく `Option`、`o.poll.id` のようにフィールドをたどる）。同じ投票1件を両方で実行した結果は一致しました。
 
 ```text
 [得票数] JdbcClient=[OptionCount[id=1, label=option-1, votes=3], OptionCount[id=2, label=option-2, votes=1], OptionCount[id=3, label=option-3, votes=0]]
@@ -68,11 +68,11 @@ JPA 版の `@Query` は、SQLではなく **JPQL**（Jakarta Persistence Query L
   select o1_0.id,o1_0.label,count(v1_0.id) from options o1_0 left join votes v1_0 on v1_0.option_id=o1_0.id where o1_0.poll_id=? group by o1_0.id,o1_0.label order by o1_0.id
 ```
 
-**ほぼ同じSQLが出ています。** JPQL は「SQLを書かなくてよい」わけではなく、**SQLを別の文法で書いている**のです。集計・結合・`GROUP BY` の領域では、JPA でも結局SQLの知識が要ります。さらに、読み取り専用の集計は DTO で受けるので、Entity も永続コンテキストも出番がありません。**この領域では、JPAの強みはほぼ生きません。**
+出力されたSQLはほぼ同じです。JPQL を使っても「SQLを書かなくてよい」わけではなく、SQL を別の文法で書いているだけです。集計・結合・`GROUP BY` では、JPA でも結局SQLの知識が要ります。しかも、読み取り専用の集計は DTO で受けるので、Entity も永続コンテキストも出番がありません。**この領域では、JPAの強みはほぼ生きません。**
 
 ## 3. 比べる②：投票（1人1票・上書き）
 
-次は書き込みです。QuickVote の `VoteRepository.upsert` は、`ON CONFLICT` で「初投票なら INSERT、別の選択肢なら UPDATE、同じ選択肢なら何もしない」を**SQL1本**で行います。
+次は書き込みです。QuickVote の `VoteRepository.upsert` は、`ON CONFLICT` を使って、「初投票なら INSERT、別の選択肢なら UPDATE、同じ選択肢なら何もしない」をSQL1本で行います。
 
 === "JdbcClient（QuickVote の実コード）"
     ```java title="code/quickvote/.../vote/VoteRepository.java"
@@ -106,7 +106,7 @@ JPA 版の `@Query` は、SQLではなく **JPQL**（Jakarta Persistence Query L
     }
     ```
 
-「探す → なければ INSERT、あれば Entity を書き換える」。JPAでは、いかにも自然な書き方です。これを、3回続けて呼んだときのSQLを見ます。
+「探す → なければ INSERT、あれば Entity を書き換える」は、JPAではごく自然な書き方です。これを3回続けて呼んだときのSQLを見ます。
 
 ```text
 [JPA版 投票] ① 初めての投票 ↓
@@ -128,7 +128,7 @@ JPA 版の `@Query` は、SQLではなく **JPQL**（Jakarta Persistence Query L
 
 ### 同時に初投票が来たら
 
-本数よりも深刻なのは、**「確認してから挿入」**の形です（第9章の check-then-act、第26章）。同じ人の初投票が、ほぼ同時に2つ届いたらどうなるでしょう。
+本数よりも深刻なのは、確認してから挿入する形です（第9章の check-then-act、第26章）。同じ人の初投票がほぼ同時に2つ届いたらどうなるでしょう。
 
 ```java title="src/test/java/com/example/jpalab/SqlVsJpaTest.java（抜粋）"
 tx.executeWithoutResult(a -> {
@@ -142,15 +142,15 @@ tx.executeWithoutResult(a -> {
 [確認してから挿入] DataIntegrityViolationException ← ConstraintViolationException
 ```
 
-票が2行になることは**ありませんでした**。DBの `UNIQUE(poll_id, participant_id)`（第18章）が止めたからです。ただし、その結果は例外（`DataIntegrityViolationException`）で、利用者に500エラーが見えます。QuickVote の `ON CONFLICT` は、この衝突を**エラーにせず、SQL1本の中で解決します**。
+票が2行になることはありませんでした。DBの `UNIQUE(poll_id, participant_id)`（第18章）が止めたからです。ただし、その結果は例外（`DataIntegrityViolationException`）で、利用者には500エラーが見えます。QuickVote の `ON CONFLICT` は、この衝突をエラーにせず、SQL1本の中で解決します。
 
 !!! tip "現場では：JPAでもネイティブSQLを使える"
-    JPAを使っていても、`@Query(nativeQuery = true)` で本線と**同じ `ON CONFLICT` のSQL**を呼べます（jpa-lab の `VoteRepository.upsert`）。更新件数は、初回=1、変更=1、同じ選択肢=0 で、本線の `upsert` と同じでした。
-    **「JPAか、SQLか」は二者択一ではありません。** 1つのプロジェクトの中で、処理ごとに選びます。
+    JPAを使っていても、`@Query(nativeQuery = true)` で本線と同じ `ON CONFLICT` のSQLを呼べます（jpa-lab の `VoteRepository.upsert`）。更新件数は、初回=1、変更=1、同じ選択肢=0 で、本線の `upsert` と同じでした。
+    「JPAか、SQLか」は二者択一ではなく、1つのプロジェクトの中で処理ごとに選べます。
 
 ## 4. 比べる③：親行ロック
 
-第25章で、QuickVote は参加人数や選択肢数の上限を守るために、**親の `polls` 行を `FOR UPDATE` でロック**してから再カウントしていました。JPA で同じことをするには、`@Lock` を使います。
+第25章で、QuickVote は参加人数や選択肢数の上限を守るために、親の `polls` 行を `FOR UPDATE` でロックしてから再カウントしていました。JPA で同じことをするには `@Lock` を使います。
 
 === "JdbcClient（QuickVote の実コード）"
     ```java title="code/quickvote/.../poll/PollRepository.java"
@@ -173,14 +173,14 @@ tx.executeWithoutResult(a -> {
 select p1_0.id,p1_0.closes_at,p1_0.status,p1_0.title,p1_0.version from polls p1_0 where p1_0.id=? for no key update of p1_0
 ```
 
-JPAの `PESSIMISTIC_WRITE` は、PostgreSQL では **`FOR NO KEY UPDATE`** になりました。本線の `FOR UPDATE` より**一段弱いロック**です。違いを実際に確かめます。ロックを取った接続が持っている間に、別の接続が**子の表（`options`）に行を追加**します（外部キーの確認で `polls` の行に触れる操作です）。
+JPAの `PESSIMISTIC_WRITE` は、PostgreSQL では `FOR NO KEY UPDATE` になりました。本線の `FOR UPDATE` より一段弱いロックです。違いを実際に確かめます。ロックを取った接続がロックを持っている間に、別の接続が子の表（`options`）に行を追加します（外部キーの確認で `polls` の行に触れる操作です）。
 
 ```text
 [ロックの強さ] polls を FOR UPDATE でロック中に options へ INSERT → 待たされた（lock_timeout で中断: 55P03）
 [ロックの強さ] polls を FOR NO KEY UPDATE でロック中に options へ INSERT → すぐ成功
 ```
 
-QuickVote のように**すべての更新経路が先に `polls` をロックする**規則なら、どちらでも直列化されます。ただし、ロックを取らずに子行を追加する経路があると、`FOR UPDATE` なら待たされ、`FOR NO KEY UPDATE` なら通り抜けます。**「JPAに置き換えたら、ロックの強さが変わっていた」**ことに気づけるのは、発行されるSQLを見ているときだけです。
+QuickVote のように、すべての更新経路が先に `polls` をロックする規則なら、どちらでも直列化されます。ただし、ロックを取らずに子行を追加する経路があると、`FOR UPDATE` なら待たされ、`FOR NO KEY UPDATE` なら通り抜けます。JPAに置き換えたらロックの強さが変わっていた、ということに気づけるのは、発行されるSQLを見ているときだけです。
 
 ## 5. 使い分けの基準
 
@@ -188,10 +188,10 @@ QuickVote のように**すべての更新経路が先に `polls` をロック�
 
 | 観点 | JdbcClient＋SQL | JPA（Hibernate） |
 | --- | --- | --- |
-| SQLが見えるか | 自分で書くので**常に見える** | 組み立てられるので、**ログを見ないと分からない** |
+| SQLが見えるか | 自分で書くので常に見える | 組み立てられるので、ログを見ないと分からない |
 | 検索・集計・結合 | 得意（SQLそのもの） | JPQL＝別文法のSQL。DTO射影が前提 |
 | 1つの集約を読んで、業務ルールで状態を変える | 手で `UPDATE` を書く | 得意（Entityのメソッド＋dirty checking） |
-| 同時更新の制御 | SQL1本・ロック・制約を**明示的に**設計 | `@Version`／`@Lock` が使えるが、「読んでから書く」形になりがち |
+| 同時更新の制御 | SQL1本・ロック・制約を明示的に設計 | `@Version`／`@Lock` が使えるが、「読んでから書く」形になりがち |
 | 性能の落とし穴 | 書いたSQLの数がそのまま | N+1、全列UPDATE、1行ずつDELETE、OSIV |
 | テーブル・列の変更への追従 | SQLを探して直す | Entityを直せば追従（`ddl-auto: validate` で検出） |
 | 学習コスト | SQLが分かれば低い | JPA特有の概念（カゴ・状態遷移・遅延ロード）が必要 |
@@ -205,20 +205,16 @@ flowchart TD
     B -->|"いいえ（単純なCRUD）"| J["JPA<br/>Entity＋@Version"]
 ```
 
-**QuickVote の判断**を書いておきます。本線は JdbcClient のままが妥当です。理由は3つあります。
+QuickVote の判断を書いておきます。本線は JdbcClient のままが妥当です。第一に、守るべき約束の中心が同時実行にあります（人数上限・選択肢上限・1人1票・イベント採番）。どれもSQL1本・ロック順序・制約で守っており、JPAのEntityを書き換える形には置き換えにくいものです。第二に、詳細取得は複数テーブルの集計で、DTO射影が前提になります。第三に、SSE の再送（第37章）は「この `seq` より後」を読み直すだけで、Entity の管理は要りません。
 
-1. **守るべき約束の中心が「同時実行」**です（人数上限・選択肢上限・1人1票・イベント採番）。どれもSQL1本・ロック順序・制約で守っており、これはJPAのEntityを書き換える形に置き換えにくい
-2. 詳細取得は**複数テーブルの集計**で、DTO射影が前提になる
-3. SSE の再送（第37章）は、「この `seq` より後」を**読み直すだけ**で、Entity の管理は要らない
-
-一方、「投票の作成」や「タイトルの変更」のような**単純な CRUD** は、JPA でも十分に書けます。**現場では、1つのアプリの中で両方が同居していることも珍しくありません。**
+一方、「投票の作成」や「タイトルの変更」のような単純な CRUD は、JPA でも十分に書けます。現場では、1つのアプリの中で両方が同居していることも珍しくありません。
 
 !!! warning "「JPAは遅い」「SQLは古い」は、判断基準ではありません"
-    本当の基準は、①処理の形（集計か、状態遷移か）、②同時更新の守り方、③チームがその方式の落とし穴（N+1、ロック、flush）を**検出できるか**、の3つです。方式を決めたら、**その方式の事故を検出するテスト**（SQL本数、競合）もセットで用意します。
+    本当の基準は、①処理の形（集計か、状態遷移か）、②同時更新の守り方、③チームがその方式の落とし穴（N+1、ロック、flush）を検出できるか、の3つです。方式を決めたら、その方式の事故を検出するテスト（SQL本数、競合）もセットで用意します。
 
 ## 6. 混在させるときの落とし穴
 
-同じトランザクションの中で、JPAとJdbcClient（またはネイティブSQL）を**混ぜる**場合があります。本章のjpa-labで、よく起きる4つの落とし穴を観察しました。
+同じトランザクションの中で、JPAとJdbcClient（またはネイティブSQL）を混ぜる場合があります。本章のjpa-labで、よく起きる4つの落とし穴を観察しました。
 
 ### 6.1 JPAの変更は、flush するまで JdbcClient から見えない
 
@@ -234,7 +230,7 @@ jdbc.sql("SELECT status FROM polls WHERE id = 1")...             // → 新し�
 [混在1] 同じトランザクション内で JdbcClient が見た status: flush前=OPEN / flush後=CLOSED
 ```
 
-JdbcClient はカゴを知らないので、auto flush は起きません（JPAのクエリの前でだけ起きる）。**JPAで変更してから、同じトランザクションの SQL で読むなら、先に `flush()`** が必要です。なお、flush後に変更が見えたことから、JdbcClient とJPAは**同じトランザクションの同じ接続**を共有していることも分かります。
+JdbcClient は JPA のカゴを経由しないので、auto flush は起きません（JPAのクエリの前でだけ起きます）。JPAで変更してから同じトランザクションの SQL で読むなら、先に `flush()` が必要です。なお、flush後に変更が見えたことから、JdbcClient とJPAが同じトランザクションの同じ接続を共有していることも分かります。
 
 ### 6.2 SQLで直接更新すると、カゴの中の Entity は古いまま
 
@@ -249,7 +245,7 @@ em.refresh(poll);                                                    // カゴ�
 [混在2] SQLで CLOSED に更新したあと Entity が見せた status: そのまま=OPEN / refresh後=CLOSED
 ```
 
-第39章の「同じ id は、カゴの中で1つ」の裏返しです。**JPAを通さずに行を変えたら、その Entity は古い**。`refresh`（読み直し）か、そのトランザクションでその Entity を使わない、のどちらかです。
+第39章の「同じ id は、カゴの中で1つ」の裏返しです。JPAを通さずに行を変えると、その Entity は古いままになります。対処は、`refresh`（読み直し）するか、そのトランザクションでその Entity を使わないか、のどちらかです。
 
 ### 6.3 バルク更新のJPQLも、Entity は古いまま
 
@@ -261,7 +257,7 @@ update polls p1_0 set status='CLOSED' where p1_0.id=?
 [混在3] バルク更新: 更新件数=1 / Entityの status=OPEN / DBの status=CLOSED
 ```
 
-Entity は `OPEN` のままです。しかも、このバルク更新は `version` を**増やしません**。`@Modifying(clearAutomatically = true)` のようにカゴを空にする指定もありますが、「カゴの中の他の変更はどうなるか」まで考える必要があります。**バルク更新のあとは、同じトランザクションで Entity を使わない**のが安全です。
+Entity は `OPEN` のままです。しかも、このバルク更新は `version` を増やしません。`@Modifying(clearAutomatically = true)` のようにカゴを空にする指定もありますが、「カゴの中の他の変更はどうなるか」まで考える必要があります。**バルク更新のあとは、同じトランザクションで Entity を使わない**のが安全です。
 
 ### 6.4 ネイティブクエリの直前にも、flush は起きる
 
@@ -272,21 +268,21 @@ select status from polls where id = 1
 [混在4] ネイティブクエリが返した status=CLOSED
 ```
 
-`EntityManager.createNativeQuery`（JPA経由のネイティブクエリ）の前には、JPQL と同じように **auto flush が起きました**。ところが 6.1 の JdbcClient では起きませんでした。**「JPAを通る」クエリか、JdbcClient のように「JPAを通らない」かで、結果が変わります。**
+`EntityManager.createNativeQuery`（JPA経由のネイティブクエリ）の前には、JPQL と同じように auto flush が起きました。ところが 6.1 の JdbcClient では起きませんでした。JPAを通るクエリか、JdbcClient のようにJPAを通らないかで、結果が変わります。
 
 | 経路 | カゴの変更は自動で flush されるか |
 | --- | --- |
 | JPQL・派生クエリ（Repositoryのメソッド） | される（本章6.4、第39章） |
 | `EntityManager.createNativeQuery` | される（本章6.4で確認） |
-| **JdbcClient（JPAを通らない）** | **されない**（本章6.1） |
-| バルク更新の JPQL | 実行はDBへ直接。**カゴの中の Entity は更新されない**（本章6.3） |
+| JdbcClient（JPAを通らない） | されない（本章6.1） |
+| バルク更新の JPQL | 実行はDBへ直接。カゴの中の Entity は更新されない（本章6.3） |
 
 !!! tip "現場では"
-    混在させるなら、**ルールを1つ決めます**。たとえば「**1つの業務操作（1つの `@Transactional`）では、どちらかの方式だけ使う**」。複数の操作をまたぐ場合は、方式の切り替わりに `flush()` と `refresh()`（または `clear()`）を明示します。
+    混在させるなら、ルールを1つ決めます。たとえば「1つの業務操作（1つの `@Transactional`）では、どちらかの方式だけ使う」。複数の操作をまたぐ場合は、方式の切り替わりに `flush()` と `refresh()`（または `clear()`）を明示します。
 
 ## 7. コラム：MyBatis ── 「XMLにSQLを書く」形を読む
 
-日本のSI現場では、JPAよりも **MyBatis（マイバティス）** に出会う確率も高くあります。**SQLをJavaではなくXMLファイルに書き**、Javaのインターフェースのメソッドと結びつける方式です。第3部で学んだSQLの知識が、そのまま使えます。読めるようになっておきましょう。
+日本のSI現場では、JPAよりも MyBatis（マイバティス）に出会う確率のほうが高いこともあります。SQLをJavaではなくXMLファイルに書き、Javaのインターフェースのメソッドと結びつける方式で、第3部で学んだSQLの知識がそのまま使えます。読めるようになっておきましょう。
 
 ### 7.1 Javaのインターフェースと、XMLの対応
 
@@ -325,9 +321,9 @@ public interface PollMapper {
 
 読み方は3つだけです。
 
-1. XMLの **`namespace`** ＝ Javaのインターフェースの完全修飾名。**`id`** ＝ メソッド名。この対応でメソッドとSQLが結びつく
-2. **`#{pollId}`** は、引数を**バインド変数**（`?`）として渡す。JdbcClientの `:pollId` と同じ役割
-3. SQLの中に `<`、`>` を書くときは、XMLの規則で **`&lt;`、`&gt;`** にする（`<>` は `&lt;&gt;`）
+1. XMLの `namespace` はJavaのインターフェースの完全修飾名、`id` はメソッド名に対応する。この対応でメソッドとSQLが結びつく
+2. `#{pollId}` は、引数をバインド変数（`?`）として渡す。JdbcClientの `:pollId` と同じ役割
+3. SQLの中に `<`、`>` を書くときは、XMLの規則で `&lt;`、`&gt;` にする（`<>` は `&lt;&gt;`）
 
 実行すると、SQLとパラメータがログに出ます（第3部の SQL ログと同じ感覚で読めます）。
 
@@ -340,7 +336,7 @@ public interface PollMapper {
 
 ### 7.2 `#{}` と `${}`：SQLインジェクションの分かれ道
 
-XMLの中の `$` を見たら、**必ず立ち止まってください。**
+XMLの中に `$` があったら、必ず立ち止まってください。
 
 ```xml
 <select id="search" resultType="PollRow">
@@ -353,19 +349,19 @@ XMLの中の `$` を見たら、**必ず立ち止まってください。**
 </select>
 ```
 
-- `#{...}` ＝ バインド変数（`?`）。**値**として渡されるので、安全
-- `${...}` ＝ **文字列がそのまま SQL に埋め込まれる**。外部の入力を渡せば、第19章の SQL インジェクションそのもの
+- `#{...}` ＝ バインド変数（`?`）。値として渡されるので、安全
+- `${...}` ＝ 文字列がそのまま SQL に埋め込まれる。外部の入力を渡せば、第19章の SQL インジェクションそのもの
 
 ```text
 mapper.search(null, null, "id DESC") を実行すると：
 SELECT id, title, status FROM polls ORDER BY id DESC
 ```
 
-`orderBy` に渡した文字列が、そのまま SQL の一部になりました。`ORDER BY` や表名のように、バインド変数にできない場所で `${}` が使われがちです。使うなら、**Java側で許可する値の一覧（allow-list）と照合**してから渡します。
+`orderBy` に渡した文字列が、そのまま SQL の一部になりました。`ORDER BY` や表名のように、バインド変数にできない場所で `${}` が使われがちです。使うなら、Java側で許可する値の一覧（allow-list）と照合してから渡します。
 
 ### 7.3 動的SQL：`<where>` と `<if>`
 
-上のXMLの `<where>` と `<if>` は、**条件があるときだけ WHERE を組み立てる**ための部品です。
+上のXMLの `<where>` と `<if>` は、条件があるときだけ WHERE を組み立てるための部品です。
 
 ```text
 mapper.search(null, null, "id") →
@@ -374,11 +370,11 @@ mapper.search("OPEN", "poll-1", "id") →
 SELECT id, title, status FROM polls WHERE status = ? AND title LIKE concat('%', ?, '%') ORDER BY id
 ```
 
-条件がなければ `WHERE` ごと消え、あれば先頭の `AND` を取って `WHERE` に直してくれます。**検索画面のように条件が可変のSQL**で、JdbcClient ならJavaで文字列を組み立てる処理を、XMLの部品が担います。
+条件がなければ `WHERE` ごと消え、あれば先頭の `AND` が取られて `WHERE` に直されます。検索画面のように条件が可変のSQLでは、JdbcClient ならJavaで文字列を組み立てる処理を、XMLの部品が受け持ちます。
 
 ### 7.4 `resultMap` と N+1：MyBatis にもある
 
-親子の関係は、`resultMap` の `<collection>` で詰めます。ここに、JPAと同じ N+1 の罠があります。
+親子の関係は、`resultMap` の `<collection>` で詰めます。ここにも、JPAと同じ N+1 の落とし穴があります。
 
 ```xml
 <!-- (A) 入れ子の select：親ごとに selectOptionsByPollId を実行する（1 + N） -->
@@ -407,13 +403,13 @@ SELECT id, title, status FROM polls WHERE status = ? AND title LIKE concat('%', 
 [MyBatis JOIN+collection] SQL 1本
 ```
 
-`select="..."` で子を取る形（A）は、投票100件で **101本**になりました（JPAの遅延ロードと同じ数字です）。JOINして `<collection>` で詰め直す形（B）は **1本**です。**N+1は「JPAの欠陥」ではなく、「親子を別々のSQLで取る」ことの帰結**です。方式が違っても、SQLの本数を数える習慣は変わりません。
+`select="..."` で子を取る形（A）は、投票100件で 101本になりました（JPAの遅延ロードと同じ数字です）。JOINして `<collection>` で詰め直す形（B）は1本です。N+1 は JPA の欠陥ではなく、親子を別々のSQLで取ることから起きます。方式が違っても、SQLの本数を数える習慣は変わりません。
 
 ### 7.5 JPA・JdbcClient・MyBatis の比べ方
 
 | | JdbcClient | MyBatis | JPA |
 | --- | --- | --- | --- |
-| SQLを書く場所 | Javaの中（テキストブロック） | **XMLファイル** | 書かない（JPQL・自動生成） |
+| SQLを書く場所 | Javaの中（テキストブロック） | XMLファイル | 書かない（JPQL・自動生成） |
 | SQLの可視性 | 常に見える | 常に見える | ログを見ないと分からない |
 | 結果の詰め替え | 自分で書く（`RowMapper`） | `resultType`／`resultMap`（設定） | 自動（Entity） |
 | 変更検出（dirty checking） | なし | なし | あり |
@@ -421,18 +417,18 @@ SELECT id, title, status FROM polls WHERE status = ? AND title LIKE concat('%', 
 | 得意な処理 | 小さな規模で、SQLを明示したい | 複雑なSQL、DB固有の機能が多い、SQLを分離したい | 単純なCRUD、集約の状態遷移 |
 | 落とし穴 | SQLの重複 | `${}`、XMLとJavaの不整合（実行時に気づく） | N+1、flush、OSIV、LazyInit |
 
-MyBatis の XML は**実行して初めて**、列名やプロパティ名の食い違いに気づく場合があります（コンパイル時に検査されない）。テストでSQLを実際に流すことが、特に重要です。
+MyBatis の XML は、実行して初めて列名やプロパティ名の食い違いに気づく場合があります（コンパイル時に検査されないため）。そのため、テストでSQLを実際に流すことが特に重要です。
 
 !!! info "この教材で動作確認した組み合わせ"
-    Spring Boot 4.1.2 ＋ `mybatis-spring-boot-starter` 4.1.0（MyBatis 3.5.19）で、本節のコードが動作することを `code/labs/ch41-mybatis/` で確認しました。ただし、Spring Initializr は、Spring Boot 4.1.2 では MyBatis を依存として**選択できません**（対応範囲が Boot 4.0 系まで）でした。公式のバージョン対応表を確認して、**手動で依存を追加**しています。実プロジェクトでは、採用前に MyBatis 側の対応表を確認してください。
+    Spring Boot 4.1.2 ＋ `mybatis-spring-boot-starter` 4.1.0（MyBatis 3.5.19）で、本節のコードが動作することを `code/labs/ch41-mybatis/` で確認しました。ただし、Spring Initializr では、Spring Boot 4.1.2 を選ぶと MyBatis を依存として選択できませんでした（対応範囲が Boot 4.0 系まで）。公式のバージョン対応表を確認して、手動で依存を追加しています。実プロジェクトでは、採用前に MyBatis 側の対応表を確認してください。
 
 ## 8. レビュー演習：AIが書いたJPAコードの罠を5つ見つける
 
-読解章の本題です。AIに「投票の一覧と締切のAPIを JPA で書いて」と頼んだら、次のコードが返ってきたとします。コンパイルでき、一見きれいに動きます。**5つの罠**が入っています。
+読解章の本題です。AIに「投票の一覧と締切のAPIを JPA で書いて」と頼んだら、次のコードが返ってきたとします。コンパイルでき、一見きれいに動きますが、5つの罠が入っています。
 
-まず、**答えを見ずに**レビューコメントを書いてください。ヒントは次の観点です。
+まず、答えを見ずにレビューコメントを書いてください。ヒントは次の観点です。
 
-- SQLは何本流れるか（**取得方法**）
+- SQLは何本流れるか（取得方法）
 - APIの境界で何を返しているか
 - ログに出したときに何が起きるか
 - `Set` に入れたときに何が起きるか
@@ -538,9 +534,9 @@ public class BadPollController {
 ??? success "解答：5つの罠、検出方法、修正"
     **罠1：`EAGER`（`@OneToMany(fetch = EAGER)` と、`fetch` を書いていない `@ManyToOne`）**
 
-    - **何が起きるか**：`@ManyToOne` の既定は EAGER です。一覧を取っただけで、全投票の選択肢が読み込まれます。投票100件で、`findAll()` が **101本**になりました（修正後は1本）
-    - **検出方法**：`grep -rn "FetchType.EAGER"`。`@ManyToOne`／`@OneToOne` に `fetch =` が書かれていないものを探す。SQL本数を検査するテスト（`measure`）
-    - **修正**：関連は**すべて `LAZY` を明示**し、必要な画面ごとに fetch join／`@EntityGraph`／DTO射影で取る（第40章）
+    - 何が起きるか：`@ManyToOne` の既定は EAGER です。一覧を取っただけで、全投票の選択肢が読み込まれます。投票100件で、`findAll()` が 101本になりました（修正後は1本）
+    - 検出方法：`grep -rn "FetchType.EAGER"`。`@ManyToOne`／`@OneToOne` に `fetch =` が書かれていないものを探す。SQL本数を検査するテスト（`measure`）
+    - 修正：関連はすべて `LAZY` を明示し、必要な画面ごとに fetch join／`@EntityGraph`／DTO射影で取る（第40章）
 
     ```text
     [罠1] 罠入り(EAGER): 101本 / 修正後(LAZY): 1本
@@ -548,9 +544,9 @@ public class BadPollController {
 
     **罠2：ループの中の `findById`**
 
-    - **何が起きるか**：IDの数だけSQLが出ます。20個のIDで **40本**（EAGER の副作用で、1つのIDごとに「選択肢＋投票」と「その投票の全選択肢」の2本）
-    - **検出方法**：`for` の中の `findById`／`getReferenceById` を読む。SQL本数のテスト
-    - **修正**：`findAllById(ids)`（`where id in (...)` の1本）
+    - 何が起きるか：IDの数だけSQLが出ます。20個のIDで 40本になりました（EAGER の副作用で、1つのIDごとに「選択肢＋投票」と「その投票の全選択肢」の2本が出ます）
+    - 検出方法：`for` の中の `findById`／`getReferenceById` を読む。SQL本数のテスト
+    - 修正：`findAllById(ids)`（`where id in (...)` の1本）
 
     ```text
     [罠2] 罠入り(ループ内 findById): 40本 / 修正後(findAllById): 1本
@@ -562,9 +558,9 @@ public class BadPollController {
 
     **罠3：Entity をそのまま返す Controller**
 
-    - **何が起きるか**：JSON に `version` など**内部の列まで出ます**。Entity を変えるとAPIの形も変わります。無限ループを避けた `@JsonIgnore` は、問題を隠しただけです
-    - **検出方法**：`@RestController` のメソッドの**戻り値の型**に `@Entity` が含まれていないか。応答JSONを検査するテスト
-    - **修正**：DTO（`record`）に詰めて返す（第13章）
+    - 何が起きるか：JSON に `version` など内部の列まで出ます。Entity を変えるとAPIの形も変わります。無限ループを避けるために付けた `@JsonIgnore` は、問題を隠しただけです
+    - 検出方法：`@RestController` のメソッドの戻り値の型に `@Entity` が含まれていないか。応答JSONを検査するテスト
+    - 修正：DTO（`record`）に詰めて返す（第13章）
 
     ```text
     [罠3] 罠入りの応答: [{"title":"poll-1","closesAt":"2026-11-08T16:51:40.072048Z","id":1,"options":[{"id":1,"label":"option-1"},{"id":2,"label":"option-2"}],"status":"OPEN","version":0}, ...]
@@ -573,9 +569,9 @@ public class BadPollController {
 
     **罠4：`toString` に関連を含めて、循環する**
 
-    - **何が起きるか**：`BadPoll.toString()` が `options` を、`BadOption.toString()` が `poll` を出力するので、無限に呼び合い **`StackOverflowError`** になります。さらに怖いのは、**ログ出力では例外が握りつぶされる**ことです（`log.info("closed: {}", poll)` は、`closed: [FAILED toString()]` と出るだけ）
-    - **検出方法**：`toString()` を直接呼ぶテスト。ログに `[FAILED toString()]` が出ていないか grep。Lombok の `@Data`／`@ToString` は、既定ですべてのフィールドを並べるので同じ事故を起こします
-    - **修正**：`toString` に**関連（コレクション・親への参照）を含めない**。`id` と、重要な単純な値だけにする
+    - 何が起きるか：`BadPoll.toString()` が `options` を、`BadOption.toString()` が `poll` を出力するので、無限に呼び合って `StackOverflowError` になります。しかも、ログ出力ではこの例外が握りつぶされます（`log.info("closed: {}", poll)` は、`closed: [FAILED toString()]` と出るだけです）
+    - 検出方法：`toString()` を直接呼ぶテスト。ログに `[FAILED toString()]` が出ていないか grep。Lombok の `@Data`／`@ToString` は、既定ですべてのフィールドを並べるので同じ事故を起こします
+    - 修正：`toString` に関連（コレクション・親への参照）を含めない。`id` と、重要な単純な値だけにする
 
     ```text
     [罠4] poll.toString() → StackOverflowError
@@ -585,9 +581,9 @@ public class BadPollController {
 
     **罠5：`id` だけで `equals`／`hashCode` を実装する**
 
-    - **何が起きるか**：①保存前の Entity は `id` が `null` で、**すべて互いに等しい**ので、`Set` に入れると1件に潰れます。3つの選択肢を足したのに1件でした。②保存すると `id` が採番されて `hashCode` が変わり（31 → 32）、`HashSet` から**見つからなくなります**
-    - **検出方法**：`new` した Entity を `Set` に複数入れるテスト。`hashCode` が `id` を使っていないか読む
-    - **修正**：`id` が `null` の間は等しくしない（`getId() != null && ...`）、`hashCode` は定数（または不変の業務キー）にする。Entity を `Set` に入れないなら、そもそも `equals`／`hashCode` を実装しない（オブジェクト同一性のまま）のも有効
+    - 何が起きるか：①保存前の Entity は `id` が `null` で、すべて互いに等しいので、`Set` に入れると1件に潰れます。3つの選択肢を足したのに1件でした。②保存すると `id` が採番されて `hashCode` が変わり（31 → 32）、`HashSet` から見つからなくなります
+    - 検出方法：`new` した Entity を `Set` に複数入れるテスト。`hashCode` が `id` を使っていないか読む
+    - 修正：`id` が `null` の間は等しくしない（`getId() != null && ...`）、`hashCode` は定数（または不変の業務キー）にする。Entity を `Set` に入れないなら、そもそも `equals`／`hashCode` を実装しない（オブジェクト同一性のまま）という選択肢もあります
 
     ```text
     [罠5] 3回 addOption したのに options の件数 = 1
@@ -615,7 +611,7 @@ public class BadPollController {
     1. `id` が `null`（未保存）の間は、自分自身としか等しくなりません。`instanceof` ＋ `getId()` で、Hibernate のプロキシとも比較できます。
     2. 保存の前後で変わらない値にします。
 
-    **ボーナス（見つけやすい順）**：どの罠も、「SQLを数える」「JSONを見る」「`toString` を呼ぶ」「`Set` に入れてみる」という**小さなテスト1本**で検出できます。レビューでは、コードを眺めるだけでなく、**テストで反証する**のが確実です。
+    **ボーナス（見つけやすい順）**：どの罠も、「SQLを数える」「JSONを見る」「`toString` を呼ぶ」「`Set` に入れてみる」という小さなテスト1本で検出できます。レビューでは、コードを眺めるだけでなく、テストで反証するのが確実です。
 
 !!! tip "他にも注意する点"
     この演習のコードには、`@Transactional` の外で遅延ロードに触れる書き方（第40章）や、`@Version` の衝突を処理しない書き方（第40章）は含めていません。これらは前章の「現場では」の表でレビューします。レビュー観点の全体像は、第47章（AIと組むレビュー術）で、チェックリストにまとめ直します。
@@ -641,7 +637,7 @@ public class BadPollController {
     QuickVote に次の機能を足すとします。JPA と JdbcClient のどちらで書きますか。理由も添えてください。(a) 投票のタイトル変更 (b) 投票の参加者数ランキング（全投票を横断した集計） (c) 「選択肢の追加は10件まで」の判定と追加
 
 ??? success "解答"
-    (a) **JPA でも十分**。1件を読んで、業務のメソッドで変えるだけ。`@Version` で同時編集を検出する。(b) **SQL**（JdbcClient か DTO射影）。横断した集計で、Entity は不要。(c) **SQL（本線のまま）**。「親行をロック → 再カウント → 追加」は、同時実行の制御が本質。JPA の「読んでから書く」では、競合の穴ができやすい（JPAなら `@Lock(PESSIMISTIC_WRITE)` を使うが、ロックの強さが `FOR NO KEY UPDATE` に変わる点に注意）。
+    (a) JPA でも十分です。1件を読んで業務のメソッドで変えるだけで、`@Version` で同時編集を検出できます。(b) SQL（JdbcClient か DTO射影）です。横断した集計で、Entity は不要です。(c) SQL（本線のまま）です。「親行をロック → 再カウント → 追加」は、同時実行の制御が本質です。JPA の「読んでから書く」では、競合の穴ができやすくなります（JPAなら `@Lock(PESSIMISTIC_WRITE)` を使いますが、ロックの強さが `FOR NO KEY UPDATE` に変わる点に注意）。
 
 ??? question "確認問題2：混在の事故を予測する"
     次のメソッドを呼ぶと、戻り値はどうなりますか。

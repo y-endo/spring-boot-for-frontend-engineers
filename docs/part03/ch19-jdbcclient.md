@@ -22,7 +22,7 @@ public Optional<Poll> findById(long id) {
 }
 ```
 
-第3部では、**この Repository のメソッド名・引数・戻り値を変えずに**、中身を SQL にします。Service と Controller は、ほぼそのまま動くはずです。それを確かめながら、`JdbcClient` の使い方を一通り身につけます。
+第3部では、この Repository のメソッド名・引数・戻り値を変えずに、中身だけを SQL にします。そうすれば Service と Controller はほぼそのまま動くはずです。それを確かめながら、`JdbcClient` の使い方を一通り身につけます。
 
 ```java title="第3部のラボ：PollRepository（抜粋）"
 public Optional<Poll> findById(long id) {
@@ -34,7 +34,7 @@ public Optional<Poll> findById(long id) {
 ```
 
 !!! note "用語：JdbcClient（ジェイディービーシー・クライアント）"
-    SQL を書いて DB に問い合わせるための、Spring の道具です（Spring Framework 6.1 で追加）。SQL は**文字列で自分で書き**、結果を Java のオブジェクトに変換する部分を手伝ってくれます。JDBC は、Java が DB につなぐための標準の仕組みで、`JdbcClient` はその上の使いやすい窓口です。ORM（JPA）のように SQL を隠さないので、**何が実行されるかが読めます**（JPA は第8部）。
+    SQL を書いて DB に問い合わせるための、Spring の道具です（Spring Framework 6.1 で追加）。SQL は自分で文字列として書き、結果を Java のオブジェクトに変換する部分を手伝ってくれます。JDBC は Java が DB につなぐための標準の仕組みで、`JdbcClient` はその上の使いやすい窓口です。ORM（JPA）のように SQL を隠さないので、何が実行されるかをそのまま読めます（JPA は第8部）。
 
 前の章で作った表と Flyway はそのままです。第3部のラボ（`code/labs/part03-quickvote-jdbc/`）を使います。
 
@@ -48,12 +48,12 @@ cd code/labs/part03-quickvote-jdbc
 | 項目 | 第2部（メモリ） | 第3部 |
 | --- | --- | --- |
 | 保存先 | `ConcurrentHashMap` | PostgreSQL |
-| Repository の公開メソッド | `insert` `findById` `count` など | **同じ** |
+| Repository の公開メソッド | `insert` `findById` `count` など | 同じ |
 | 参加コード重複の例外 | 自前の `DuplicateJoinCodeException` | `DuplicateKeyException`（DB の UNIQUE 違反が変換されたもの） |
 | 時刻 | `clock.instant()` | `Db.now(clock)`（マイクロ秒に丸める。後述） |
 | 票数の集計 | `VoteRepository.countByOption`（Java で数える） | SQL の `count(...) GROUP BY` |
 
-変えたのは Repository 4クラス、`Db`（時刻の変換）、そして Service の2か所だけです。
+変えたのは Repository の4クラスと `Db`（時刻の変換）、そして Service の2か所だけです。
 
 ```mermaid
 flowchart LR
@@ -75,12 +75,12 @@ public int count(long pollId) {
 }
 ```
 
-1. SQL を文字列で書く。`:pollId` が**名前付きパラメータ**（値の入る穴）
+1. SQL を文字列で書く。`:pollId` が名前付きパラメータ（値の入る穴）
 2. 穴に値を渡す。名前で対応づける
 3. 1列の結果を何の型で受けるか
 4. ちょうど1行を期待して取り出す
 
-`JdbcClient` は、Spring Boot が `DataSource` から自動で用意するので、コンストラクタ注入できます（第11章）。
+`JdbcClient` は Spring Boot が `DataSource` から自動で用意するので、コンストラクタ注入で受け取れます（第11章）。
 
 ```java
 public OptionRepository(JdbcClient jdbc) {
@@ -96,14 +96,14 @@ public OptionRepository(JdbcClient jdbc) {
 | `optional()` | 0または1 | `Optional.empty()` | 例外 |
 | `list()` | 何行でも | 空のリスト | リスト |
 
-実験で、`single()` の例外を確かめました（`PollRepositoryIT`）。
+`single()` が投げる例外は、実験で確かめました（`PollRepositoryIT`）。
 
 ```text
 0行  → EmptyResultDataAccessException
 2行  → IncorrectResultSizeDataAccessException
 ```
 
-「あるかもしれないし、ないかもしれない」検索（ID で探す）は `optional()`、「必ず1行ある」集計（`count(*)`）は `single()` と、**期待を型で表します**。第5章の「Optional は戻り値専用」が、ここで使われます。
+ID で探すような「あるかもしれないし、ないかもしれない」検索には `optional()`、`count(*)` のように「必ず1行ある」集計には `single()` を使います。こうして、期待する行数を戻り値の型で表します。第5章の「Optional は戻り値専用」が、ここで使われます。
 
 ### 登録：`INSERT ... RETURNING` で採番されたIDを受け取る
 
@@ -122,7 +122,7 @@ return jdbc.sql("""
         .single();
 ```
 
-identity 列（第18章）の値は DB が決めるので、アプリは**入れた行の ID を教えてもらう必要**があります。PostgreSQL の `RETURNING id` を付けると、`INSERT` が結果を1行返します。だから、更新系なのに `query(...)` で受けます。
+identity 列（第18章）の値は DB が決めるので、アプリは入れた行の ID を DB から教えてもらう必要があります。PostgreSQL では `RETURNING id` を付けると、`INSERT` が結果を1行返します。そのため、更新系の文なのに `query(...)` で受けます。
 
 ### 更新：`update()` は更新件数を返す
 
@@ -141,7 +141,7 @@ public int upsert(long pollId, long participantId, long optionId, Instant now) {
 }
 ```
 
-`update()` は、**影響を受けた行数**を返します。実験で確かめました。
+`update()` は、影響を受けた行数を返します。実験で確かめました。
 
 | 操作 | 戻り値 |
 | --- | --- |
@@ -149,14 +149,14 @@ public int upsert(long pollId, long participantId, long optionId, Instant now) {
 | 条件に合う行がない | `0`（エラーにならない） |
 | 条件なしで全行を更新 | `2`（行数） |
 
-この件数は、捨ててはいけません。`upsert` は、**初めての投票も別の選択肢への変更も `1`、同じ選択肢への再投票は `0`** を返します（`ON CONFLICT ... DO UPDATE ... WHERE` の `WHERE` が偽になり、何もしないため）。この `0` と `1` が「票が実際に変わったか」を表し、第7部では「イベントを出すかどうか」の判定に使います。PUT が本質的に冪等であることの現れでもあります（第27章）。
+この件数は捨てずに使います。`upsert` は、初めての投票も別の選択肢への変更も `1` を返し、同じ選択肢への再投票だけが `0` を返します（`ON CONFLICT ... DO UPDATE ... WHERE` の `WHERE` が偽になり、何もしないため）。この `0` と `1` が「票が実際に変わったか」を表すので、第7部では、イベントを出すかどうかの判定に使います。PUT が本質的に冪等であることの現れでもあります（第27章）。
 
 !!! note "用語：`ON CONFLICT`（upsert）"
-    「入れようとして、UNIQUE 制約に衝突したら、代わりに更新する」を、SQL 1本で行う PostgreSQL の書き方です。`EXCLUDED` は「入れようとした行」を指します。アプリで「あるか確認 → なければ入れる」と書く代わりに、DB に判断を任せるので、確認と更新の間に割り込まれません（第26章）。
+    入れようとした行が UNIQUE 制約に衝突したら、代わりに更新する処理を、SQL 1本で行う PostgreSQL の書き方です。`EXCLUDED` は「入れようとした行」を指します。アプリで「あるか確認 → なければ入れる」と書く代わりに DB に判断を任せるので、確認と更新の間に他のリクエストが割り込めません（第26章）。
 
 ## 4. 名前付きパラメータを使いこなす
 
-`:name` は、いくつか便利な性質を持っています（`JdbcClientTourIT` で確認）。
+`:name` には便利な性質がいくつかあります（`JdbcClientTourIT` で確認）。
 
 ```java
 // 同じ名前は、何度書いても1回の渡しでよい
@@ -175,11 +175,11 @@ jdbc.sql("INSERT INTO options (poll_id, label, created_by, created_at) VALUES (:
         .update();
 ```
 
-`?`（位置で対応づける古い書き方）に比べて、**順番を間違えない**のが利点です。引数が8個ある `PollRepository.insert` を見れば、その価値が分かります。
+`?`（位置で対応づける古い書き方）と違って、順番を間違える心配がありません。引数が8個ある `PollRepository.insert` を見れば、その利点が分かります。
 
 ## 5. 行を record に変換する
 
-`ResultSet`（DB から返ってきた行）を Java のオブジェクトにするには、2つの方法があります。
+`ResultSet`（DB から返ってきた行）を Java のオブジェクトにする方法は2つあります。
 
 ### 方法A：自分で変換を書く
 
@@ -214,7 +214,7 @@ List<PollRow> rows = jdbc.sql("SELECT id, title, status, join_code, allow_member
 [PollRow[id=1, title=ランチ, status=OPEN, joinCode=ABCDEFGH, allowMemberOptions=true], ...]
 ```
 
-列名の `join_code` を `joinCode` に読み替えて、`record` のコンストラクタに入れてくれます。`timestamptz` 列を `Instant` のコンポーネントに入れることも、実験でできました。
+列名の `join_code` は `joinCode` に読み替えられ、`record` のコンストラクタに渡されます。`timestamptz` 列を `Instant` のコンポーネントに入れることも、実験でできました。
 
 | | A：自前の `RowMapper` | B：`query(Class)` |
 | --- | --- | --- |
@@ -223,11 +223,11 @@ List<PollRow> rows = jdbc.sql("SELECT id, title, status, join_code, allow_member
 | 列の過不足 | コードで見える | 実行時に例外（列が足りないと `BadSqlGrammarException` など） |
 | 向く場面 | 本線の主要な Entity、変換が要るもの | 一覧用の読み取り専用の行、集計の結果 |
 
-QuickVote の完成形は、主要な表は方法A、集計結果の `OptionCount` は小さなラムダで書いています。**どちらにしても、`SELECT *` は避け、必要な列を書く**ほうが安全です。列が足されたとき、静かに結果が変わらないからです（`PollRepository` の `SELECT * FROM polls` は、`map` が全列を読む前提で意図して使っています）。
+QuickVote の完成形は、主要な表は方法A、集計結果の `OptionCount` は小さなラムダで書いています。どちらの方法でも、`SELECT *` は避けて必要な列を書くほうが安全です。表に列が足されたときに、気付かないうちに結果が変わることがなくなるからです（`PollRepository` の `SELECT * FROM polls` は、`map` が全列を読む前提で、意図して使っています）。
 
 ## 6. 例外：DataAccessException の階層
 
-DB の操作は、いろいろな理由で失敗します。JDBC は失敗を `SQLException` という1つの例外で表しますが、Spring は**意味のある例外の階層**（`DataAccessException`）に変換して投げます。
+DB の操作は、さまざまな理由で失敗します。JDBC は失敗をすべて `SQLException` という1つの例外で表しますが、Spring はそれを、意味ごとに分かれた例外の階層（`DataAccessException`）に変換して投げます。
 
 ```mermaid
 flowchart TD
@@ -252,16 +252,16 @@ flowchart TD
 | `single()` で2行以上 | `IncorrectResultSizeDataAccessException` |
 | 結果の列が足りない／存在しない列 | `BadSqlGrammarException` |
 
-`DuplicateKeyException` は `DataIntegrityViolationException` の**子**です。「UNIQUE だけ別扱いしたい」ときは `catch (DuplicateKeyException e)`、「制約違反全般」は親で受けます。
+`DuplicateKeyException` は `DataIntegrityViolationException` の子です。UNIQUE 違反だけ別扱いしたいときは `catch (DuplicateKeyException e)` と書き、制約違反全般を受けたいときは親で受けます。
 
 !!! tip "`@Repository` は、この変換のために必須？"
-    古い記事では「`@Repository` を付けると例外が変換される」と説明されます。確かめました。`PollRepository` の `@Repository` を外しても、`DuplicateKeyException` は同じように出ました。`JdbcClient`（の内部の `JdbcTemplate`）が自分で変換するからです。`@Repository` は、第2部で学んだとおり「役割を示すラベル」で、JPA を使うときに例外変換の効果が出ます（第8部）。
+    古い記事では「`@Repository` を付けると例外が変換される」と説明されています。実際に確かめると、`PollRepository` の `@Repository` を外しても、`DuplicateKeyException` は同じように出ました。`JdbcClient`（の内部の `JdbcTemplate`）が自分で変換するからです。`@Repository` は、第2部で学んだとおり役割を示すラベルで、例外変換の効果が出るのは JPA を使うときです（第8部）。
 
-    ひとつ、実用上の注意があります。`@Repository` の Bean は、Spring が例外変換の**代理（プロキシ）で包んで**渡します。第2部のラボの `journey` ログが、Repository の呼び出しを出さなくなったのは、そのためでした（クラスの注釈の判定を、代理ではなく元のクラスで行うように直しました）。代理の話は、第23章で扱います。
+    実用上の注意が1つあります。`@Repository` の Bean は、Spring が例外変換用の代理（プロキシ）で包んでから渡します。第2部のラボの `journey` ログが Repository の呼び出しを出さなくなったのは、そのためでした（クラスの注釈の判定を、代理ではなく元のクラスで行うように直しました）。代理の話は第23章で扱います。
 
 ## 7. DuplicateKeyException を、どう扱うか
 
-制約違反の例外は、「想定外」ではなく「**想定した最終防衛線が働いた**」結果です。500 にせず、意味のある扱いに翻訳します。QuickVote には、3つの扱いがあります。
+制約違反の例外は、想定外の障害ではなく、想定していた最終防衛線が働いた結果です。500 にはせず、意味のある扱いに翻訳します。QuickVote には3通りの扱いがあります。
 
 ### (a) 取り直す：参加コードの衝突
 
@@ -276,10 +276,10 @@ for (int attempt = 1; attempt <= MAX_JOIN_CODE_ATTEMPTS; attempt++) {
 throw new IllegalStateException("参加コードを生成できませんでした");
 ```
 
-31^8 通りの中から選ぶので、衝突は滅多に起きません。起きたら、**別のコードで取り直す**のが正しい扱いです。メモリ版でも同じ形（自前の例外）で書いていたので、差し替えたのは `catch` する例外の型だけです。
+参加コードは 31^8 通りの中から選ぶので、衝突はめったに起きません。起きたときは、別のコードで取り直すのが正しい扱いです。メモリ版でも同じ形（自前の例外）で書いていたので、差し替えたのは `catch` する例外の型だけです。
 
 !!! warning "PostgreSQL では、UNIQUE 違反のあとトランザクションが使えなくなる"
-    この「取り直す」は、**トランザクションの外**だから成り立っています。トランザクションの中で UNIQUE 違反が起きると、PostgreSQL はそのトランザクションを「失敗状態」にし、以降の SQL を受け付けません。完成形が `@Transactional` ではなく `TransactionTemplate` で1回ごとにやり直している理由です（第22章）。
+    この「取り直す」が成り立つのは、トランザクションの外で行っているからです。トランザクションの中で UNIQUE 違反が起きると、PostgreSQL はそのトランザクションを「失敗状態」にし、以降の SQL を受け付けません。完成形が `@Transactional` ではなく `TransactionTemplate` を使い、1回ごとにトランザクションをやり直しているのは、このためです（第22章）。
 
 ### (b) 成功として扱う：二重参加
 
@@ -294,11 +294,11 @@ try {
 }
 ```
 
-この仕様では「同じ訪問者の再参加は成功」でした。確認（`findByPollAndVisitor`）をすり抜けた二重参加を、UNIQUE が止め、アプリが**仕様どおりの結果**に翻訳します。この翻訳は、狙って競合を作るテストで確かめました（`JoinRaceTranslationIT`。確認が1回だけ「まだいない」と答えるように細工しています。本物の同時実行を作る方法は第26章）。
+この仕様では、同じ訪問者の再参加は成功として扱います。確認（`findByPollAndVisitor`）をすり抜けた二重参加は UNIQUE が止め、アプリがそれを仕様どおりの結果に翻訳します。この翻訳は、競合をわざと起こすテストで確かめました（`JoinRaceTranslationIT`。確認が1回だけ「まだいない」と答えるように細工しています。本物の同時実行を作る方法は第26章）。
 
 ### (c) 受け皿：409 にする
 
-どこにも翻訳がなかった `DuplicateKeyException` は、そのままだと**500（想定外）**になります。ラボでは `@RestControllerAdvice` に、最後の受け皿を足しました。
+どこにも翻訳がなかった `DuplicateKeyException` は、そのままだと 500（想定外のエラー）になります。ラボでは `@RestControllerAdvice` に、最後の受け皿を足しました。
 
 ```java title="ProblemDetailAdvice（抜粋。第3部のラボで追加）"
 @ExceptionHandler(DuplicateKeyException.class)
@@ -311,7 +311,7 @@ public ResponseEntity<ProblemDetail> handleDuplicateKey(DuplicateKeyException ex
 }
 ```
 
-`@WebMvcTest` で、`DuplicateKeyException("Key (join_code)=(SECRET99) already exists")` を投げさせると、409 `ALREADY_EXISTS` が返り、**重複した値（`SECRET99`）も制約の列名も応答に含まれない**ことを確認しています。例外のメッセージには値が入るので、**そのまま外に出さない**のが原則です（第14章）。
+`@WebMvcTest` で `DuplicateKeyException("Key (join_code)=(SECRET99) already exists")` を投げさせると、409 `ALREADY_EXISTS` が返り、重複した値（`SECRET99`）も制約の列名も応答に含まれないことを確認できます。例外のメッセージには値が入っているので、そのまま外に出さないのが原則です（第14章）。
 
 | 扱い | 使う場面 | 例 |
 | --- | --- | --- |
@@ -319,11 +319,11 @@ public ResponseEntity<ProblemDetail> handleDuplicateKey(DuplicateKeyException ex
 | (b) 成功に翻訳 | 仕様上「同じ結果」とみなせる | 再参加、同じ票の再送 |
 | (c) 409 にする | 呼び出し側に「すでにある」と伝えるべき | 同じ名前の重複作成 |
 
-(c) は最後の受け皿です。**意味が分かる場所では、そこで翻訳します**。(c) に頼ると、どの制約で止まったかが応答から分からなくなります。
+(c) は最後の受け皿です。意味が分かる場所ではそこで翻訳します。(c) に頼ると、どの制約で止まったのかが応答から分からなくなるからです。
 
 ## 8. 事故：SQL インジェクションを通す
 
-JdbcClient で「いちばんやってはいけない書き方」があります。入力を文字列に連結して SQL を作ることです。実際に通してみます（`SqlInjectionDemoIT`。悪い例はテストの中にだけ置いてあります）。
+JdbcClient で最もやってはいけない書き方は、入力を文字列に連結して SQL を作ることです。実際に攻撃を通してみます（`SqlInjectionDemoIT`。悪い例はテストの中にだけ置いてあります）。
 
 ```java
 // 悪い例：入力を文字列連結で SQL に埋め込む
@@ -353,16 +353,16 @@ DB には2つの投票（`社外秘の投票A`、`社外秘の投票B`）があ�
 [demo] バインド版の結果: []
 ```
 
-答えは (b) です。連結版は、入力の `'` が文字列の終わりと解釈され、`OR '1'='1'`（常に真）が**SQL の一部として実行**されました。全件が返ります。
+答えは (b) です。連結版では、入力の `'` が文字列の終わりと解釈され、`OR '1'='1'`（常に真）が SQL の一部として実行されたため、全件が返りました。
 
-もっと悪い入力もあります。`UNION` で、**別の表の中身**を読ませる攻撃です。
+もっと悪質な入力もあります。`UNION` を使って、別の表の中身を読み出す攻撃です。
 
 ```text
 [demo] 実行されるSQL: SELECT title FROM polls WHERE join_code = 'x' UNION SELECT 'visitor=' || visitor_id || ' role=' || role FROM participants --'
 [demo] UNION の結果: [visitor=4242 role=HOST]
 ```
 
-`participants` 表の中身が、投票のタイトルの列として返ってきました。入力の末尾の `--` は SQL のコメントで、後ろに残った `'` を無効にします。**入力欄ひとつで、DB 全体が読まれる**のです。
+`participants` 表の中身が、投票のタイトルの列として返ってきました。入力の末尾の `--` は SQL のコメントで、後ろに残った `'` を無効にします。入力欄ひとつから、DB 全体を読まれてしまいます。
 
 ### バインド変数で、なぜ防げるのか
 
@@ -377,17 +377,17 @@ sequenceDiagram
     PG-->>App: 結果（join_code が その文字列に等しい行 → 0件）
 ```
 
-名前付きパラメータ（`:code`）は、JdbcClient が `?` に直して、`PreparedStatement` という仕組みで**SQL の形と値を別々に**送ります。値は、どんな文字が入っていても「ただの値」で、SQL の一部にはなりません。
+名前付きパラメータ（`:code`）は、JdbcClient が `?` に直し、`PreparedStatement` という仕組みで SQL の形と値を別々に送ります。値にどんな文字が入っていても、それはただの値として扱われ、SQL の一部にはなりません。
 
-エラーメッセージにも、この変換が見えます。実験で文法エラーを起こすと、`bad SQL grammar [SELECT id FROM polls WHERE created_at = ?]` と、`?` に変わった SQL が表示されました。
+この変換は、エラーメッセージにも現れます。実験で文法エラーを起こすと、`bad SQL grammar [SELECT id FROM polls WHERE created_at = ?]` と、`?` に変わった SQL が表示されました。
 
 ### バインドできないもの
 
-バインドできるのは**値**だけです。次のものは `?` にできないので、連結の誘惑が強くなります。
+バインドできるのは値だけです。次のものは `?` にできないので、つい連結したくなります。
 
 | やりたいこと | 安全な方法 |
 | --- | --- |
-| 並べ替えの列（`ORDER BY :col`） | 許可リストで決める。`enum`（`CREATED_AT`／`TITLE`）を受けて、Java 側で SQL の断片に**対応づける** |
+| 並べ替えの列（`ORDER BY :col`） | 許可リストで決める。`enum`（`CREATED_AT`／`TITLE`）を受けて、Java 側で SQL の断片に対応づける |
 | テーブル名・列名 | 入力で決めない。必要なら許可リストから |
 | `LIKE` の検索語 | 値として渡す（`%` を足すのは Java 側で `param` の値に） |
 
@@ -401,11 +401,11 @@ jdbc.sql("SELECT id, title FROM polls ORDER BY " + orderBy)   // 連結してい
 ```
 
 !!! danger "AI が書く JdbcClient のコードで、まず見る場所"
-    `jdbc.sql("..." + 変数 + "...")`、`String.format` で作った SQL、`"WHERE title LIKE '%" + keyword + "%'"` のような**連結**です。変数が利用者の入力に由来するなら、攻撃が成立します。「検証しているから大丈夫」ではなく、**値は必ずバインドする**のが規則です（Bean Validation は、規則を守る道具ではなく、前線）。
+    `jdbc.sql("..." + 変数 + "...")`、`String.format` で作った SQL、`"WHERE title LIKE '%" + keyword + "%'"` のような連結です。変数が利用者の入力に由来するなら、攻撃が成立します。入力を検証しているから大丈夫だとは考えず、値は必ずバインドするのが規則です。Bean Validation は規則を守るための道具ではなく、手前の防御線にすぎません。
 
 ## 9. 時刻：Instant は直接バインドできない
 
-JdbcClient で、`Instant` を直接渡すと、どうなるでしょう（`JdbcClientTourIT`）。
+JdbcClient に `Instant` を直接渡すとどうなるか、試します（`JdbcClientTourIT`）。
 
 ```java
 jdbc.sql("SELECT id FROM polls WHERE created_at = :at").param("at", Instant.parse("2030-01-01T00:00:00Z"))...
@@ -415,7 +415,7 @@ jdbc.sql("SELECT id FROM polls WHERE created_at = :at").param("at", Instant.pars
 BadSqlGrammarException ... 原因: Can't infer the SQL type to use for an instance of java.time.Instant. Use setObject() with an explicit Types value to specify the type to use.
 ```
 
-（日本語の環境では、同じ内容の日本語のメッセージが出ます。）PostgreSQL の JDBC ドライバは、`Instant` を `timestamptz` と推測しません。`OffsetDateTime`（UTC）に直して渡すと、通ります。完成形は、その変換を 1か所に集めています。
+（日本語の環境では、同じ内容の日本語のメッセージが出ます。）PostgreSQL の JDBC ドライバは、`Instant` を `timestamptz` と推測してくれません。`OffsetDateTime`（UTC）に直して渡せば通ります。完成形は、その変換を1か所に集めています。
 
 ```java title="src/main/java/com/example/quickvote/common/Db.java（抜粋）"
 public static Instant now(Clock clock) {
@@ -427,17 +427,17 @@ public static @Nullable OffsetDateTime ts(@Nullable Instant instant) {
 }
 ```
 
-1. 現在時刻を**マイクロ秒に丸める**
+1. 現在時刻をマイクロ秒に丸める
 2. `Instant` → `OffsetDateTime`（UTC）。パラメータには `Db.ts(...)` を通して渡す
 
-なぜ丸めるのでしょう。`timestamptz` はマイクロ秒（小数6桁）までしか持たず、Java の `Instant` はナノ秒（9桁）まで持てます。実験で確かめました（`PollRepositoryIT`）。
+丸めるのは、精度が合わないからです。`timestamptz` はマイクロ秒（小数6桁）までしか持てませんが、Java の `Instant` はナノ秒（9桁）まで持てます。実験で確かめました（`PollRepositoryIT`）。
 
 ```text
 書いた時刻 : 2030-01-01T00:00:00.123456789Z
 読み戻した : 2030-01-01T00:00:00.123457Z      ← 四捨五入されている
 ```
 
-**保存して読み戻すと、値が変わります。** 締切の判定（`closes_at` と現在時刻の比較。第28章）で、「ちょうど」の境界がずれる原因になります。時刻は最初からマイクロ秒に丸めて使う、というのが完成形の規則で、ラボの Service も `clock.instant()` から `Db.now(clock)` に替えました。
+保存して読み戻すと、値が変わります。締切の判定（`closes_at` と現在時刻の比較。第28章）では、「ちょうど」の境界がずれる原因になります。そこで完成形では、時刻を最初からマイクロ秒に丸めて使う規則にしており、ラボの Service も `clock.instant()` から `Db.now(clock)` に替えました。
 
 ## 10. 動かしてみる
 
@@ -450,7 +450,7 @@ curl -s -X PUT  localhost:18019/api/polls/<pollId>/my-vote -H 'X-Visitor-Id: 2' 
 
 Windows の Git Bash から日本語を含む JSON を `-d` で渡すと、文字コードの都合で `400 Failed to read request` になることがありました（筆者の環境）。その場合は、UTF-8 で保存したファイルを `--data-binary @create.json`（`Content-Type: application/json; charset=utf-8`）で渡してください。
 
-アプリを**再起動しても**、投票は残ります。DB の中も見られます。
+アプリを再起動しても投票は残ります。DB の中も見られます。
 
 ```bash
 docker compose exec postgres psql -U quickvote -c 'SELECT id, title, status, join_code FROM polls' -c 'SELECT poll_id, participant_id, option_id FROM votes'
@@ -467,9 +467,9 @@ docker compose exec postgres psql -U quickvote -c 'SELECT id, title, status, joi
 ```
 
 !!! warning "この時点の保証"
-    ここまでで QuickVote は**再起動しても消えない**ようになりました。まだ守れていないことが、2つあります。
-    1. **全部成功か、全部なしか**：`PollService.create` は、投票・参加者・選択肢を**別々の SQL（別々のコミット）**で書きます。途中で失敗すると、投票だけが残ります。→ 第22章
-    2. **同時実行**：人数上限・選択肢の上限は、「数える → 足す」の間に割り込まれます。→ 第25章
+    ここまでで QuickVote は、再起動しても消えないようになりました。まだ守れていないことが2つあります。
+    1. 全部成功か、全部なしか：`PollService.create` は、投票・参加者・選択肢を別々の SQL（別々のコミット）で書きます。途中で失敗すると、投票だけが残ります。→ 第22章
+    2. 同時実行：人数上限と選択肢の上限は、「数える → 足す」の間に他のリクエストが割り込めてしまいます。→ 第25章
 
 ## 11. 現場ではこうする：AI が書いた Repository のレビュー
 
@@ -490,11 +490,11 @@ docker compose exec postgres psql -U quickvote -c 'SELECT id, title, status, joi
 
 !!! abstract "この章の3点セット"
     **① 一言で言うと**
-    `JdbcClient` は SQL を文字列で書き、値は名前付きパラメータ（バインド変数）で渡し、行数の期待は `single`／`optional`／`list`、更新は `update()` の件数で受ける。DB の失敗は `DataAccessException` に変換され、`DuplicateKeyException` は、取り直す・成功とみなす・409 にする、のいずれかに翻訳する。入力を連結した SQL は、インジェクションで任意の SQL を実行される。
+    `JdbcClient` では SQL を文字列で書き、値は名前付きパラメータ（バインド変数）で渡す。行数の期待は `single`／`optional`／`list` で、更新結果は `update()` の件数で受ける。DB の失敗は `DataAccessException` に変換され、`DuplicateKeyException` は、取り直す・成功とみなす・409 にする、のいずれかに翻訳する。入力を連結して作った SQL は、インジェクションで任意の SQL を実行される。
 
     **② 現場でこう聞かれる**
     「SQL インジェクションは、バリデーションで防げばいいんじゃないですか？」
-    → 防ぎきれない。入力の検証は前線にすぎず、SQL の組み立てに連結が残っていれば、見落とした1か所で破られる。値は必ずバインド変数で渡し、SQL の構造に入力を混ぜない。
+    → 防ぎきれない。入力の検証は手前の防御線にすぎず、SQL の組み立てに連結が残っていれば、見落とした1か所で破られる。値は必ずバインド変数で渡し、SQL の構造に入力を混ぜない。
 
     **③ 自分のサービスならどこに当たるか**
     自分のサービスの検索・並べ替え・一覧のうち、「利用者の入力が SQL の形に影響する」場所を挙げる。バインドできるもの、許可リストで決めるものに分ける。
@@ -505,7 +505,7 @@ docker compose exec postgres psql -U quickvote -c 'SELECT id, title, status, joi
     `VoteRepository.upsert` を、(1) 初めての投票 (2) 別の選択肢への変更 (3) 同じ選択肢への再投票 の順に呼びました。戻り値はそれぞれ何で、(3) が `0` になるのは SQL のどの部分のためですか。
 
 ??? success "解答"
-    `1`、`1`、`0` です。`ON CONFLICT ... DO UPDATE ... WHERE votes.option_id <> EXCLUDED.option_id` の `WHERE` が、同じ選択肢のときは偽になり、更新が行われないためです。件数で「票が実際に変わったか」が分かります。
+    `1`、`1`、`0` です。`ON CONFLICT ... DO UPDATE ... WHERE votes.option_id <> EXCLUDED.option_id` の `WHERE` が、同じ選択肢のときは偽になり、更新が行われないためです。この件数から、票が実際に変わったかどうかが分かります。
 
 ??? question "確認問題2：どの例外？"
     次の操作で投げられる例外を答えてください。
@@ -524,16 +524,16 @@ docker compose exec postgres psql -U quickvote -c 'SELECT id, title, status, joi
     ```
 
 ??? success "解答"
-    `keyword` が SQL に連結されています。`%' OR '1'='1` のような入力で、条件を無効にできます。直し方：
+    `keyword` が SQL に連結されています。`%' OR '1'='1` のような入力で、条件を無効にできてしまいます。直し方は次のとおりです。
     ```java
     jdbc.sql("SELECT title FROM polls WHERE title LIKE :pattern")
             .param("pattern", "%" + keyword + "%")
             .query(String.class).list();
     ```
-    `%` を足すのは Java 側で、値の一部として渡します。なお、`keyword` に含まれる `%` や `_` は `LIKE` のワイルドカードとして働くので、そのままでよいかは仕様として決めます。
+    `%` は Java 側で足し、値の一部として渡します。なお、`keyword` に含まれる `%` や `_` は `LIKE` のワイルドカードとして働くので、そのままでよいかどうかは仕様として決めます。
 
 ??? question "説明問題：現場でこう聞かれる"
     「DB の UNIQUE 違反が起きたら、全部 500 でいいですか？ それとも 409 にしますか？」200字程度で答えてください。
 
 ??? success "解答"
-    例：どちらも一律にはしません。意味の分かる場所で翻訳するのが基本です。参加コードの衝突は取り直し、二重参加は仕様上「成功」と同じ扱いにします。それでも残った UNIQUE 違反は、利用者が「すでに存在する」ことを知るべき衝突なので、最後の受け皿で 409 にします。ただし、例外のメッセージには重複した値が入るので、応答やログには出しません。
+    例：どちらも一律にはしません。意味の分かる場所で翻訳するのが基本です。参加コードの衝突は取り直し、二重参加は仕様上「成功」と同じ扱いにします。それでも残った UNIQUE 違反は、利用者が「すでに存在する」ことを知るべき衝突なので、最後の受け皿で 409 にします。ただし、例外のメッセージには重複した値が入っているので、応答やログには出しません。

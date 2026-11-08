@@ -14,52 +14,50 @@
 
 ## 1. 問いかけ：`java -jar` の1行でサーバーが立つのはなぜか
 
-Node で API を作るとき、あなたは何をしますか。`npm i express`、`app.get(...)`、`app.listen(3000)`。ほかに、JSON を扱う設定、ログの設定、ポートの設定を足していきます。
+Node で API を作るなら、`npm i express` で入れて、`app.get(...)` でルートを書き、`app.listen(3000)` で待ち受けます。JSON の扱い、ログ、ポートの設定も、必要に応じて自分で足していきます。
 
-Spring Boot では、次の1行でHTTPサーバーが立ちます。
+Spring Boot では、次の1行で HTTP サーバーが立ちます。
 
 ```bash
 java -jar target/hello-0.0.1-SNAPSHOT.jar
 ```
 
-Tomcat（HTTPサーバー）をインストールしていません。JSON を変換する設定も書いていません。ポートの指定すらありません。それなのに `GET /api/hello` に JSON が返ります。
-
-この章では、まず動かします。次に、**誰が・いつ・何を勝手に決めたのか**を、ログとレポートで確かめます。第2部の最初の章なので、ここで「Spring Boot とは何か」の地図を持ち帰ってください。
+Tomcat（HTTP サーバー）のインストールも、JSON 変換の設定も、ポートの指定もしていないのに、`GET /api/hello` に JSON が返ります。この章ではまずアプリを動かし、そのあとで、何をいつ誰が決めたのかをログとレポートで確かめます。第2部の最初の章なので、ここで「Spring Boot とは何か」の全体像をつかんでおいてください。
 
 ## 2. 層で見る：Spring Boot は何の上に載っているか
 
-初めて Spring に触れると、名前がたくさん出てきて混乱します。Java、Spring、Spring Framework、Spring Boot、Tomcat、Servlet。**層で整理すると、1枚で収まります。**
+Spring に初めて触れると、Java、Spring、Spring Framework、Spring Boot、Tomcat、Servlet と名前がたくさん出てきて混乱します。層で整理すると、1枚に収まります。
 
 ![Javaサーバーの層構造](../assets/diagrams/ch10-layers.svg)
 
 !!! note "用語：Spring Framework と Spring Boot"
-    **Spring Framework** は、サーバーアプリを作るための部品集です。DIコンテナ（第11章）、Web（Spring MVC）、検証、テスト支援などを持ちます。**Spring Boot** は、その Spring Framework を「設定なしで動く状態」にまとめる仕組みです。起動、自動構成、スターター、設定ファイル、依存のバージョン表（BOM）を提供します。
+    Spring Framework は、サーバーアプリを作るための部品集です。DI コンテナ（第11章）、Web（Spring MVC）、検証、テスト支援などを持っています。Spring Boot は、その Spring Framework を設定なしで動く状態にまとめる仕組みで、起動、自動構成、スターター、設定ファイル、依存のバージョン表（BOM）を提供します。
     本教材で「Spring」と書くときは、この2つを合わせたものを指します。
 
 !!! note "用語：Servlet / Tomcat"
-    **Servlet** は、HTTPリクエストを受け取って応答を返す、Java 標準の仕組みです（`jakarta.servlet.*`）。**Tomcat** は、Servlet を動かす HTTPサーバーです（Servlet コンテナとも呼ばれます）。昔は Tomcat を別にインストールして、アプリを配置していました。Spring Boot は **Tomcat をアプリの中に埋め込んで**、`java -jar` だけで起動できるようにしています。
+    Servlet は、HTTP リクエストを受け取って応答を返す、Java 標準の仕組みです（`jakarta.servlet.*`）。Tomcat は、Servlet を動かす HTTP サーバーで、Servlet コンテナとも呼ばれます。昔は Tomcat を別にインストールして、そこにアプリを配置していました。Spring Boot は Tomcat をアプリの中に埋め込むので、`java -jar` だけで起動できます。
 
 ### 例え：レストランと電源タップ
 
-2つの例えを使います。どちらも、**この章の範囲で完結**させます。
+例えを2つ使います。どちらもこの章の中だけで使います。
 
 ![レストラン：ホール係・厨房・食材庫・注文票](../assets/illustrations/restaurant.webp)
 
-**レストラン**は、Webアプリの層です。注文票（リクエスト）が入口から来て、ホール係（Controller）が受け、厨房（Service）が調理し、食材庫（Repository / DB）から材料を取り出します。次章以降、各層の役割をこの例えで話します。
+レストランは、Web アプリの層にあたります。注文票（リクエスト）が入口から来て、ホール係（Controller）が受け、厨房（Service）が調理し、食材庫（Repository / DB）から材料を取り出します。次章以降も、各層の役割をこの例えで話します。
 
 !!! warning "この例えが外れる点"
-    実際のサーバーでは、**1人の店員（スレッド）が、受付から配膳まで1つの注文を最後まで運びます**。ホール係・厨房係が別人で、注文票を手渡しているわけではありません（第12章で動画で見ます）。また、層の名前は「慣習」で、Spring が強制するものではありません。
+    実際のサーバーでは、1人の店員（スレッド）が、受付から配膳まで1つの注文を最後まで担当します。ホール係と厨房係が別人で、注文票を手渡しているわけではありません（第12章で動画で見ます）。また、層の名前は慣習であって、Spring が強制するものではありません。
 
 ![配線済みの電源タップ](../assets/illustrations/power-strip.webp)
 
-**電源タップ**は、Spring Boot です。Boot は「ひな形（雛形を生成して終わり）」ではなく、**あらかじめ配線済みのタップ**です。差し込み口に何かを挿すと、配線が自動でつながります。Web用のスターターを足せば Tomcat と JSON 変換がつながり、DB用のスターターを足せばコネクションプールがつながります。
+電源タップは、Spring Boot にあたります。Boot は、雛形を生成して終わりのツールではなく、あらかじめ配線済みのタップです。差し込み口に何かを挿すと、配線が自動でつながります。Web 用のスターターを足せば Tomcat と JSON 変換がつながり、DB 用のスターターを足せばコネクションプールがつながります。
 
 !!! warning "この例えが外れる点"
-    タップには「何もしなくても電気が来る」以上の意味はありませんが、Boot は**既定の判断を持っています**（ポートは 8080、JSON は ISO 8601、など）。そして、その判断は**あなたが何かを定義すると引っ込みます**（本章の 7 節）。また、雛形生成ツールと違い、Boot が配線した結果は**ソースコードとして生成されません**。実行時に決まります。だから、何が配線されたかは「見に行く」必要があります。
+    タップは何もしなくても電気が来るだけですが、Boot は既定の判断を持っています（ポートは 8080、日時の JSON は ISO 8601、など）。その判断は、読者が何かを定義すると引っ込みます（本章の 7 節）。また、雛形生成ツールとは違って、Boot が配線した結果はソースコードとして生成されず、実行時に決まります。何が配線されたかは、見に行って確かめる必要があります。
 
 ## 3. 手を動かす①：Initializr で雛形を作る
 
-**Spring Initializr** は、プロジェクトの雛形を作る Web サービスです（`https://start.spring.io`）。ブラウザでも使えますし、`curl` でも取れます。IntelliJ IDEA の「新規プロジェクト」からも、同じものが呼ばれます。
+Spring Initializr は、プロジェクトの雛形を作る Web サービスです（`https://start.spring.io`）。ブラウザでも `curl` でも使えて、IntelliJ IDEA の「新規プロジェクト」からも同じものが呼ばれます。
 
 ```bash
 curl https://start.spring.io/starter.zip \
@@ -85,7 +83,7 @@ hello/
 
 ### `pom.xml` を読む：package.json との違い
 
-`pom.xml` は XML ですが、**データ**として読めば怖くありません。重要な部分だけ抜き出します。
+`pom.xml` は XML ですが、データとして読めば怖くありません。重要な部分だけを抜き出します。
 
 ```xml title="pom.xml（抜粋）"
 <parent>
@@ -109,25 +107,25 @@ hello/
 </dependencies>
 ```
 
-1. **親 POM**。この1行が、数百の依存ライブラリの**バージョン表**（BOM）を持ち込みます。ここに書いたのは Spring Boot のバージョンだけです
-2. コンパイルに使う Java のバージョン
-3. **スターター**。「Web を作るのに必要なもの一式」という名前のついた依存です。下の `dependency:tree` で中身を見ます
-4. `scope` が `test` の依存は、テストの時だけ使います（`package.json` の `devDependencies` に近い）
+1. 親 POM です。この1行で、数百の依存ライブラリのバージョン表（BOM）を取り込みます。ここに書くのは Spring Boot のバージョンだけです
+2. コンパイルに使う Java のバージョンです
+3. スターターです。「Web を作るのに必要なもの一式」にあたる依存で、中身は下の `dependency:tree` で見ます
+4. `scope` が `test` の依存は、テストのときだけ使います（`package.json` の `devDependencies` に近い）
 
 !!! note "用語：BOM（Bill of Materials）"
-    「どのライブラリのどのバージョンを組み合わせれば動くか」を、動作確認済みの組として1つの表にしたものです。Spring Boot の親 POM が持っています。
-    表に載っているライブラリは、`<version>` を**書かなくてよい**。Spring Boot 4.1.2 を指定すると、Tomcat 11.0.27、Jackson 3.1.7、Spring Framework 7.0.10 など、**組み合わせが決まります**。
+    どのライブラリのどのバージョンを組み合わせれば動くかを、動作確認済みの組として1つの表にしたものです。Spring Boot の親 POM が持っています。
+    表に載っているライブラリは `<version>` を書かなくてよく、Spring Boot 4.1.2 を指定するだけで、Tomcat 11.0.27、Jackson 3.1.7、Spring Framework 7.0.10 などの組み合わせが決まります。
 
-TypeScript の世界と並べます。
+npm と比べると、次のようになります。
 
 | | npm（package.json） | Maven（pom.xml） |
 | --- | --- | --- |
-| バージョンの書き方 | `"express": "^4.19.0"`（範囲） | `<version>4.1.2</version>`（**ぴったり1つ**） |
-| 実際のバージョンを固定するもの | **lockfile**（package-lock.json） | **BOM**（親 POM のバージョン表）。lockfile は標準ではない |
+| バージョンの書き方 | `"express": "^4.19.0"`（範囲） | `<version>4.1.2</version>`（ぴったり1つ） |
+| 実際のバージョンを固定するもの | lockfile（package-lock.json） | BOM（親 POM のバージョン表）。lockfile は標準ではない |
 | 推移的な依存 | node_modules に入る。バージョンが重なることがある | 1つに決まる（同じライブラリは1バージョン） |
-| 更新の単位 | パッケージごとに上げる | Spring Boot のバージョンを上げると**全部が一緒に**変わる |
+| 更新の単位 | パッケージごとに上げる | Spring Boot のバージョンを上げると全部が一緒に変わる |
 
-Maven では、**範囲指定をせず、動作確認済みの組を丸ごと選ぶ**考え方です。個別のバージョンを自分で書き始めたら、BOM を外れた（組み合わせが保証されない）サインです。
+Maven は、範囲を指定せず、動作確認済みの組を丸ごと選ぶ考え方です。個別のバージョンを自分で書き始めたら、BOM を外れて組み合わせが保証されなくなっているサインです。
 
 ### スターターの中身を見る
 
@@ -152,14 +150,14 @@ com.example:hello:jar:0.0.1-SNAPSHOT
       \- org.springframework:spring-webmvc:jar:7.0.10:compile
 ```
 
-（長いので抜粋しています。実際は約35行です。）1つの `spring-boot-starter-webmvc` が、ログ（Logback）、JSON（Jackson）、HTTPサーバー（Tomcat）、Spring MVC を**まとめて**連れてきています。これが**スターター**です。
+（長いので抜粋しています。実際は約35行です。）1つの `spring-boot-starter-webmvc` が、ログ（Logback）、JSON（Jackson）、HTTP サーバー（Tomcat）、Spring MVC をまとめて取り込んでいます。これがスターターです。
 
 !!! warning "バージョン注意：Boot 4 でスターター名が変わった"
-    古い記事や、AIが出した `pom.xml` には、次のように書かれていることがあります。
+    古い記事や AI が出した `pom.xml` には、次のように書かれていることがあります。
     ```xml
     <artifactId>spring-boot-starter-web</artifactId>   <!-- Boot 3 までの名前 -->
     ```
-    Spring Boot 4 では、**機能ごとにスターターが分かれ**、Web（Spring MVC）は `spring-boot-starter-webmvc` になりました。テスト用のスターターも機能ごとにあります（`spring-boot-starter-webmvc-test` など）。旧名の `spring-boot-starter-web` は 4.1.2 でも取得できますが、**非推奨**（deprecated）の扱いで、`webmvc` への置き換えが案内されています。新しく書くときは `webmvc` を使います。
+    Spring Boot 4 ではスターターが機能ごとに分かれ、Web（Spring MVC）は `spring-boot-starter-webmvc` になりました。テスト用のスターターも機能ごとにあります（`spring-boot-starter-webmvc-test` など）。旧名の `spring-boot-starter-web` は 4.1.2 でも取得できますが非推奨（deprecated）で、`webmvc` への置き換えが案内されています。新しく書くときは `webmvc` を使います。
 
     | 用途 | Boot 4 のスターター |
     | --- | --- |
@@ -184,9 +182,9 @@ public class HelloApplication {
 ```
 
 1. この1つのアノテーションに、3つの意味が入っています（5 節で分解します）
-2. ここが入口です。`SpringApplication.run` が、Spring を起動し、Tomcat を立ち上げます
+2. ここが入口です。`SpringApplication.run` が Spring を起動し、Tomcat を立ち上げます
 
-APIを1つ足します。
+API を1つ足します。
 
 ```java title="src/main/java/com/example/hello/HelloController.java"
 @RestController
@@ -207,7 +205,7 @@ public class HelloController {
 3. 第4章で学んだ `record` が、そのまま応答の形になります
 
 !!! note "用語：@RestController"
-    HTTPリクエストを受けるクラスの目印です。メソッドの戻り値は、**JSON に変換されて応答の本文になります**。同じ形で `@Controller` もありますが、こちらは HTML 画面（テンプレート）用で、本教材では使いません。
+    HTTP リクエストを受けるクラスの目印です。メソッドの戻り値は JSON に変換され、応答の本文になります。同じ形で `@Controller` もありますが、こちらは HTML 画面（テンプレート）用で、本教材では使いません。
 
 起動して、呼びます。
 
@@ -227,11 +225,11 @@ Content-Length: 79
 {"message":"こんにちは、QuickVote","at":"2026-11-07T16:22:18.280562900Z"}
 ```
 
-`Instant` が、UTC の ISO 8601 文字列で出ています。JSON の変換設定は何も書いていません。**これも Boot が決めた既定の判断**です（第13章で詳しく見ます）。
+`Instant` が UTC の ISO 8601 文字列で出ています。JSON の変換設定は何も書いていないので、これも Boot が決めた既定の判断です（第13章で詳しく見ます）。
 
 ## 5. 起動ログを1行ずつ読む
 
-AIが書いたコードを動かして、起動に失敗したとき、最初に読むのが起動ログです。正常な起動ログを、**1度は1行ずつ読んでおきます**。
+AI が書いたコードを動かして起動に失敗したとき、最初に読むのが起動ログです。正常に起動したときのログを、一度は1行ずつ読んでおきましょう。
 
 ```text
  :: Spring Boot ::                (v4.1.2)
@@ -251,27 +249,27 @@ AIが書いたコードを動かして、起動に失敗したとき、最初に
 | 行 | 読み取れること |
 | --- | --- |
 | `(v4.1.2)` | 実際に動いている Spring Boot のバージョン。`pom.xml` と一致するか確認する |
-| `Starting ... using Java 25.0.5 with PID` | 動いている **JVM のバージョン**と、プロセスID。「Java 17 で動いていた」はここで分かる |
-| `No active profile set` | **プロファイル**（開発用・本番用の設定の切替）は未指定。第15章 |
+| `Starting ... using Java 25.0.5 with PID` | 動いている JVM のバージョンとプロセスID。「Java 17 で動いていた」といったことはここで分かる |
+| `No active profile set` | プロファイル（開発用・本番用の設定の切替）が未指定であること。第15章 |
 | `Tomcat initialized with port 18010` | 埋め込み Tomcat が作られた。ポートは設定（`server.port`）から。未指定なら 8080 |
-| `Starting Servlet engine: [Apache Tomcat/11.0.27]` | Tomcat のバージョン。**BOM が決めた版**（`pom.xml` には書いていない） |
-| `Root WebApplicationContext: initialization completed in 1705 ms` | **DIコンテナ**（Spring が部品を作って管理する場所）の準備が終わった。第11章 |
-| `Tomcat started on port 18010` | **ここからリクエストを受けられる** |
+| `Starting Servlet engine: [Apache Tomcat/11.0.27]` | Tomcat のバージョン。BOM が決めた版（`pom.xml` には書いていない） |
+| `Root WebApplicationContext: initialization completed in 1705 ms` | DI コンテナ（Spring が部品を作って管理する場所）の準備が終わった。第11章 |
+| `Tomcat started on port 18010` | ここからリクエストを受けられる |
 | `Started HelloApplication in 3.344 seconds` | 起動完了。起動の所要時間 |
-| `[main]`（スレッド名の欄） | 起動処理は **main スレッド**で行っている |
+| `[main]`（スレッド名の欄） | 起動処理は main スレッドで行っている |
 
-もう1つ注目してほしいのは、**最初のリクエストが来たとき**に出る行です。
+もう1つ、最初のリクエストが来たときに出る行にも注目してください。
 
 ```text
 01:22:18.232  INFO ... [io-18010-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]  : Initializing Spring DispatcherServlet 'dispatcherServlet'
 01:22:18.234  INFO ... [io-18010-exec-1] o.s.web.servlet.DispatcherServlet   : Completed initialization in 1 ms
 ```
 
-スレッド名が `[main]` から `[io-18010-exec-1]` に変わっています。これが、第9章で見た**リクエストを処理するスレッド**です（Tomcat のスレッドプールの1本。名前は `http-nio-18010-exec-1` が省略されたもの）。`DispatcherServlet`（第12章の主役）が、最初のリクエストで初期化されました。
+スレッド名が `[main]` から `[io-18010-exec-1]` に変わっています。これが、第9章で見たリクエストを処理するスレッドです（Tomcat のスレッドプールの1本で、名前は `http-nio-18010-exec-1` を省略したもの）。第12章の主役である `DispatcherServlet` は、この最初のリクエストで初期化されました。
 
 ### `@SpringBootApplication` の3つの意味
 
-`@SpringBootApplication` は、3つのアノテーションの合わせ技です。
+`@SpringBootApplication` は、3つのアノテーションをまとめたものです。
 
 ```mermaid
 flowchart LR
@@ -282,7 +280,7 @@ flowchart LR
 
 | 意味 | 何をするか | つまずきどころ |
 | --- | --- | --- |
-| `@ComponentScan` | `@RestController`、`@Service` などの**目印が付いたクラス**を探して、部品（Bean）として登録する | **探す範囲は、このクラスのパッケージ以下だけ** |
+| `@ComponentScan` | `@RestController`、`@Service` などの目印が付いたクラスを探して、部品（Bean）として登録する | 探す範囲は、このクラスのパッケージ以下だけ |
 | `@EnableAutoConfiguration` | 依存ライブラリを見て、必要な設定を自動で足す（7 節） | 何が足されたか、コードには現れない |
 | `@SpringBootConfiguration` | このクラス自身も設定クラスとして扱う | ほぼ意識しない |
 
@@ -308,7 +306,7 @@ Content-Type: application/json
 **起動は成功し、404 が返ります。** `@ComponentScan` の範囲外にあるクラスは、そもそも存在を知られていないので、エラーも出ません。
 
 !!! danger "AIが生成したコードで起きやすい"
-    AIは、ファイルを新しいパッケージ（`com.example.api` のように、アプリのルートの外）に作ることがあります。「起動はするが 404」は、この種のミスの典型です。**アプリのクラスは、`@SpringBootApplication` を付けたクラスと同じパッケージ、またはその配下に置く**。QuickVote が `com.example.quickvote` の下に `poll`、`vote` などを切るのは、この規則に従っています。
+    AI は、ファイルを新しいパッケージ（`com.example.api` のように、アプリのルートの外）に作ることがあります。「起動はするが 404」は、この種のミスの典型です。**アプリのクラスは、`@SpringBootApplication` を付けたクラスと同じパッケージか、その配下に置きます。** QuickVote が `com.example.quickvote` の下に `poll`、`vote` などを切っているのは、この規則に従っているためです。
 
 ## 6. Spring Boot が起動時にやること
 
@@ -324,11 +322,11 @@ flowchart LR
     S6 --> S7["Started ..."]
 ```
 
-ここで大事なのは、**S4 の「条件に合うものだけ」**です。次の節で見ます。
+S4 の「条件に合うものだけ」が、次の節の話題です。
 
 ## 7. 自動構成は「条件付きの設定」：if 文として読む
 
-Boot の自動構成の正体は、**「もし〇〇ならこの設定を足す」という if 文の集まり**です。TypeScript で書くなら、次のような疑似コードです。
+Boot の自動構成は、「もし〇〇ならこの設定を足す」という if 文の集まりです。TypeScript で書くなら、次のような疑似コードになります。
 
 ```ts
 // 疑似コード：自動構成が考えていること
@@ -339,15 +337,15 @@ if (classpath.has("tools.jackson.databind.json.JsonMapper")) {   // Jackson が�
 }
 ```
 
-実際の Java の定義も、ほぼ同じ形です。アノテーションが「条件」を表します。
+実際の Java の定義もほぼ同じ形で、条件をアノテーションで表します。
 
 | アノテーション | 意味 |
 | --- | --- |
 | `@ConditionalOnClass` | そのクラスがクラスパスにあれば（依存が入っていれば） |
-| `@ConditionalOnMissingBean` | **まだその Bean がなければ**（あなたが用意していなければ） |
+| `@ConditionalOnMissingBean` | まだその Bean がなければ（自分で用意していなければ） |
 | `@ConditionalOnProperty` | 設定ファイルにそのプロパティがあれば（`true` なら、など） |
 
-**`@ConditionalOnMissingBean` がいちばん大事**です。これは「あなたが先に定義したら、自動構成は引っ込む（back off）」という意味です。電源タップの例えで言えば、「あなたが自分の延長コードを挿したら、タップの既定の配線は使われない」です。
+この中で押さえておきたいのは `@ConditionalOnMissingBean` です。自分が先に定義したら、自動構成は引っ込みます（back off）。電源タップの例えなら、自分の延長コードを挿したときに、タップの既定の配線が使われなくなるということです。
 
 ### 見る：`--debug` で条件評価レポートを出す
 
@@ -355,7 +353,7 @@ if (classpath.has("tools.jackson.databind.json.JsonMapper")) {   // Jackson が�
 java -jar target/hello-0.0.1-SNAPSHOT.jar --debug
 ```
 
-起動ログのあとに、`CONDITIONS EVALUATION REPORT` が出ます。**Positive matches**（条件に合い、適用された設定）と、**Negative matches**（条件に合わず、適用されなかった設定）です。実際の出力から抜粋します。
+起動ログのあとに `CONDITIONS EVALUATION REPORT` が出ます。条件に合って適用された設定が Positive matches、条件に合わず適用されなかった設定が Negative matches です。実際の出力から抜粋します。
 
 ```text
 Positive matches:
@@ -382,11 +380,11 @@ Negative matches:
          - @ConditionalOnBooleanProperty (spring.mvc.problemdetails.enabled=true) did not find property 'spring.mvc.problemdetails.enabled' (OnPropertyCondition)
 ```
 
-読み方は単純です。`Tomcat...matched` は「Tomcat のクラスが依存にあったから、Tomcat を起動する設定が有効になった」。`Gson...Did not match` は「Gson（別のJSONライブラリ）は依存にないから、使わない」。この例の Positive matches は、全部で約50件ありました。**自分では1行も書いていない、約50件の判断**が、起動のたびに行われています。
+読み方は単純です。`Tomcat...matched` は、Tomcat のクラスが依存にあったので、Tomcat を起動する設定が有効になったという意味です。`Gson...Did not match` は、Gson（別の JSON ライブラリ）が依存にないので使わないという意味です。この例の Positive matches は全部で約50件ありました。自分では1行も書いていない約50件の判断が、起動のたびに行われています。
 
 ### 壊してみる：自分で `JsonMapper` を用意する
 
-`@ConditionalOnMissingBean` が本当に「引っ込む」のか、確かめます。わざと、`JsonMapper` を自分で定義します。
+`@ConditionalOnMissingBean` が本当に引っ込むのかを確かめるために、わざと `JsonMapper` を自分で定義します。
 
 ```java title="CustomMapperConfig.java（実験用。profile 'custom-mapper' のときだけ有効）"
 @Configuration
@@ -421,16 +419,16 @@ curl localhost:18010/api/hello
 ```
 
 !!! danger "本番で事故になるパターン：JsonMapper を丸ごと自作すると、Boot の既定が全部消える"
-    上の実験は、整形したかっただけです。しかし `JsonMapper` を丸ごと定義した結果、**Boot が `JsonMapper` に施していた設定（`application.yaml` の `spring.jackson.*` を含む）が、すべて使われなくなります**。JSON の挙動を少し変えたいときは、Bean を丸ごと差し替えるのではなく、`application.yaml` の設定や、Boot が用意するカスタマイズの口を使います。
-    AIは「`@Bean` で `JsonMapper` を作る」コードを、気軽に出します。**なぜ自作が必要か**を、レビューで必ず聞いてください。
+    上の実験は、整形したかっただけです。しかし `JsonMapper` を丸ごと定義した結果、Boot が `JsonMapper` に施していた設定（`application.yaml` の `spring.jackson.*` を含む）がすべて使われなくなります。JSON の挙動を少し変えたいときは、Bean を丸ごと差し替えず、`application.yaml` の設定や、Boot が用意しているカスタマイズの口を使います。
+    AI は「`@Bean` で `JsonMapper` を作る」コードを気軽に出します。なぜ自作が必要なのかを、レビューで必ず確かめてください。
 
 !!! warning "バージョン注意：Boot 4 では、自動構成クラスの名前とパッケージが変わった"
-    Boot 3 までの記事では、自動構成クラスは `org.springframework.boot.autoconfigure.web.servlet.*` のように、`spring-boot-autoconfigure` という巨大な1つの jar の中にありました。Boot 4 では**機能ごとの jar に分割**され、パッケージも `org.springframework.boot.webmvc.autoconfigure.*`、`org.springframework.boot.jdbc.autoconfigure.*` などに移りました。上のレポートに `org.springframework.boot.webmvc.error.ErrorController` のような名前が出るのは、そのためです。
-    JSON も、Jackson 2（`com.fasterxml.jackson.databind.ObjectMapper`）から、**Jackson 3（`tools.jackson.databind.json.JsonMapper`）**に変わりました。レポートに `Jackson2HttpMessageConvertersConfiguration` が「Did not match」で出ているのは、Jackson 2 用の旧設定です。古い記事の `ObjectMapper` は、Boot 4 では `JsonMapper` と読み替えます。
+    Boot 3 までの記事では、自動構成クラスは `org.springframework.boot.autoconfigure.web.servlet.*` のように、`spring-boot-autoconfigure` という大きな1つの jar の中にありました。Boot 4 では機能ごとの jar に分割され、パッケージも `org.springframework.boot.webmvc.autoconfigure.*`、`org.springframework.boot.jdbc.autoconfigure.*` などに移りました。上のレポートに `org.springframework.boot.webmvc.error.ErrorController` のような名前が出るのは、そのためです。
+    JSON も、Jackson 2（`com.fasterxml.jackson.databind.ObjectMapper`）から Jackson 3（`tools.jackson.databind.json.JsonMapper`）に変わりました。レポートに `Jackson2HttpMessageConvertersConfiguration` が「Did not match」で出ているのは、Jackson 2 用の旧設定です。古い記事の `ObjectMapper` は、Boot 4 では `JsonMapper` と読み替えます。
 
 ## 8. 自動構成の「地図」を持つ：何を見れば分かるか
 
-自動構成は、ソースコードに現れないぶん、**調べ方を知っていること**が大事です。
+自動構成はソースコードに現れないので、調べ方を知っておく必要があります。
 
 | 知りたいこと | 見る場所 |
 | --- | --- |
@@ -440,7 +438,7 @@ curl localhost:18010/api/hello
 | 実行中の Bean の一覧 | 起動ログを `DEBUG` にする。またはテストで `ApplicationContext#getBeanDefinitionNames()` |
 | 使われている Java・Tomcat のバージョン | 起動ログの先頭 |
 
-IntelliJ IDEA では、自動構成クラス（`JacksonAutoConfiguration` など）に **Ctrl+クリック**でジャンプして、`@ConditionalOn...` を読めます。AIが生成した設定が「なぜ効かないのか」を調べるとき、最後は**この自動構成のソースが答え**になります。
+IntelliJ IDEA では、自動構成クラス（`JacksonAutoConfiguration` など）を Ctrl+クリックでたどって、`@ConditionalOn...` を読めます。AI が生成した設定がなぜ反映されないのかを調べるとき、最終的な答えはこの自動構成のソースにあります。
 
 ## 9. 現場で：AIが出した `pom.xml` と起動エラーのレビュー
 
@@ -452,7 +450,7 @@ IntelliJ IDEA では、自動構成クラス（`JacksonAutoConfiguration` など
 | クラスが `@SpringBootApplication` のパッケージの外にある | 起動はするが 404（5 節） |
 | 「ビルドが通らないので `<scope>` を消した」 | テスト用の依存を本番に入れている。理由を聞く |
 | `@Bean` で `JsonMapper` などを自作 | Boot の既定が消える（7 節）。設定で足りないか |
-| 起動ログの Java バージョンが想定と違う | `JAVA_HOME` や IDE の設定の問題。ここを見れば分かる |
+| 起動ログの Java バージョンが想定と違う | `JAVA_HOME` や IDE の設定の問題で、起動ログを見れば分かる |
 
 ---
 
@@ -460,14 +458,14 @@ IntelliJ IDEA では、自動構成クラス（`JacksonAutoConfiguration` など
 
 !!! abstract "この章の3点セット"
     **① 一言で言うと**
-    Spring Boot は、Spring Framework・Tomcat・Jackson などを、BOM で決めた動作確認済みのバージョンで束ね、クラスパスと設定を見て「条件付きの設定（自動構成）」を適用し、`java -jar` だけで起動できる状態にする仕組み。自分で定義した Bean があれば、自動構成は引っ込む。
+    Spring Boot は、Spring Framework・Tomcat・Jackson などを、BOM で決めた動作確認済みのバージョンで束ねる仕組みです。クラスパスと設定を見て「条件付きの設定（自動構成）」を適用し、`java -jar` だけで起動できる状態にします。自分で定義した Bean があれば、自動構成は引っ込みます。
 
     **② 現場でこう聞かれる**
     「`pom.xml` に Tomcat や Jackson のバージョンが書いてないのに、どうして動くの？」
-    → 親 POM（`spring-boot-starter-parent`）の BOM がバージョンを決めている。スターターが関連ライブラリを連れてくる。実際の組み合わせは `dependency:tree` と起動ログで確認できる。
+    → 親 POM（`spring-boot-starter-parent`）の BOM がバージョンを決めています。スターターが関連ライブラリをまとめて取り込み、実際の組み合わせは `dependency:tree` と起動ログで確認できます。
 
     **③ 自分のサービスならどこに当たるか**
-    自分のサービスに必要な機能（Web、DB、検証、…）を挙げ、それぞれに対応するスターターの名前を調べる。Boot 4 で名前が変わったものはないか確認する。
+    自分のサービスに必要な機能（Web、DB、検証など）を挙げ、それぞれに対応するスターターの名前を調べます。Boot 4 で名前が変わったものがないかも確認します。
 
 ## 演習
 
@@ -483,7 +481,7 @@ IntelliJ IDEA では、自動構成クラス（`JacksonAutoConfiguration` など
     `HelloController` を `com.example.hello.web` パッケージに移しました（`HelloApplication` は `com.example.hello` のまま）。起動すると、どうなりますか。(a) 起動に失敗する (b) 起動して 404 (c) 起動して 200
 
 ??? success "解答"
-    (c) 起動して 200 です。`@ComponentScan` は `HelloApplication` のパッケージ**以下**を探します。`com.example.hello.web` は配下なので、見つかります。(b) になるのは、`com.example.hello` の**外**（`com.elsewhere` など）に置いたときです。「配下」と「外」の違いを、パッケージ名の前方一致で判断します。
+    (c) 起動して 200 です。`@ComponentScan` は `HelloApplication` のパッケージ以下を探します。`com.example.hello.web` は配下なので見つかります。(b) になるのは、`com.example.hello` の外（`com.elsewhere` など）に置いたときです。配下か外かは、パッケージ名の前方一致で判断します。
 
 ??? question "確認問題3：読解"
     `--debug` のレポートに、次の行がありました。何を意味しますか。
@@ -494,7 +492,7 @@ IntelliJ IDEA では、自動構成クラス（`JacksonAutoConfiguration` など
     ```
 
 ??? success "解答"
-    仮想スレッド用のタスク実行設定が、適用されなかったことを意味します。`spring.threads.virtual.enabled=true` を指定していないためです（既定は無効）。本教材では、第36章（SSE）まで仮想スレッドを使いません。「条件に合わなかった理由」が、1行で書かれているのが分かります。
+    仮想スレッド用のタスク実行設定が適用されなかった、という意味です。`spring.threads.virtual.enabled=true` を指定していないためです（既定は無効）。本教材では第36章（SSE）まで仮想スレッドを使いません。条件に合わなかった理由が1行で書かれていることが分かります。
 
 ??? question "応用：QuickVote の起動を確かめる"
     `code/labs/part02-quickvote-inmemory/` を `./mvnw spring-boot:run` で起動し、起動ログから (1) Spring Boot のバージョン (2) Tomcat のバージョン (3) ポート番号 (4) 起動にかかった秒数 を読み取ってください。さらに `--debug` で起動し、Negative matches の中から、自分で理由を説明できるものを3つ選んでください。

@@ -1,25 +1,23 @@
 # 第8部 JPAを理解して使い分ける
 
-QuickVote の本線は、ここまでずっと **JdbcClient とSQL** で書いてきました。この部では、日本の現場で最もよく出会うもう1つの方式、**JPA（Hibernate）** を、**本線とは別の実験プロジェクト `code/jpa-lab/` で**動かして学びます。
+QuickVote の本線は、ここまでずっと JdbcClient と SQL で書いてきました。この部では、日本の現場でいちばんよく出会うもう1つの方式、JPA（Hibernate）を、本線とは別の実験プロジェクト `code/jpa-lab/` で動かして学びます。
 
-目的は「JPAに乗り換えること」ではありません。**JPAが何を肩代わりしてくれて、何を隠してしまうのか**を、発行されるSQLを数えて理解し、AIが書いたJPAコードを**読み、レビューし、直せる**ようになることです。
+目的は JPA に乗り換えることではありません。JPA が何を肩代わりして何を隠すのかを、発行される SQL を数えて理解し、AI が書いた JPA コードを読み、レビューし、直せるようになることです。
 
 ## この部でできるようになること
 
 - JPA・Hibernate・Spring Data JPA の関係と、`jakarta.persistence.*` の世代（Jakarta Persistence 3.2／Hibernate ORM 7）を説明できる
 - 「永続コンテキスト＝レジのカゴ」の例えで、`save()` を呼ばなくても UPDATE が出る理由と、`@Transactional` がないと変更が消える理由を説明できる
-- 一覧APIで **SQLが何本流れるか**を、ログとHibernateの統計で数えられる（投票100件で101本）
-- fetch join／`@EntityGraph`／DTO射影／バッチフェッチで、101本を1〜3本に減らし、それぞれの注意点を言える
+- 一覧APIで SQL が何本流れるかを、ログと Hibernate の統計で数えられる（投票100件で101本）
+- fetch join／`@EntityGraph`／DTO射影／バッチフェッチで 101本を1〜3本に減らし、それぞれの注意点を言える
 - `LazyInitializationException` と open-in-view（OSIV）の関係、`@Version` による楽観ロックの衝突を、再現して説明できる
-- QuickVote の同じユースケースを JdbcClient と JPA で並べ、**使い分けの基準**を言葉にできる
+- QuickVote の同じユースケースを JdbcClient と JPA で並べ、使い分けの基準を言葉にできる
 - MyBatis の「XMLにSQLを書く」形を読める
-- AIが生成したJPAコードの典型的な罠5つを、検出する方法（SQL本数・grep・テスト）つきで指摘し、直せる
+- AIが生成したJPAコードの典型的な落とし穴5つを、検出する方法（SQL本数・grep・テスト）つきで指摘し、直せる
 
 ## アプリの到達状態
 
-QuickVote 本線（`code/quickvote/`）は **JdbcClientのまま**です。この部では変更しません。
-
-その代わりに、QuickVote の `polls`／`options`／`votes` を簡略化した同じ形のテーブルで、JPA 版の実験プロジェクトを動かします。
+QuickVote 本線（`code/quickvote/`）は JdbcClient のままで、この部では変更しません。代わりに、QuickVote の `polls`／`options`／`votes` を簡略化した同じ形のテーブルを使い、JPA 版の実験プロジェクトを動かします。
 
 | | QuickVote 本線 | jpa-lab（この部の実験） |
 | --- | --- | --- |
@@ -60,7 +58,7 @@ flowchart LR
     B --> C["第41章<br/>使い分け・レビュー<br/>（罠を見抜く）"]
 ```
 
-第39章で「JPAは裏で何をしているか」を知り、第40章でその裏側が**性能事故**として表に出る様子を観測し、第41章で**判断とレビュー**に使います。
+第39章で JPA が裏で何をしているかを知り、第40章でその裏側が性能事故として表に出る様子を観測します。第41章では、そこで得た知識を判断とレビューに使います。
 
 ## 実験コードの置き場
 
@@ -79,18 +77,18 @@ code/labs/ch41-mybatis/        第41章のコラム用。MyBatis（XMLのSQL）�
 実験は `./mvnw test`（Windows は `.\mvnw.cmd test`）で再現できます。実PostgreSQL 18 を Testcontainers で起動するので、Docker Desktop を起動しておいてください。
 
 !!! note "なぜWebを入れたのか"
-    open-in-view（第40章）は、Webアプリでしか効かない設定です。そのため jpa-lab には Spring MVC（`spring-boot-starter-webmvc`）を入れてあります。
+    open-in-view（第40章）は、Webアプリでしか意味を持たない設定です。そのため jpa-lab には Spring MVC（`spring-boot-starter-webmvc`）を入れてあります。
 
 ## 第8部のチェックリスト
 
-第41章を終えたら、次の項目を確かめてください。**説明できない項目は、白紙に自分の言葉で書いてみて、書けなければ該当章へ戻ります。** 目安は「③ 検証できる」です。
+第41章を終えたら、次の項目を確かめてください。説明できない項目は、白紙に自分の言葉で書いてみて、書けなければ該当章へ戻ります。目安は「③ 検証できる」です。
 
 - [ ] JPA・Hibernate・Spring Data JPA の違いを説明でき、import が `jakarta.persistence.*` であることを確認できる
 - [ ] 永続コンテキスト（レジのカゴ）が何を覚えていて、いつSQLを出すかを説明できる
 - [ ] `save()` を呼ばなくても UPDATE が出るコードを読み、その UPDATE がどの時点で出るかを言える
 - [ ] `@Transactional` がない更新が黙って捨てられる理由を、カゴの例えで説明できる
 - [ ] Entity の4つの状態（new／managed／detached／removed）と、`save()` が新規と既存で何をするかを説明できる
-- [ ] 発行されるSQLをログに出し、**SQLの本数を数えるテスト**を書ける
+- [ ] 発行されるSQLをログに出し、SQL の本数を数えるテストを書ける
 - [ ] N+1 の発生箇所を、コードとSQLログの両方から指摘できる
 - [ ] fetch join・`@EntityGraph`・DTO射影・バッチフェッチの違いと、それぞれの注意点（0件の親、ページング）を言える
 - [ ] `LazyInitializationException` が起きる理由と、安全な直し方・やってはいけない直し方を言える
@@ -102,4 +100,4 @@ code/labs/ch41-mybatis/        第41章のコラム用。MyBatis（XMLのSQL）�
 - [ ] AIが書いたJPAコードの罠（EAGER、ループ内`findById`、Entity直返し、`toString`循環、`equals/hashCode`）を、検出方法つきで指摘できる
 
 !!! tip "統合課題：自分の言葉でレビューする"
-    第41章の「罠入りコード」を見ずに、`code/jpa-lab/src/main/java/com/example/jpalab/traps/` のファイルを読み、**テストを1本も実行せずに**レビューコメントを書いてください。そのあと `TrapsTest` を実行して、見つけた罠と見つけられなかった罠を照らし合わせます。
+    第41章の「罠入りコード」の解説を見ずに、`code/jpa-lab/src/main/java/com/example/jpalab/traps/` のファイルを読み、テストを1本も実行せずにレビューコメントを書いてください。そのあと `TrapsTest` を実行して、見つけた罠と見つけられなかった罠を照らし合わせます。

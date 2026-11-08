@@ -4,9 +4,9 @@
 
 この付録の使い方
 
-- 「TypeScriptで書くならこうだが、Javaではどう書くか」を引く辞書です。通して読む必要はありません
-- 各節は **表（早見）→ 左右対訳のコード → 詳しい章へのリンク** の順です
-- Javaのコードは、`code/labs/appendix-ts-java/` で JDK 25 により実際にコンパイル・実行して確かめたものです。SpringのコードはSpring Boot 4.1.2のテストまで通してあります
+- 「TypeScript ではこう書くが、Java ではどう書くか」を引く辞書です。通して読む必要はありません
+- 各節は、表（早見）、左右対訳のコード、詳しい章へのリンクの順に並んでいます
+- Java のコードは、`code/labs/appendix-ts-java/` で JDK 25 を使って実際にコンパイルし、実行して確かめたものです。Spring のコードは、Spring Boot 4.1.2 のテストまで通してあります
 
 </div>
 
@@ -19,16 +19,16 @@
 | `number` | `int` / `long` / `double` / `BigDecimal` | ⚠ | 用途で選ぶ。金額・率は `BigDecimal`（[第7章](../part01/ch07-value-pitfalls.md)） |
 | `bigint` | `BigInteger` / `long` | ✅ | |
 | `string` / `boolean` | `String` / `boolean` | ✅ | `String` は参照型。比較は `equals` |
-| `any` | `Object` | ⚠ | 使うたびにキャストが要る。多用は型の保護を捨てる |
+| `any` | `Object` | ⚠ | 使うたびにキャストが要る。多用すると型チェックの意味がなくなる |
 | `unknown` | `Object` ＋ `instanceof` で絞り込み | ✅ | |
 | `void` | `void` | ✅ | |
 | `never` | （無い） | ❌ | 例外を投げるメソッドで代用 |
 | `undefined` / `null` | `null`（のみ） | ⚠ | `undefined` は無い（[第5章](../part01/ch05-null-exceptions.md)） |
-| <code>"OPEN" &#124; "CLOSED"</code> | `enum PollStatus { OPEN, CLOSED }` | ⚠ | 文字列リテラル型は無い。enumを作る |
+| <code>"OPEN" &#124; "CLOSED"</code> | `enum PollStatus { OPEN, CLOSED }` | ⚠ | 文字列リテラル型は無い。enum を作る |
 | 判別可能ユニオン | `sealed interface` ＋ `record` | ✅ | 網羅漏れがコンパイルエラー（[第4章](../part01/ch04-data-shapes.md)） |
 | `type`／`interface`（データの形） | `record` | ⚠ | 形が合うだけでは代入できない（[第3章](../part01/ch03-types.md)） |
 | `A & B` | `class X implements A, B` | ⚠ | 交差型そのものは無い |
-| `[string, number]`（タプル） | `record Pair<A,B>(A first, B second)` | ⚠ | 名前付きのrecordを作る |
+| `[string, number]`（タプル） | `record Pair<A,B>(A first, B second)` | ⚠ | 名前付きの record を作る |
 | `Array<T>` / `T[]` | `List<T>` | ✅ | `T[]` もあるが固定長 |
 | `Record<string, T>` | `Map<String, T>` | ✅ | |
 | `readonly` / `as const` | `final` / `record` / `List.of` | ⚠ | `final` は再代入禁止のみ |
@@ -69,7 +69,7 @@
 実行結果は `area(new Circle(1.0))` が `3.141592653589793`、`area(new Rect(2, 3))` が `6.0` です。`Circle` と `Rect` のどちらかを `permits` に足し忘れたり、`case` を1つ抜いたりすると、実行前にコンパイルエラーになります。
 
 !!! warning "`number` を1つの型で済ませない"
-    `0.1 + 0.2` は `double` で `0.30000000000000004`、`BigDecimal` で `0.3` でした（実行して確認済み）。TypeScriptの `number` に当たる型が4つあり、**選ぶことが設計**です。
+    `0.1 + 0.2` は `double` で `0.30000000000000004`、`BigDecimal` で `0.3` でした（実行して確認済み）。TypeScript の `number` に当たる型が Java には4つあり、どれを選ぶかが設計の一部になります。
 
 ## 2. null・undefined
 
@@ -93,10 +93,10 @@ String nick = find(db, "u1")                // Optional<User>
 NPE: Cannot invoke "String.length()" because "raw" is null
 ```
 
-NPEのメッセージに変数名が出るのは、デバッグ情報つきでコンパイルしたとき（`javac -g`、Mavenの既定）です。`java NullDemo.java` で直接実行すると `"<local3>"` と表示されました。
+NPE のメッセージに変数名が出るのは、デバッグ情報つきでコンパイルしたとき（`javac -g`、Maven の既定）です。`java NullDemo.java` で直接実行すると `"<local3>"` と表示されました。
 
 !!! tip "`Optional` は戻り値専用"
-    フィールドや引数に `Optional` を使うのは避けます。「結果が無いかも」を呼び出し側に伝える場所でだけ使います（[第5章](../part01/ch05-null-exceptions.md)）。
+    フィールドや引数に `Optional` を使うのは避けます。使うのは、「結果が無いかもしれない」ことを呼び出し側に伝える戻り値だけです（[第5章](../part01/ch05-null-exceptions.md)）。
 
 ## 3. 関数
 
@@ -123,7 +123,7 @@ Function<Integer, Integer> plusBase = x -> x + base;   // OK
 // base++;   // ← あとで変えるとコンパイルエラー（ラムダが捕まえる変数は変更不可）
 ```
 
-出力は `Hello, QuickVote / Hi, QuickVote`、`plusBase.apply(5)` は `15` です。TypeScriptのクロージャは変数を後から書き換えられますが、Javaのラムダでは不可です。詳しくは[第6章](../part01/ch06-collections-streams.md)。
+出力は `Hello, QuickVote / Hi, QuickVote`、`plusBase.apply(5)` は `15` です。TypeScript のクロージャは捕まえた変数を後から書き換えられますが、Java のラムダでは書き換えられません。詳しくは[第6章](../part01/ch06-collections-streams.md)。
 
 ## 4. クラス
 
@@ -132,7 +132,7 @@ Function<Integer, Integer> plusBase = x -> x + base;   // OK
 | `class A implements I` | `class A implements I` | ✅ |
 | `constructor(readonly x: T)` | フィールド宣言 ＋ コンストラクタ（recordなら1行） | ⚠ |
 | `#x` / `private x` | `private`（実行時にも強制） | ✅ |
-| 修飾子なし＝`public` | 修飾子なし＝**パッケージ内だけ** | ⚠ |
+| 修飾子なし＝`public` | 修飾子なし＝パッケージ内だけ | ⚠ |
 | `static readonly X = 1` | `static final int X = 1` | ✅ |
 | `abstract class` | `abstract class` | ✅ |
 | `get count()` | `count()`（慣習。構文は無い） | ⚠ |
@@ -150,27 +150,27 @@ record Config(String host, int port) {
 }
 ```
 
-実行すると `Config[host=localhost, port=80] -> Config[host=localhost, port=8080]` と表示されます。recordは不変なので、「変えたコピー」を返すメソッドを自分で用意します。詳細は[第3章](../part01/ch03-types.md)・[第4章](../part01/ch04-data-shapes.md)。
+実行すると `Config[host=localhost, port=80] -> Config[host=localhost, port=8080]` と表示されます。record は不変なので、「一部だけ変えたコピー」を返すメソッドを自分で用意します。詳しくは[第3章](../part01/ch03-types.md)・[第4章](../part01/ch04-data-shapes.md)。
 
 ## 5. モジュール・パッケージ管理
 
 | TypeScript / Node | Java | 印 |
 | --- | --- | --- |
 | `import { X } from "./a/b"` | `import com.example.a.X;` | ⚠ |
-| ファイルパスでimport | **完全修飾名（パッケージ名）** でimport | ⚠ |
+| ファイルパスで import | 完全修飾名（パッケージ名）で import | ⚠ |
 | `export` | `public` | ⚠ |
 | `export default` | （無い） | ❌ |
 | barrel（`index.ts`） | （無い） | ❌ |
-| 1ファイル複数export | 1ファイルに `public` クラス1つ | ⚠ |
+| 1ファイル複数 export | 1ファイルに `public` クラス1つ | ⚠ |
 | `package.json` | `pom.xml`（Gradleなら `build.gradle.kts`） | ⚠ |
 | `dependencies` / `devDependencies` | `compile`（既定）／ `test` スコープ | ✅ |
 | npm registry | Maven Central | ✅ |
 | `node_modules`（プロジェクトごと） | `~/.m2`（マシンで共有） | ⚠ |
-| `^1.2.3` の範囲指定 | 厳密な版。**BOM（親POM）が版を決める** | ⚠ |
-| `package-lock.json` | （無い）BOMが担う | ⚠ |
+| `^1.2.3` の範囲指定 | 厳密な版。BOM（親 POM）が版を決める | ⚠ |
+| `package-lock.json` | （無い）BOM が版を固定する | ⚠ |
 | `workspaces` | マルチモジュール | ✅ |
 
-QuickVoteの `pom.xml` が依存の版を1つも書いていないのは、Spring Bootの親POMが決めているからです（[第10章](../part02/ch10-spring-boot.md)）。Gradleとの対訳は[Gradle 対訳](gradle.md)にあります。
+QuickVote の `pom.xml` が依存の版を1つも書いていないのは、Spring Boot の親 POM が決めているからです（[第10章](../part02/ch10-spring-boot.md)）。Gradle との対訳は[Gradle 対訳](gradle.md)にあります。
 
 ## 6. 非同期
 
@@ -185,7 +185,7 @@ QuickVoteの `pom.xml` が依存の版を1つも書いていないのは、Sprin
 | `setTimeout` | `ScheduledExecutorService.schedule(…)` | ✅ |
 | イベントループ（1スレッド） | 1リクエスト1スレッド | ⚠ |
 
-Javaのサーバーでは、**`async/await` を書かず、待つ処理をそのまま書く**のが基本です。待っている間も、そのリクエスト専用のスレッドが居座るので、並行性はスレッドの数で決まります（[第9章](../part01/ch09-threads.md)・[第24章](../part04/ch24-connection-pool.md)）。
+Java のサーバーでは `async/await` を書かず、待つ処理をそのまま書くのが基本です。待っている間もそのリクエスト専用のスレッドが居座るので、並行して処理できる数はスレッドの数で決まります（[第9章](../part01/ch09-threads.md)・[第24章](../part04/ch24-connection-pool.md)）。
 
 === "TypeScript"
 
@@ -207,7 +207,7 @@ Javaのサーバーでは、**`async/await` を書かず、待つ処理をその
     }
     ```
 
-1件200msの処理を3件並べて、全体が約200ms（直列なら約600ms）で終わりました。`CompletableFuture` の失敗は `CompletionException` に包まれ、元の例外は `getCause()` で取り出します（`cause = java.lang.IllegalStateException: boom` を確認）。
+1件200msの処理を3件並べたところ、全体が約200ms（直列なら約600ms）で終わりました。`CompletableFuture` の失敗は `CompletionException` に包まれて届くので、元の例外は `getCause()` で取り出します（`cause = java.lang.IllegalStateException: boom` を確認）。
 
 ## 7. コレクション操作
 
@@ -236,7 +236,7 @@ Map<String, Integer> tally = votes.stream()
 // 結果: {そば=1, カレー=1, ラーメン=3}
 ```
 
-`stream()` を挟む点が最大の違いです。`filter` や `map` は、`List` ではなく `Stream` のメソッドです。末尾の `.toList()` で `List` に戻します（[第6章](../part01/ch06-collections-streams.md)）。
+最大の違いは、間に `stream()` を挟むことです。`filter` や `map` は `List` ではなく `Stream` のメソッドなので、末尾の `.toList()` で `List` に戻します（[第6章](../part01/ch06-collections-streams.md)）。
 
 ## 8. 文字列・日時・JSON
 
@@ -259,7 +259,7 @@ String json = mapper.writeValueAsString(new Dto("ランチ", 3));
 Dto back = mapper.readValue(json, Dto.class);
 ```
 
-時刻の落とし穴は[第7章](../part01/ch07-value-pitfalls.md)、JSONの型は[第13章](../part02/ch13-api-contract.md)です。Jackson 2の記事は `com.fasterxml.jackson.databind` で書かれています。見分け方は[Spring Boot 3→4 差分カード](boot3-to-4.md)にあります。
+時刻の落とし穴は[第7章](../part01/ch07-value-pitfalls.md)、JSON の型は[第13章](../part02/ch13-api-contract.md)で扱います。Jackson 2 の記事は `com.fasterxml.jackson.databind` を使って書かれています。見分け方は[Spring Boot 3→4 差分カード](boot3-to-4.md)にあります。
 
 ## 9. エラー処理
 
@@ -271,7 +271,7 @@ Dto back = mapper.readValue(json, Dto.class);
 | `try / catch / finally` | `try / catch / finally` | ✅ |
 | `catch (e)`（`unknown`） | `catch (IOException e)`（型で受ける） | ⚠ |
 | <code>e instanceof A &#124;&#124; e instanceof B</code> | <code>catch (A &#124; B e)</code> | ✅ |
-| 何でも `throw` できる | `Throwable` のみ。**checked例外は `throws` の宣言が必須** | ⚠ |
+| 何でも `throw` できる | `Throwable` のみ。checked 例外は `throws` の宣言が必須 | ⚠ |
 | `await using` / `finally` で閉じる | `try (var r = …) { }`（try-with-resources） | ✅ |
 | `arr[9]` → `undefined` | `arr[9]` → `ArrayIndexOutOfBoundsException` | ⚠ |
 
@@ -283,7 +283,7 @@ try (var a = new Res("A"); var b = new Res("B")) {
 // 出力: open A / open B / body / close B / close A（宣言と逆順に必ず閉じる）
 ```
 
-「例外を握りつぶさない」「checkedとuncheckedの使い分け」は[第5章](../part01/ch05-null-exceptions.md)、HTTPエラーへの変換は[第14章](../part02/ch14-validation-errors.md)です。
+「例外を握りつぶさない」ことと、checked 例外と unchecked 例外の使い分けは[第5章](../part01/ch05-null-exceptions.md)、HTTP エラーへの変換は[第14章](../part02/ch14-validation-errors.md)で扱います。
 
 ## 10. テスト
 
@@ -325,7 +325,7 @@ try (var a = new Res("A"); var b = new Res("B")) {
     }
     ```
 
-メソッド名に日本語を使えます（`void 追加すると増える()`）。ただし数字で始めることはできません。入門は[第8章](../part01/ch08-junit.md)、APIのテストは[第16章](../part02/ch16-api-testing.md)です。
+メソッド名には日本語を使えます（`void 追加すると増える()`）。ただし数字で始めることはできません。JUnit の入門は[第8章](../part01/ch08-junit.md)、API のテストは[第16章](../part02/ch16-api-testing.md)で扱います。
 
 ## 11. ビルド・実行・開発ツール
 
@@ -342,7 +342,7 @@ try (var a = new Res("A"); var b = new Res("B")) {
 | `nvm` / `.nvmrc` | `JAVA_HOME`／toolchain／SDKMAN | `java.toolchain` |
 | ESLint / Prettier | Checkstyle・SpotBugs／Spotless（教材では扱わない） | 同左 |
 
-Windowsでは `./mvnw` を `.\mvnw.cmd` に読み替えます。`.jar` はJavaの実行可能ファイルで、`node_modules` ごと1つに固めた成果物に近いものです（[第2章](../part01/ch02-how-java-runs.md)）。
+Windows では `./mvnw` を `.\mvnw.cmd` に読み替えます。`.jar` は Java の実行可能ファイルで、`node_modules` ごと1つに固めた成果物に近いものです（[第2章](../part01/ch02-how-java-runs.md)）。
 
 ## 12. Webフレームワーク：Express／Next.js ↔ Spring MVC
 
@@ -391,7 +391,7 @@ Windowsでは `./mvnw` を `.\mvnw.cmd` に読み替えます。`.jar` はJava�
     }
     ```
 
-差が出るのは「入口の検証」と「エラーの出口」です。Expressではハンドラの中で `parse` し、失敗を自分で変換します。Springは**メソッドに入る前に検証が走り**、例外は**1か所（`@RestControllerAdvice`）で一括変換**します。
+差が出るのは、入口の検証とエラーの出口です。Express ではハンドラの中で `parse` し、失敗を自分で変換します。Spring ではメソッドに入る前に検証が走り、例外は1か所（`@RestControllerAdvice`）でまとめて変換します。
 
 ```java title="code/labs/appendix-ts-java/spring-web/.../ApiErrors.java（抜粋）"
 @RestControllerAdvice
@@ -405,7 +405,7 @@ class ApiErrors {
 }
 ```
 
-テストは supertest と同じ感覚で書けます。次の4件（作成201、空タイトル400、存在しない404、フィルターのヘッダー）が、Spring Boot 4.1.2 で通ることを確認しました。
+テストは supertest と同じ感覚で書けます。作成201、空タイトル400、存在しない404、フィルターのヘッダーの4件が Spring Boot 4.1.2 で通ることを確認しました。次のコードは、そのうちの空タイトルのテストです。
 
 ```java
 var result = mvc.post().uri("/api/polls")
@@ -415,7 +415,7 @@ var result = mvc.post().uri("/api/polls")
 assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
 ```
 
-詳しい流れは[第12章](../part02/ch12-request-journey.md)（リクエストの旅）、検証とエラーは[第14章](../part02/ch14-validation-errors.md)です。
+リクエストが届くまでの流れは[第12章](../part02/ch12-request-journey.md)、検証とエラーは[第14章](../part02/ch14-validation-errors.md)で扱います。
 
 ## 13. 引っかかりやすい違い 10
 

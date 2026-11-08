@@ -160,7 +160,7 @@ fast（実験の後）: 200 0.025s
 
 ### エラーメッセージを読む
 
-500 になった2本のログです。
+500 になった2本のうち、1本のログです。もう1本にも同じ形の行が出ます。
 
 ```text
 HikariPool-1 - Connection is not available, request timed out after 2001ms (total=3, active=3, idle=0, waiting=1)

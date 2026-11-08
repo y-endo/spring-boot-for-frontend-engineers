@@ -57,9 +57,9 @@ private static List<String> labelsOf(Poll poll) {
   ...
 ```
 
-答えは **3（101本）** です。最初の1本で投票を100件取り、その**1件ごとに**選択肢を取るSQLが1本ずつ、合計100本。**1 + N 本**なので、**N+1問題**と呼ばれます。
+答えは **3（101本）** です。最初の1本で投票を100件取り、そのあと1件ごとに選択肢を取る SQL が1本ずつ、合計100本流れます。1 + N 本なので、N+1問題と呼ばれます。
 
-コードのどこにも、ループで `SELECT` を呼ぶ記述はありません。それなのに、SQLの滝が流れました。
+コードのどこにも、ループで `SELECT` を呼ぶ記述はありません。それなのに、SQL が100本余計に流れました。
 
 ## 2. 動画で見る：N+1の「滝」
 
@@ -71,12 +71,12 @@ private static List<String> labelsOf(Poll poll) {
   <p class="video-credit">音声：VOICEVOX:冥鳴ひまり</p>
 </div>
 
-**動画の要点**
+動画の要点
 
-- 最初に投票の一覧を取ります（SQL1本）。取ったデータは**レジのカゴ**（永続コンテキスト）に入ります
-- 選択肢には「あとで店員（DB）に聞く」札（**Lazy**）が付いています。ループで投票ごとに札を見るたび、聞きに行きます
-- 投票が100件なら、SQLが100本追加されて**合計101本（1＋N）**。データが少ない開発中は気づきにくいのが怖いところです
-- 直し方は「**最初から一緒に取ってくる**」こと（fetch join）や、「必要な形だけ取る」こと（DTO）。SQLは1〜2本になります
+- 最初に投票の一覧を取る（SQL1本）。取ったデータはレジのカゴ（永続コンテキスト）に入る
+- 選択肢には「あとで店員（DB）に聞く」札（Lazy）が付いていて、ループで投票ごとに札を見るたび、聞きに行く
+- 投票が100件なら SQL が100本追加されて、合計101本（1＋N）になる。データが少ない開発中は気づきにくいのが怖いところ
+- 直し方は「最初から一緒に取ってくる」こと（fetch join）や、「必要な形だけ取る」こと（DTO）。SQL は1〜2本になる
 - 注意：トランザクションが終わったあとに札を見に行くと、`LazyInitializationException` になります
 
 ??? note "字幕全文"
@@ -97,7 +97,7 @@ private static List<String> labelsOf(Poll poll) {
     それが、LazyInitializationExceptionです。
     SQLが何本流れるか、言えるようにする。
 
-動画の「札」は、コードでは `poll.getOptions()` の戻り値です。最初に触れるまで中身を持たず、**触れた瞬間にSQLを出す**特別なリストです。
+動画の「札」は、コードでは `poll.getOptions()` の戻り値です。最初に触れるまで中身を持たず、触れた瞬間に SQL を出す特別なリストです。
 
 ## 3. なぜ101本になるのか：遅延ロードの仕組み
 
@@ -108,7 +108,7 @@ private static List<String> labelsOf(Poll poll) {
 private List<Option> options = new ArrayList<>();
 ```
 
-`@OneToMany` の取得方法の既定は **LAZY（遅延）** です。`findAll` で `Poll` を読んだ時点では、`options` は**空の入れ物**（Hibernate が差し込む特殊なリスト）で、中身は読まれていません。`poll.getOptions().stream()...` で**中身に初めて触れた瞬間**に、その1件ぶんの `SELECT` が出ます。
+`@OneToMany` の取得方法の既定は LAZY（遅延）です。`findAll` で `Poll` を読んだ時点では、`options` は空の入れ物（Hibernate が差し込む特殊なリスト）で、中身は読まれていません。`poll.getOptions().stream()...` で中身に初めて触れた瞬間に、その1件ぶんの `SELECT` が出ます。
 
 ```mermaid
 sequenceDiagram
@@ -126,19 +126,19 @@ sequenceDiagram
 ```
 
 !!! note "用語：N+1問題"
-    親を取る1本のSQLのあと、子を取るSQLが**親の件数（N）だけ**追加で流れる状態です。1件ずつの往復が積み上がるので、件数に比例して遅くなります。DBが別サーバーなら、1往復が1ミリ秒かかるだけでも、100件で約100ミリ秒、1000件で約1秒です（試算）。
+    親を取る1本の SQL のあと、子を取る SQL が親の件数（N）だけ追加で流れる状態です。1件ずつの往復が積み上がるので、件数に比例して遅くなります。DB が別サーバーなら、1往復が1ミリ秒かかるだけでも、100件で約100ミリ秒、1000件で約1秒です（試算）。
 
 !!! tip "フロントエンドで例えると"
-    `useEffect` の中で、リストの要素ごとに `fetch('/api/items/' + id)` を呼ぶコンポーネントを、親が `map` で100個並べたときと同じです。**1個ずつは速いのに、全体で遅い**。React なら「リクエストの滝」としてネットワークタブに並びますが、JPAでは**サーバーとDBの間**で起きるので、ブラウザからは見えません。
+    `useEffect` の中で、リストの要素ごとに `fetch('/api/items/' + id)` を呼ぶコンポーネントを、親が `map` で100個並べたときと同じです。1個ずつは速いのに、全体では遅くなります。React なら「リクエストの滝」としてネットワークタブに並びますが、JPA ではサーバーと DB の間で起きるので、ブラウザからは見えません。
 
 ## 4. SQLの本数を数える
 
-N+1は、**数えないと気づけません**。この教材では、3つの方法を使い分けます。
+N+1は、数えないと気づけません。この教材では、3つの方法を使い分けます。
 
 | 方法 | 使いどころ | 本章で使ったもの |
 | --- | --- | --- |
 | ① SQLログ（`org.hibernate.SQL`） | 開発中に目で見る。どのSQLが何回出たかを知る | `logging.level.org.hibernate.SQL: DEBUG` |
-| ② Hibernate の統計（`Statistics`） | **テストで本数を数えて、固定する** | `hibernate.generate_statistics: true` |
+| ② Hibernate の統計（`Statistics`） | テストで本数を数えて、固定する | `hibernate.generate_statistics: true` |
 | ③ datasource-proxy などのJDBCプロキシ | Hibernate以外（JdbcClientなど）も含めて数える | 本教材では使いません |
 
 テストでの数え方は、次の10行ほどです。
@@ -162,7 +162,7 @@ Measured<List<PollView>> m = measure(service::listLazy);
 assertThat(m.sqlCount()).isEqualTo(101);
 ```
 
-「**このAPIのSQLは何本まで**」をテストに書いておけば、誰かが `@OneToMany` の周辺を触ったとき、**CIで落ちて気づけます**。性能の劣化を、レビューの目視ではなくテストに任せる方法です。
+「このAPIのSQLは何本まで」をテストに書いておけば、誰かが `@OneToMany` の周辺を触ったとき、CIで落ちて気づけます。性能の劣化を、レビューの目視ではなくテストに任せる方法です。
 
 ## 5. 直し方：4つの取得戦略
 
@@ -175,14 +175,14 @@ assertThat(m.sqlCount()).isEqualTo(101);
 List<Poll> findAllWithOptions();
 ```
 
-`join fetch` は「結合して、**関連も一緒に読み込む**」指示です。
+`join fetch` は「結合して、関連も一緒に読み込む」指示です。
 
 ```text
 [fetch join] Hibernate統計=1本
   select p1_0.id,p1_0.closes_at,o1_0.poll_id,o1_0.id,o1_0.label,p1_0.status,p1_0.title,p1_0.version from polls p1_0 join options o1_0 on p1_0.id=o1_0.poll_id order by p1_0.id
 ```
 
-**1本**になりました。結果は、投票×選択肢の行（300行）を、Hibernate が「投票100件、それぞれに選択肢3件」に組み立て直します。
+1本になりました。結果は投票×選択肢の300行で、Hibernate がこれを「投票100件、それぞれに選択肢3件」に組み立て直します。
 
 ### 5.2 `@EntityGraph`：JPQLを書かずに「一緒に取る」を宣言する
 
@@ -196,10 +196,10 @@ List<Poll> findAllWithGraphByOrderByIdAsc();
   select p1_0.id,p1_0.closes_at,o1_0.poll_id,o1_0.id,o1_0.label,p1_0.status,p1_0.title,p1_0.version from polls p1_0 left join options o1_0 on p1_0.id=o1_0.poll_id order by p1_0.id
 ```
 
-こちらも**1本**です。派生クエリ（メソッド名から作るクエリ）に、あとから「options も取る」を足せるのが利点です。
+こちらも1本です。派生クエリ（メソッド名から作るクエリ）に、あとから「options も取る」を足せるのが利点です。
 
 !!! warning "よくある間違い：fetch join は `join`、`@EntityGraph` は `left join`"
-    上の2つのSQLをよく見ると、fetch join は `join options`（**内部結合**）、`@EntityGraph` は `left join options`（**外部結合**）です。選択肢が0件の投票は、fetch join の結果から**消えます**。「選択肢がまだない投票も一覧に出したい」のなら、`left join fetch` と書くか、`@EntityGraph` を使います。件数が合わない不具合は、この違いが原因になりがちです。
+    上の2つのSQLをよく見ると、fetch join は `join options`（内部結合）、`@EntityGraph` は `left join options`（外部結合）です。選択肢が0件の投票は、fetch join の結果から消えます。「選択肢がまだない投票も一覧に出したい」のなら、`left join fetch` と書くか、`@EntityGraph` を使います。件数が合わない不具合は、この違いが原因になりがちです。
 
 ### 5.3 DTO射影：必要な列だけを、Entityにせず受け取る
 
@@ -222,7 +222,7 @@ public record PollOptionRow(Long pollId, String title, String label) {
   select p1_0.id,p1_0.title,o1_0.label from polls p1_0 join options o1_0 on p1_0.id=o1_0.poll_id order by p1_0.id,o1_0.id
 ```
 
-SQLが**必要な3列だけ**になりました（上の2つは `closes_at`、`status`、`version` まで読んでいます）。Entityを作らないので、**カゴにも入らず、flush の対象にもなりません**。読むだけの画面には、最も軽い方法です。結果の組み立て（投票ごとにまとめる）は、Javaの側で行います。集計もDBにやらせたいなら、こう書けます。
+SQL が必要な3列だけになりました（上の2つは `closes_at`、`status`、`version` まで読んでいます）。Entity を作らないので、カゴにも入らず、flush の対象にもなりません。読むだけの画面には、最も軽い方法です。結果の組み立て（投票ごとにまとめる）は、Java の側で行います。集計も DB にやらせたいなら、こう書けます。
 
 ```text
 [集計DTO] Hibernate統計=1本
@@ -248,18 +248,18 @@ spring:
   select o1_0.poll_id,o1_0.id,o1_0.label from options o1_0 where o1_0.poll_id = any (?)
 ```
 
-101本が **3本**になりました。1 ＋ 100÷50 ＝ 3 です。「投票50件ぶんの選択肢を、1本のSQLでまとめて読む」ようになります。
+101本が3本になりました。1 ＋ 100÷50 ＝ 3 です。投票50件ぶんの選択肢を、1本の SQL でまとめて読むようになります。
 
 ### 5.5 4つの比べ方
 
 | 方法 | 本数（実測） | 向く場面 | 注意点 |
 | --- | --- | --- | --- |
-| fetch join | 1 | 親と子を**Entityとして**使う（更新もする） | 内部結合で0件の親が消える。ページングは件数と挙動の確認が必要（次節） |
+| fetch join | 1 | 親と子を Entity として使う（更新もする） | 内部結合で0件の親が消える。ページングは件数と挙動の確認が必要（次節） |
 | `@EntityGraph` | 1 | 派生クエリにも足したい | 外部結合。複数の関連を同時に取ると行が掛け算で増える |
-| DTO射影 | 1 | **読み取り専用**の一覧・画面・集計 | 更新はできない。DTOを増やす手間がある |
+| DTO射影 | 1 | 読み取り専用の一覧・画面・集計 | 更新はできない。DTOを増やす手間がある |
 | バッチフェッチ | 3 | 既存コードを大きく変えずに減らしたい | 「必要なときに、まとめて」なので本数は読み取り方次第。根治ではなく緩和 |
 
-**迷ったら、読み取り専用ならDTO射影、更新するなら fetch join または `@EntityGraph`、既存の救急処置ならバッチフェッチ**、です。
+迷ったときは、読み取り専用ならDTO射影、更新するなら fetch join または `@EntityGraph`、既存コードの応急処置ならバッチフェッチを選びます。
 
 ## 6. 壊してみる：fetch join とページング
 
@@ -277,13 +277,13 @@ Page<Poll> findPageWithOptions(Pageable pageable);
   select count(p1_0.id) from polls p1_0
 ```
 
-この環境（Hibernate 7.4）では、**親の絞り込みを副問い合わせの中で行う**SQLが作られ、投票10件（行は30行）が返りました。
+この環境（Hibernate 7.4）では、親の絞り込みを副問い合わせの中で行う SQL が作られ、投票10件（行は30行）が返りました。
 
-ただし、ここは**ライブラリの版や書き方によって挙動が変わる場所**です。古い版では「コレクションの fetch join にページングを付けると、全件を読んでからメモリ上で10件に切る（警告ログが出る）」という動きが知られています。この教材の検証中にも、問い合わせの使い方によっては10件に絞られず全件が返る現象を観測しました（`NPlusOneTest` の「壊してみる」テスト）。
+ただし、ここはライブラリの版や書き方によって挙動が変わる場所です。古い版では「コレクションの fetch join にページングを付けると、全件を読んでからメモリ上で10件に切る（警告ログが出る）」という動きが知られています。この教材の検証中にも、問い合わせの使い方によっては10件に絞られず全件が返る現象を観測しました（`NPlusOneTest` の「壊してみる」テスト）。
 
 !!! warning "現場ではこうする：コレクションの fetch join とページングは、2段階に分ける"
-    「たぶん10件になっている」に頼らず、**誰が読んでも結果が明らかな形**にします。
-    先に**親のIDだけ**をページングで取り、そのIDで fetch join する2段階です。SQLは2本で、件数は必ず10件になります。
+    「たぶん10件になっている」に頼らず、誰が読んでも結果が明らかな形にします。
+    先に親のIDだけをページングで取り、そのIDで fetch join する2段階です。SQLは2本で、件数は必ず10件になります。
 
     ```text
     [IDページング→fetch join] Hibernate統計=2本
@@ -291,11 +291,11 @@ Page<Poll> findPageWithOptions(Pageable pageable);
       select p1_0.id,...,o1_0.label,... from polls p1_0 join options o1_0 on p1_0.id=o1_0.poll_id where p1_0.id in (?,?,?,?,?,?,?,?,?,?) order by p1_0.id
     ```
 
-    そして、**ページングの件数とSQLの本数をテストで確かめます**。ライブラリを更新したときに挙動が変わっても、テストが教えてくれます。
+    ページングの件数とSQLの本数は、テストで確かめます。ライブラリを更新して挙動が変わっても、テストが失敗するので気づけます。
 
 ## 7. LazyInitializationException：札を見に行ったら、店が閉まっていた
 
-動画の最後の注意を、再現します。Service が Entity を返し、**トランザクションを抜けた後で**関連に触れます。
+動画の最後の注意を、再現します。Service が Entity を返し、トランザクションを抜けた後で関連に触れます。
 
 ```java title="src/main/java/com/example/jpalab/poll/PollService.java（抜粋）"
 /** トランザクションは、このメソッドを抜けた時点で終わる。返ってくる Poll の options は未取得のまま。 */
@@ -314,13 +314,13 @@ poll.getOptions().size();             // 遅延ロードを発動させる
 [LazyInitializationException] Cannot lazily initialize collection of role 'com.example.jpalab.poll.Poll.options' with key '1' (no session)
 ```
 
-メッセージの `no session` は、**カゴ（永続コンテキスト、Session）がもう閉じている**という意味です。遅延ロードは「カゴが開いている間に、SQLを出す」仕組みなので、カゴが閉じたあとでは出せません。
+メッセージの `no session` は、カゴ（永続コンテキスト、Session）がもう閉じているという意味です。遅延ロードは「カゴが開いている間に、SQLを出す」仕組みなので、カゴが閉じたあとでは出せません。
 
-N+1が「遅い」不具合なら、これは「**落ちる**」不具合です。直し方を、安全な順に並べます。
+N+1が「遅い」不具合なら、これは「落ちる」不具合です。直し方を、安全な順に並べます。
 
 | 直し方 | 安全か | 理由 |
 | --- | --- | --- |
-| **トランザクションの中で必要な形（DTO）まで作って返す** | ◎ | 本章の `findView`。Service の外にEntityを出さない |
+| トランザクションの中で必要な形（DTO）まで作って返す | ◎ | 本章の `findView`。Service の外にEntityを出さない |
 | 必要な関連を fetch join／`@EntityGraph` で読んでおく | ○ | 関連が必要なことが、クエリに明示される |
 | Controller に `@Transactional` を付ける | △ | 動くが、トランザクションが HTTP の入出力まで長くなる（第24章） |
 | `spring.jpa.open-in-view=true` のまま、Controller で遅延ロードする | ✕ | 次節。動いてしまうので、N+1も接続の占有も見えなくなる |
@@ -328,7 +328,7 @@ N+1が「遅い」不具合なら、これは「**落ちる**」不具合です�
 
 ## 8. open-in-view（OSIV）：エラーを消す設定は、接続を握りしめる
 
-直前の `LazyInitializationException` を、**Spring Boot の既定の設定のまま**、Controller で再現してみます。
+直前の `LazyInitializationException` を、Spring Boot の既定の設定のまま、Controller で再現してみます。
 
 ```java title="src/main/java/com/example/jpalab/web/LabController.java（抜粋）"
 @GetMapping("/polls/{id}/option-labels")
@@ -359,20 +359,18 @@ controller: トランザクション中=false, 使用中の接続数=1
 select o1_0.poll_id,o1_0.id,o1_0.label from options o1_0 where o1_0.poll_id=?
 ```
 
-答えは **2**（そして起動時に警告）です。Controller では「トランザクション中=false」なのに、`options` の `SELECT` が**成功しました**。しかも、「使用中の接続数=1」。トランザクションが終わったのに、**DB接続はプールに返されていません**。
+答えは **2**（そして起動時に警告）です。Controller では「トランザクション中=false」なのに、`options` の `SELECT` が成功しました。しかも「使用中の接続数=1」で、トランザクションが終わったのに DB 接続はプールに返されていません。
 
-これが **open-in-view（OSIV）** です。
+これが open-in-view（OSIV）です。
 
 !!! note "用語：open-in-view（OSIV）"
-    リクエストの最初から最後まで（Controller、Viewの描画、JSON化まで）、**EntityManager（カゴ）を開きっぱなしにする**仕組みです。Spring Boot では**既定で有効**（`spring.jpa.open-in-view` が未設定なら `true`）で、そのまま起動すると上の警告ログが出ます。
+    リクエストの最初から最後まで（Controller、View の描画、JSON 化まで）、EntityManager（カゴ）を開きっぱなしにする仕組みです。Spring Boot では既定で有効（`spring.jpa.open-in-view` が未設定なら `true`）で、そのまま起動すると上の警告ログが出ます。
 
-OSIV が有効だと、Service の外でも遅延ロードが動きます。`LazyInitializationException` は出なくなります。しかし、**エラーが消えただけで、問題は消えていません。**
+OSIV が有効だと、Service の外でも遅延ロードが動き、`LazyInitializationException` は出なくなります。しかし、**エラーが消えただけで、問題は消えていません。**
 
 ![open-in-viewがtrueとfalseで、DB接続を持つ時間が違う](../assets/diagrams/ch40-osiv-timeline.svg)
 
-- **接続を握り続ける**：Controller に戻ってからJSON化が終わるまで、プールの接続を1本占有します。遅いJSON化や外部呼び出しが挟まれば、その間ずっと接続が戻らず、**コネクションプールの枯渇**を招きます（第24章の「傘立て」が空になる事故です）
-- **SQLがどこで出るか分からなくなる**：JSON化の最中（`return` のあと）にSQLが出る場合があり、トランザクションの境界とも無関係になります
-- **N+1が隠れる**：Controllerの中で `getOptions()` をループで呼んでも、エラーにならない。気づくきっかけを失います
+まず、Controller に戻ってから JSON 化が終わるまで、プールの接続を1本占有し続けます。遅い JSON 化や外部呼び出しが挟まれば、その間ずっと接続が戻らず、コネクションプールの枯渇を招きます（第24章の「傘立て」が空になる事故です）。次に、JSON 化の最中（`return` のあと）にも SQL が出る場合があり、SQL がどこで出るかがトランザクションの境界と無関係になって分からなくなります。さらに、Controller の中で `getOptions()` をループで呼んでもエラーにならないので、N+1 に気づくきっかけを失います。
 
 では、設定を `false` にするとどうなるでしょう。
 
@@ -380,7 +378,7 @@ OSIV が有効だと、Service の外でも遅延ロードが動きます。`Laz
 [OSIV=false] ServletException ← Cannot lazily initialize collection of role 'com.example.jpalab.poll.Poll.options' with key '1' (no session)
 ```
 
-同じ Controller が `LazyInitializationException` で落ちました。**これが正しい姿**です。開発中に落ちるので、Serviceの中でDTOまで作るよう直せます。DTOを返す版では、Controller に戻った時点の接続数は次のとおりでした。
+同じ Controller が `LazyInitializationException` で落ちました。これが正しい姿です。開発中に落ちるので、Service の中で DTO まで作るよう直せます。DTO を返す版では、Controller に戻った時点の接続数は次のとおりでした。
 
 ```text
 [OSIV=false] controller: トランザクション中=false, 使用中の接続数=0
@@ -389,17 +387,17 @@ OSIV が有効だと、Service の外でも遅延ロードが動きます。`Laz
 | | `open-in-view=true`（既定） | `open-in-view=false` |
 | --- | --- | --- |
 | Controller での遅延ロード | 動く（SQLが出る） | `LazyInitializationException` |
-| トランザクション後の接続 | **握ったまま**（実測 1） | 返す（実測 0） |
+| トランザクション後の接続 | 握ったまま（実測 1） | 返す（実測 0） |
 | 問題に気づく時期 | 本番で負荷が上がってから | 開発中のテスト |
 
 !!! tip "現場では"
-    - **`spring.jpa.open-in-view=false` を、`application.yaml` に明示する**。警告も消え、意図が残る
+    - `spring.jpa.open-in-view=false` を、`application.yaml` に明示する。警告も消え、意図が残る
     - 既存のプロジェクトで `false` にするときは、先にテストを厚くする。Controller や JSON化の中で遅延ロードに頼っている箇所が、まとめて `LazyInitializationException` になる
     - 「エラーが出たから `true` にした」というAIの提案は、そのまま採用しない
 
 ## 9. `@Version`：同時に書き換える2人を、DBに任せずに検出する
 
-第39章で、JPAの `UPDATE` は**全列**を更新する、と見ました。2人の主催者が同じ投票を同時に編集したらどうなるでしょう。
+第39章で、JPA の `UPDATE` は全列を更新すると見ました。2人の主催者が同じ投票を同時に編集したらどうなるでしょう。
 
 ### 9.1 `@Version` がないと、後勝ちで黙って上書きされる
 
@@ -421,7 +419,7 @@ update options set label=?,poll_id=? where id=?
 [versionなし] DBの最終状態: label=Aが付けたラベル（Bの変更は黙って消えた）
 ```
 
-例外は出ません。Bの変更は**黙って消えました**。これを **更新の消失（lost update）** と呼びます（第9章の `counter++` と同じ型の事故が、DBの行で起きています）。
+例外は出ません。Bの変更は黙って消えました。これを更新の消失（lost update）と呼びます（第9章の `counter++` と同じ型の事故が、DBの行で起きています）。
 
 ### 9.2 `@Version` があると、後から保存した側が失敗する
 
@@ -447,12 +445,12 @@ tx.executeWithoutResult(a -> {
 
 （`←` 以降は、読みやすくするための注釈で、実際のログにはありません。）
 
-仕組みは、`UPDATE` の `WHERE` にあります。`where id=? and version=?` の `version` は、**Aが読んだ時点の値（0）**です。Bの保存で DB の version は 1 になっているので、Aの `UPDATE` は **0件**しか更新できません。Hibernate は「期待は1件、実際は0件」を検出して、`ObjectOptimisticLockingFailureException` を投げます。Bの変更は残り、Aの変更は捨てられ（正確には、失敗として知らされ）ました。
+仕組みは `UPDATE` の `WHERE` にあります。`where id=? and version=?` の `version` は、Aが読んだ時点の値（0）です。Bの保存で DB の version は 1 になっているので、Aの `UPDATE` は0件しか更新できません。Hibernate は「期待は1件、実際は0件」を検出して、`ObjectOptimisticLockingFailureException` を投げます。Bの変更は残り、Aの変更は反映されず、失敗として通知されます。
 
 !!! note "用語：楽観ロック（optimistic locking）"
-    「めったに衝突しない」と**楽観**して、読んでいる間はロックを取らず、**書くときに「自分が読んだあとで変わっていないか」を確認する**方式です。変わっていたら失敗させます。対して、読むときに `SELECT ... FOR UPDATE` で行を押さえる方式が**悲観ロック**です（第25章）。
+    「めったに衝突しない」と楽観して、読んでいる間はロックを取らず、書くときに「自分が読んだあとで変わっていないか」を確認する方式です。変わっていたら失敗させます。対して、読むときに `SELECT ... FOR UPDATE` で行を押さえる方式を悲観ロックと呼びます（第25章）。
 
-- 別の列を変えていても（Aはタイトル、Bは締切）、**同じ行なら衝突**します（`OptimisticLockTest` で確認）。version は行単位だからです
+- 別の列を変えていても（Aはタイトル、Bは締切）、同じ行なら衝突します（`OptimisticLockTest` で確認）。version は行単位だからです
 - 編集画面を開いた時点の Entity を保存する（detached を `save()` する）場合でも、同じように検出されます。`merge` で version が比較されるためです
 
 ```text
@@ -461,15 +459,15 @@ tx.executeWithoutResult(a -> {
 
 ### 9.3 HTTP APIでは、どうつなぐか
 
-WebのAPIでは、「編集画面を開いた」と「保存する」が**別のHTTPリクエスト**です。version を画面に持たせて往復させないと、2つ目のリクエストでは version を比べられません。
+Web の API では、「編集画面を開いた」と「保存する」が別の HTTP リクエストです。version を画面に持たせて往復させないと、2つ目のリクエストでは version を比べられません。
 
 | 方式 | 内容 |
 | --- | --- |
 | リクエストに version を含める | レスポンスのDTOに `version` を入れ、更新リクエストで送り返してもらう。Service は、読んだ Entity の version と一致するかを確認する |
 | `ETag` ／ `If-Match` ヘッダー | HTTPの標準の仕組みで、version を表す。不一致なら `412 Precondition Failed` |
-| 例外 → HTTPステータス | `ObjectOptimisticLockingFailureException` を `@RestControllerAdvice`（第14章）で **409 Conflict** に変える。「他の人が先に更新しました。読み込み直してください」 |
+| 例外 → HTTPステータス | `ObjectOptimisticLockingFailureException` を `@RestControllerAdvice`（第14章）で 409 Conflict に変える。「他の人が先に更新しました。読み込み直してください」 |
 
-QuickVote の本線は、**同時更新を悲観ロック（`FOR UPDATE`）と制約で守りました**（第25章・第26章）。`@Version` は、それとは別の守り方です。**どちらを選ぶか**は、第41章で扱います。
+QuickVote の本線は、同時更新を悲観ロック（`FOR UPDATE`）と制約で守りました（第25章・第26章）。`@Version` は、それとは別の守り方です。どちらを選ぶかは、第41章で扱います。
 
 ## 10. 現場では：N+1とLazyを見張る
 
@@ -478,11 +476,11 @@ AIが書いたJPAコードのレビューや、新機能を足したときのチ
 | 見るもの | 疑う理由 |
 | --- | --- |
 | 一覧・検索APIで、Entity の関連（`getXxx()`）を `map` やループの中で呼んでいる | N+1。SQLログで本数を見る |
-| 一覧のテストが、**SQL本数を検査していない** | 劣化に気づけない。`measure` の形で本数を固定する |
+| 一覧のテストが、SQL本数を検査していない | 劣化に気づけない。`measure` の形で本数を固定する |
 | `@OneToMany` の関連を fetch join するのにページングも付けている | 件数・本数を必ずテストで確認する（本章第6節） |
 | `fetch = FetchType.EAGER` | 常に読み込むので、別の画面を遅くする。基本は LAZY に戻す |
-| Controller／JSON化の中で関連に触れている | OSIV で隠れた遅延ロード。`open-in-view=false` で顕在化させる |
-| Entity を更新するのに `@Version` がない | 更新の消失の可能性。同時編集があり得る画面か確認する |
+| Controller／JSON化の中で関連に触れている | OSIV で隠れた遅延ロード。`open-in-view=false` にして表に出す |
+| Entity を更新するのに `@Version` がない | 更新の消失が起きることがある。同時編集がありうる画面か確認する |
 | `ObjectOptimisticLockingFailureException` が処理されず 500 になっている | 409 に変換する |
 | 「本番だけ遅い」「データが増えると遅くなる」という報告 | まずSQLの本数と、1本ごとの時間を見る（第20章の `EXPLAIN`） |
 
@@ -499,7 +497,7 @@ AIが書いたJPAコードのレビューや、新機能を足したときのチ
     → まずSQLログで本数を数える。親の件数に比例して増えていればN+1。関連をfetch joinか`@EntityGraph`で一緒に読むか、読み取り専用ならDTO射影にする。直したら、SQL本数を検査するテストで固定する。
 
     **③ 自分のサービスならどこに当たるか**
-    自分のサービスの「一覧」を3つ挙げ、それぞれの表示項目が**何テーブルにまたがるか**を書く。親100件で、SQLが何本流れるか予測し、実際に数えて答え合わせをする。
+    自分のサービスの「一覧」を3つ挙げ、それぞれの表示項目が何テーブルにまたがるかを書く。親100件で、SQLが何本流れるか予測し、実際に数えて答え合わせをする。
 
 ## 演習
 
@@ -507,14 +505,14 @@ AIが書いたJPAコードのレビューや、新機能を足したときのチ
     投票200件、選択肢は各5件とします。次の3つで、SQLはそれぞれ何本ですか。(a) 遅延ロード任せ (b) `default_batch_fetch_size=50` (c) DTO射影（本章の `findOptionRows`）
 
 ??? success "解答"
-    (a) 1 + 200 ＝ **201本**。(b) 1 + 200 ÷ 50 ＝ **5本**。(c) **1本**（行は 200 × 5 ＝ 1,000行）。
+    (a) 1 + 200 ＝ 201本。(b) 1 + 200 ÷ 50 ＝ 5本。(c) 1本（行は 200 × 5 ＝ 1,000行）。
     本数は同じ1本でも、(c) は行数が掛け算で増える点に注意します。選択肢が1投票100件あれば、20,000行です。DTO射影・fetch join は「本数」と「行数」の両方を見ます。
 
 ??? question "確認問題2：なぜ落ちたか"
     `spring.jpa.open-in-view=false` にしたら、一覧APIで `LazyInitializationException` が出るようになりました。原因はコードのどこにあり、どう直しますか。
 
 ??? success "解答"
-    Service が Entity を返し、Controller（または JSON化）の中で関連（`getOptions()`）に触れているからです。OSIV が `true` の間は、カゴが開きっぱなしだったので動いていただけで、**もともと不適切な書き方**でした。
+    Service が Entity を返し、Controller（または JSON化）の中で関連（`getOptions()`）に触れているからです。OSIV が `true` の間は、カゴが開きっぱなしだったので動いていただけで、もともと不適切な書き方でした。
     直し方は、Service の `@Transactional` の中で DTO（`PollView`）まで作って返す（本章の `findView`）、または必要な関連を fetch join／`@EntityGraph` で読む、です。`open-in-view` を `true` に戻すのは、直し方ではありません。
 
 ??? question "確認問題3：fetch join の落とし穴"
@@ -528,7 +526,7 @@ AIが書いたJPAコードのレビューや、新機能を足したときのチ
 
 ??? success "解答"
     (1) レスポンスのDTOに `version` を入れ、更新リクエストに「読んだときの `version`」を含めます。Service は、読んだ Entity の version と一致するか確認してから更新します（`If-Match` ヘッダーでも可）。
-    (2) `ObjectOptimisticLockingFailureException` を `@RestControllerAdvice` で受け、ProblemDetail（第14章）の **409 Conflict** で「他の人が先に更新しました」と返します。
+    (2) `ObjectOptimisticLockingFailureException` を `@RestControllerAdvice` で受け、ProblemDetail（第14章）の 409 Conflict で「他の人が先に更新しました」と返します。
     (3) 最新の内容を GET し直して、画面に反映し、利用者に再編集してもらいます。自動で再試行してはいけません（人の入力を勝手に上書きしてしまう）。
 
 ??? question "説明問題：現場でこう聞かれる"
