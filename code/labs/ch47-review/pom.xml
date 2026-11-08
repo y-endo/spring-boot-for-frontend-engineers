@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- 第47章のレビュー演習。3つの独立したプロジェクトをまとめて動かすための親（集約）POM。
+	     各モジュールは spring-boot-starter-parent を直接の親にしている。 -->
+	<groupId>com.example</groupId>
+	<artifactId>ch47-review</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>ch47-review</name>
+
+	<modules>
+		<module>review1-transaction</module>
+		<module>review2-boundary</module>
+		<module>review3-api-sse</module>
+	</modules>
+</project>

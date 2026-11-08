@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: metrics-lab
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    distribution:
+      # 「バケット」付きで出力すると、監視システム側で p95/p99 を計算できる
+      percentiles-histogram:
+        http.server.requests: true

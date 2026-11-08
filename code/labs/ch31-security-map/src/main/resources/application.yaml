@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: securitymap
+server:
+  port: 18031
+logging:
+  level:
+    # 起動時に「このチェーンに入っているフィルタの一覧」が出る
+    org.springframework.security.web.DefaultSecurityFilterChain: DEBUG
+    # リクエストごとに「どのチェーンで守るか」が出る
+    org.springframework.security.web.FilterChainProxy: DEBUG

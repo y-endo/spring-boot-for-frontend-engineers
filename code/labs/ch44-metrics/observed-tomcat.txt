@@ -1,0 +1,6 @@
+# SERVER_TOMCAT_MBEANREGISTRY_ENABLED=true で QuickVote を起動すると、tomcat.* が出る
+tomcat.threads.busy        0
+tomcat.threads.current     10
+tomcat.threads.config.max  200
+tomcat.connections.current 1
+tomcat.connections.config.max 8192

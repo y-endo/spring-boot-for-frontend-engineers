@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 470" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">複合インデックスの列順</title>
+  <desc id="d">インデックスは先頭の列で並んだ名簿。poll_id, visitor_id の順なら、poll_id が同じ行は隣り合って並ぶので、poll_id だけの検索も、両方を指定した検索も速い。visitor_id, poll_id の順では、poll_id が同じ行があちこちに散らばるので、poll_id だけの検索には使えない。</desc>
+
+  <text x="20" y="30" font-size="16" font-weight="700" fill="#7a8099">複合インデックス ＝ 「先頭の列 → 次の列」の順に並べた名簿（電話帳の「姓 → 名」と同じ）</text>
+
+  <!-- 左: (poll_id, visitor_id) -->
+  <text x="20" y="66" font-size="15" font-weight="700" fill="#14b8a6">① (poll_id, visitor_id) の順</text>
+  <g font-size="14" fill="#7a8099">
+    <rect x="20" y="80" width="400" height="26" fill="#7a809922"/>
+    <text x="36" y="98" font-weight="700">poll_id</text><text x="150" y="98" font-weight="700">visitor_id</text>
+    <rect x="20" y="106" width="400" height="26" fill="#14b8a633"/>
+    <text x="36" y="124">100</text><text x="150" y="124">1000100</text>
+    <rect x="20" y="132" width="400" height="26" fill="#14b8a633"/>
+    <text x="36" y="150">100</text><text x="150" y="150">1301</text>
+    <rect x="20" y="158" width="400" height="26" fill="#14b8a633"/>
+    <text x="36" y="176">100</text><text x="150" y="176">4872</text>
+    <text x="36" y="202">101</text><text x="150" y="202">500</text>
+    <text x="36" y="228">101</text><text x="150" y="228">1000101</text>
+    <text x="36" y="254">102</text><text x="150" y="254">500</text>
+  </g>
+  <text x="440" y="150" font-size="14" fill="#14b8a6" font-weight="700">← poll_id = 100 は連続している</text>
+  <text x="440" y="172" font-size="14" fill="#7a8099">先頭の位置を二分探索で見つけ、</text>
+  <text x="440" y="192" font-size="14" fill="#7a8099">あとは隣を読むだけ</text>
+
+  <!-- 右下: (visitor_id, poll_id) -->
+  <text x="20" y="300" font-size="15" font-weight="700" fill="#ff6d3a">② (visitor_id, poll_id) の順</text>
+  <g font-size="14" fill="#7a8099">
+    <rect x="20" y="314" width="400" height="26" fill="#7a809922"/>
+    <text x="36" y="332" font-weight="700">visitor_id</text><text x="150" y="332" font-weight="700">poll_id</text>
+    <rect x="20" y="340" width="400" height="26" fill="#ff6d3a33"/>
+    <text x="36" y="358">500</text><text x="150" y="358">101</text>
+    <text x="36" y="384">500</text><text x="150" y="384">102</text>
+    <rect x="20" y="392" width="400" height="26" fill="#ff6d3a33"/>
+    <text x="36" y="410">1301</text><text x="150" y="410">100</text>
+    <text x="36" y="436">4872</text><text x="150" y="436">100</text>
+    <text x="36" y="458">…</text>
+  </g>
+  <text x="440" y="378" font-size="14" fill="#ff6d3a" font-weight="700">← poll_id = 100 の行が、あちこちに散らばる</text>
+  <text x="440" y="400" font-size="14" fill="#7a8099">poll_id だけの検索では、名簿を端から全部読むことになる</text>
+  <text x="440" y="420" font-size="14" fill="#7a8099">（visitor_id だけの検索なら、こちらが速い）</text>
+</svg>

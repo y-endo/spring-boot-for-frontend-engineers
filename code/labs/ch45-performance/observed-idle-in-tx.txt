@@ -1,0 +1,13 @@
+SET
+BEGIN
+ id 
+----
+ 12
+(1 row)
+
+ロックを取った。ここから 6 秒、何もしない
+FATAL:  terminating connection due to idle-in-transaction timeout
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+connection to server was lost

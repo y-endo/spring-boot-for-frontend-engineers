@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuickVote</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header>
+    <h1>QuickVote</h1>
+    <p>会員登録なしで、その場で決める投票</p>
+  </header>
+
+  <main>
+    <p id="message" role="status" hidden></p>
+
+    <!-- ホーム: 作成・参加・最近の投票 -->
+    <section id="home">
+      <div class="card">
+        <h2>投票を作る</h2>
+        <form id="create-form">
+          <!-- 文字数は maxlength では制限しない（maxlength は UTF-16 の単位で数えるため、絵文字は1文字で2と数えられ、
+               サーバーが許す100文字まで入力できない）。app.js がコードポイント数で検証する。 -->
+          <label>タイトル（100文字まで）
+            <input name="title" required autocomplete="off">
+          </label>
+          <label>締切（今から何分後か。5分〜7日=10080分、整数）
+            <input name="minutes" type="number" min="5" max="10080" step="1" value="30" required>
+          </label>
+          <label>選択肢（1行に1つ。10個まで。あとから追加もできます）
+            <textarea name="options" rows="4"></textarea>
+          </label>
+          <label class="inline">
+            <input name="allowMemberOptions" type="checkbox"> 参加者も選択肢を追加できる
+          </label>
+          <button type="submit">作成する</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>参加コードで参加</h2>
+        <form id="join-form">
+          <label>参加コード（8文字）
+            <input name="code" required maxlength="16" autocomplete="off" class="code-input">
+          </label>
+          <button type="submit">参加する</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>このブラウザで開いた投票</h2>
+        <ul id="recent" class="plain"></ul>
+        <p class="hint">Cookie を消すと参加者としての権限も失われます（仕様です）。</p>
+      </div>
+    </section>
+
+    <!-- 招待リンクを開いたとき -->
+    <section id="invite" class="card" hidden>
+      <h2>共同主催者への招待</h2>
+      <p>この招待を受けると、投票の共同主催者になります。招待は一度しか使えません。</p>
+      <button id="accept-btn" type="button">招待を受ける</button>
+    </section>
+
+    <!-- 投票の画面 -->
+    <section id="poll" hidden>
+      <button id="back-btn" type="button" class="link">← 戻る</button>
+      <div class="card">
+        <h2 id="poll-title"></h2>
+        <p id="poll-meta" class="hint"></p>
+        <p id="host-row" hidden>
+          参加コード: <strong id="join-code" class="code"></strong>
+          <button id="invite-btn" type="button">共同主催者の招待リンクを発行</button>
+        </p>
+        <p id="invite-result" hidden>
+          <input id="invite-link" readonly aria-label="招待リンク">
+          <span class="hint">24時間有効・一度限り</span>
+        </p>
+
+        <ul id="options" class="plain"></ul>
+
+        <form id="option-form">
+          <input name="label" placeholder="選択肢を追加（100文字まで）" autocomplete="off" required>
+          <button type="submit">追加</button>
+        </form>
+
+        <p id="host-actions" hidden>
+          <button id="close-btn" type="button">締め切る</button>
+          <button id="delete-btn" type="button" class="danger">投票を削除</button>
+        </p>
+        <p id="conn-status" class="hint"></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+=== 実験1: SSE が1本つながっている
+SSE 受信済み: 23 byte
+docker stop にかかった時間: 1272 ms  終了コード: 143
+00:05:28.370 INFO Commencing graceful shutdown. Waiting for active requests to complete
+00:05:28.374 INFO Graceful shutdown complete
+00:05:28.375 INFO Commencing graceful shutdown. Waiting for active requests to complete
+00:05:28.376 INFO Graceful shutdown complete
+00:05:28.389 INFO HikariPool-1 - Shutdown initiated...
+00:05:28.392 INFO HikariPool-1 - Shutdown completed.
+=== 実験2: 処理中のリクエスト（ロック待ちの参加）があるときの停止
+(+3s) docker stop を実行。ロックはあと約10秒で解放される
+�i�s���������Q�����N�G�X�g�̌���: HTTP 200�i11.104672�b�j
+docker stop にかかった時間: 9456 ms  終了コード: 143
+00:05:28.370 INFO Commencing graceful shutdown. Waiting for active requests to complete
+00:05:28.374 INFO Graceful shutdown complete
+00:05:28.375 INFO Commencing graceful shutdown. Waiting for active requests to complete
+00:05:28.376 INFO Graceful shutdown complete
+00:05:40.109 INFO Commencing graceful shutdown. Waiting for active requests to complete
+00:05:48.896 INFO Graceful shutdown complete
+00:05:48.897 INFO Commencing graceful shutdown. Waiting for active requests to complete
+00:05:48.898 INFO Graceful shutdown complete

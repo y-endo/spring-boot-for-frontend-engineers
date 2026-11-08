@@ -1,0 +1,56 @@
+=== 悪い例 ===
+08:35:30.159 [main] ERROR demo.Repository -- 保存に失敗しました
+java.lang.IllegalStateException: DBに届きません
+	at LogOnceDemo.badRepository(LogOnceDemo.java:17)
+	at LogOnceDemo.badService(LogOnceDemo.java:26)
+	at LogOnceDemo.badController(LogOnceDemo.java:35)
+	at LogOnceDemo.main(LogOnceDemo.java:54)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.execute(SourceLauncher.java:258)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.run(SourceLauncher.java:138)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.main(SourceLauncher.java:76)
+08:35:30.162 [main] ERROR demo.Service -- 投票の処理に失敗しました
+java.lang.IllegalStateException: DBに届きません
+	at LogOnceDemo.badRepository(LogOnceDemo.java:17)
+	at LogOnceDemo.badService(LogOnceDemo.java:26)
+	at LogOnceDemo.badController(LogOnceDemo.java:35)
+	at LogOnceDemo.main(LogOnceDemo.java:54)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.execute(SourceLauncher.java:258)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.run(SourceLauncher.java:138)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.main(SourceLauncher.java:76)
+08:35:30.162 [main] ERROR demo.Controller -- APIが失敗しました
+java.lang.IllegalStateException: DBに届きません
+	at LogOnceDemo.badRepository(LogOnceDemo.java:17)
+	at LogOnceDemo.badService(LogOnceDemo.java:26)
+	at LogOnceDemo.badController(LogOnceDemo.java:35)
+	at LogOnceDemo.main(LogOnceDemo.java:54)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.execute(SourceLauncher.java:258)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.run(SourceLauncher.java:138)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.main(SourceLauncher.java:76)
+08:35:30.162 [main] ERROR demo.Controller -- 想定外のエラーが発生しました
+java.lang.IllegalStateException: DBに届きません
+	at LogOnceDemo.badRepository(LogOnceDemo.java:17)
+	at LogOnceDemo.badService(LogOnceDemo.java:26)
+	at LogOnceDemo.badController(LogOnceDemo.java:35)
+	at LogOnceDemo.main(LogOnceDemo.java:54)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.execute(SourceLauncher.java:258)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.run(SourceLauncher.java:138)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.main(SourceLauncher.java:76)
+=== 良い例 ===
+08:35:30.162 [main] ERROR demo.Controller -- 想定外のエラーが発生しました
+java.lang.IllegalStateException: DBに届きません
+	at LogOnceDemo.goodRepository(LogOnceDemo.java:44)
+	at LogOnceDemo.goodService(LogOnceDemo.java:48)
+	at LogOnceDemo.main(LogOnceDemo.java:61)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.execute(SourceLauncher.java:258)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.run(SourceLauncher.java:138)
+	at jdk.compiler/com.sun.tools.javac.launcher.SourceLauncher.main(SourceLauncher.java:76)

@@ -1,0 +1,14 @@
+spring:
+  sql:
+    init:
+      mode: always            # schema.sql を起動時に流す（演習用。本番はFlyway）
+  datasource:
+    hikari:
+      maximum-pool-size: 30   # 20スレッドの同時実行で、プール待ちが競合の再現を邪魔しないように
+logging:
+  level:
+    org.springframework: WARN
+    com.zaxxer: WARN
+    org.testcontainers: WARN
+    tc: WARN
+    com.github.dockerjava: WARN

@@ -1,0 +1,15 @@
+# 第25章: 数える前に、投票(polls)の行をロックする。Cは第三者として、Bが待っている様子を覗く。
+A> BEGIN;
+B> BEGIN;
+A> SELECT id FROM polls WHERE id = 1 FOR UPDATE;
+B> -- Bも鍵を取りに行く → Aが終わるまで待たされる
+B> SELECT id FROM polls WHERE id = 1 FOR UPDATE;
+C> SELECT state, wait_event_type, wait_event, left(query, 36) AS query FROM pg_stat_activity WHERE application_name = 'psql' AND pid <> pg_backend_pid() ORDER BY backend_start;
+A> SELECT count(*) FROM participants WHERE poll_id = 1;
+A> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 50, 'MEMBER', now());
+wait 1500
+A> COMMIT;
+B> -- 鍵が開いた。数え直す
+B> SELECT count(*) FROM participants WHERE poll_id = 1;
+B> -- 50人 → 満員。ロールバックして断る
+B> ROLLBACK;

@@ -1,0 +1,54 @@
+
+
+  █ THRESHOLDS 
+
+    http_req_duration{kind:detail}
+    ✓ 'p(95)<300' p(95)=132.89ms
+    ✓ 'p(99)<800' p(99)=214.12ms
+
+    http_req_duration{kind:vote}
+    ✗ 'p(95)<300' p(95)=733.38ms
+    ✗ 'p(99)<800' p(99)=1.43s
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 9412    310.301607/s
+    checks_succeeded...: 100.00% 9412 out of 9412
+    checks_failed......: 0.00%   0 out of 9412
+
+    ✓ 投票を作れた
+    ✓ 参加できた
+    ✓ 投票できた
+    ✓ 詳細を取得できた
+
+    HTTP
+    http_req_duration..............: avg=155.65ms med=79.36ms  p(90)=362.85ms p(95)=561.04ms p(99)=1.13s    max=2.91s   
+      { expected_response:true }...: avg=155.65ms med=79.36ms  p(90)=362.85ms p(95)=561.04ms p(99)=1.13s    max=2.91s   
+      { kind:detail }..............: avg=65.73ms  med=55.36ms  p(90)=105.73ms p(95)=132.89ms p(99)=214.12ms max=787.14ms
+      { kind:vote }................: avg=240.01ms med=141.27ms p(90)=532.21ms p(95)=733.38ms p(99)=1.43s    max=2.91s   
+    http_req_failed................: 0.00%  0 out of 9462
+    http_reqs......................: 9462   311.950043/s
+
+    EXECUTION
+    iteration_duration.............: avg=311.73ms med=211.57ms p(90)=629.07ms p(95)=865.35ms p(99)=1.58s    max=2.99s   
+    iterations.....................: 4730   155.942053/s
+    vus............................: 49     min=49        max=49
+    vus_max........................: 49     min=49        max=49
+
+    NETWORK
+    data_received..................: 6.5 MB 215 kB/s
+    data_sent......................: 2.7 MB 89 kB/s
+
+
+
+time="2026-11-07T23:57:59Z" level=error msg="thresholds on metrics 'http_req_duration{kind:vote}' have been crossed"
+sample +1x5s  hikari active=30 pending=18  app cpu=186.78%
+sample +2x5s  hikari active=30 pending=20  app cpu=104.12%
+sample +3x5s  hikari active=30 pending=19  app cpu=77.81%
+sample +4x5s  hikari active=30 pending=20  app cpu=100.33%
+sample +5x5s  hikari active=1 pending=0  app cpu=0.11%
+sample +6x5s  hikari active=1 pending=0  app cpu=0.07%

@@ -1,0 +1,153 @@
+=== 1. 注入されているのは本物か、プロキシか ===
+  クラス名       : com.example.lab.ch23.SelfCallService$$SpringCGLIB$$0
+  AOPプロキシ?   : true
+  CGLIBプロキシ? : true
+  本体のクラス   : com.example.lab.ch23.SelfCallService
+
+=== 2. 外から inner() を呼ぶ（プロキシを通る） ===
+  [tx] Creating new transaction with name [com.example.lab.ch23.SelfCallService.inner]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+  [tx] Acquired Connection [HikariProxyConnection@1894638973 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@1894638973 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  [tx] Initiating transaction commit
+  [tx] Committing JDBC transaction on Connection [HikariProxyConnection@1894638973 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@1894638973 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  tx=true name=com.example.lab.ch23.SelfCallService.inner readOnly=false
+
+=== 3. 同じクラスの outer() から this.inner() を呼ぶ（自己呼び出し） ===
+  tx=false
+
+=== 4. private メソッドに付けた @Transactional ===
+  tx=false
+
+=== 5. checked 例外 (IOException) を投げる ===
+  [tx] Creating new transaction with name [com.example.lab.ch23.CheckedExceptionService.failWithChecked]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+  [tx] Acquired Connection [HikariProxyConnection@2053481312 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@2053481312 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  [tx] Initiating transaction commit
+  [tx] Committing JDBC transaction on Connection [HikariProxyConnection@2053481312 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@2053481312 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  例外: 外部との通信に失敗した（checked例外）
+  [checked例外の後（polls に1行残るか）] polls=1 participants=0
+  [tx] Creating new transaction with name [com.example.lab.ch23.CheckedExceptionService.failWithCheckedRollbackFor]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,-java.lang.Exception
+  [tx] Acquired Connection [HikariProxyConnection@1594424832 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@1594424832 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  [tx] Initiating transaction rollback
+  [tx] Rolling back JDBC transaction on Connection [HikariProxyConnection@1594424832 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@1594424832 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  例外: 外部との通信に失敗した（checked例外）
+  [rollbackFor=Exception.class の後（増えないか）] polls=1 participants=0
+
+=== 6. 例外の握りつぶし（アプリの失敗） ===
+  [tx] Creating new transaction with name [com.example.lab.ch23.SwallowService.swallowAppFailure]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+  [tx] Acquired Connection [HikariProxyConnection@438432831 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@438432831 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  catch して続行: riskyStep が失敗
+  [tx] Initiating transaction commit
+  [tx] Committing JDBC transaction on Connection [HikariProxyConnection@438432831 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@438432831 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  [握りつぶした後（poll だけ残るか）] polls=2 participants=0
+
+=== 6b. 例外の握りつぶし（DBのエラー） ===
+  [tx] Creating new transaction with name [com.example.lab.ch23.SwallowService.swallowDbFailure]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+  [tx] Acquired Connection [HikariProxyConnection@90050962 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@90050962 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  catch して続行: DataIntegrityViolationException
+  [tx] Initiating transaction commit
+  [tx] Committing JDBC transaction on Connection [HikariProxyConnection@90050962 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@90050962 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  [DBエラーを握りつぶした後] polls=2 participants=0
+
+=== 7. REQUIRED: 外側が失敗。内側の監査ログも一緒に消える ===
+  [tx] Creating new transaction with name [com.example.lab.ch23.OuterService.businessThenFailWithRequired]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+  [tx] Acquired Connection [HikariProxyConnection@1262573693 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@1262573693 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  外側: pid=749 tx=true name=com.example.lab.ch23.OuterService.businessThenFailWithRequired readOnly=false
+  [tx] Participating in existing transaction
+  内側: audit(REQUIRED) pid=749 tx=true name=com.example.lab.ch23.OuterService.businessThenFailWithRequired readOnly=false
+  [tx] Initiating transaction rollback
+  [tx] Rolling back JDBC transaction on Connection [HikariProxyConnection@1262573693 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@1262573693 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  例外: 業務が失敗
+  lab_audit=0
+
+=== 8. REQUIRES_NEW: 外側が失敗しても、監査ログは残る ===
+  [tx] Creating new transaction with name [com.example.lab.ch23.OuterService.businessThenFailWithRequiresNew]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+  [tx] Acquired Connection [HikariProxyConnection@674840194 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@674840194 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  外側: pid=749 tx=true name=com.example.lab.ch23.OuterService.businessThenFailWithRequiresNew readOnly=false
+  [tx] Suspending current transaction, creating new transaction with name [com.example.lab.ch23.AuditService.recordRequiresNew]
+  [tx] Acquired Connection [HikariProxyConnection@2096511898 wrapping org.postgresql.jdbc.PgConnection@4776e209] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@2096511898 wrapping org.postgresql.jdbc.PgConnection@4776e209] to manual commit
+  [tx] Initiating transaction commit
+  [tx] Committing JDBC transaction on Connection [HikariProxyConnection@2096511898 wrapping org.postgresql.jdbc.PgConnection@4776e209]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@2096511898 wrapping org.postgresql.jdbc.PgConnection@4776e209] after transaction
+  [tx] Resuming suspended transaction after completion of inner transaction
+  内側: audit(REQUIRES_NEW) pid=750 tx=true name=com.example.lab.ch23.AuditService.recordRequiresNew readOnly=false
+  [tx] Initiating transaction rollback
+  [tx] Rolling back JDBC transaction on Connection [HikariProxyConnection@674840194 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@674840194 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  例外: 業務が失敗
+  lab_audit=1
+  [REQUIRES_NEW の後] polls=2 participants=0
+
+=== 9. 内側(REQUIRED)の失敗を外側が catch する ===
+  [tx] Creating new transaction with name [com.example.lab.ch23.OuterService.catchInnerRequired]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+  [tx] Acquired Connection [HikariProxyConnection@1379186202 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@1379186202 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  [tx] Participating in existing transaction
+  [tx] Participating transaction failed - marking existing transaction as rollback-only
+  [tx] Setting JDBC transaction [HikariProxyConnection@1379186202 wrapping org.postgresql.jdbc.PgConnection@61f377d1] rollback-only
+  外側が catch して続行: 内側(REQUIRED)で失敗
+  [tx] Global transaction is marked as rollback-only but transactional code requested commit
+  [tx] Initiating transaction rollback
+  [tx] Rolling back JDBC transaction on Connection [HikariProxyConnection@1379186202 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@1379186202 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  呼び出し元に届いた例外: org.springframework.transaction.UnexpectedRollbackException
+    Transaction rolled back because it has been marked as rollback-only
+  [内側REQUIREDが失敗した後] polls=2 participants=0
+
+=== 10. 内側(REQUIRES_NEW)の失敗を外側が catch する ===
+  [tx] Creating new transaction with name [com.example.lab.ch23.OuterService.catchInnerRequiresNew]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+  [tx] Acquired Connection [HikariProxyConnection@382788897 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@382788897 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  [tx] Suspending current transaction, creating new transaction with name [com.example.lab.ch23.AuditService.failRequiresNew]
+  [tx] Acquired Connection [HikariProxyConnection@1665967079 wrapping org.postgresql.jdbc.PgConnection@4776e209] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@1665967079 wrapping org.postgresql.jdbc.PgConnection@4776e209] to manual commit
+  [tx] Initiating transaction rollback
+  [tx] Rolling back JDBC transaction on Connection [HikariProxyConnection@1665967079 wrapping org.postgresql.jdbc.PgConnection@4776e209]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@1665967079 wrapping org.postgresql.jdbc.PgConnection@4776e209] after transaction
+  [tx] Resuming suspended transaction after completion of inner transaction
+  外側が catch して続行: 内側(REQUIRES_NEW)で失敗
+  [tx] Initiating transaction commit
+  [tx] Committing JDBC transaction on Connection [HikariProxyConnection@382788897 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@382788897 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  [内側REQUIRES_NEWが失敗した後（外側の INSERT は残るか）] polls=3 participants=0
+
+=== 11. readOnly = true ===
+  [tx] Creating new transaction with name [com.example.lab.ch23.ReadOnlyService.read]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+  [tx] Acquired Connection [HikariProxyConnection@179612254 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@179612254 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  [tx] Initiating transaction commit
+  [tx] Committing JDBC transaction on Connection [HikariProxyConnection@179612254 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@179612254 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  tx=true name=com.example.lab.ch23.ReadOnlyService.read readOnly=true participants=0
+  [tx] Creating new transaction with name [com.example.lab.ch23.ReadOnlyService.writeInReadOnly]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+  [tx] Acquired Connection [HikariProxyConnection@493519750 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@493519750 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  [tx] Initiating transaction rollback
+  [tx] Rolling back JDBC transaction on Connection [HikariProxyConnection@493519750 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@493519750 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  例外: org.springframework.jdbc.UncategorizedSQLException
+    原因: ERROR: cannot execute INSERT in a read-only transaction
+
+=== 12. 別のスレッドで動かした処理は、トランザクションに入らない ===
+  [tx] Creating new transaction with name [com.example.lab.ch23.ThreadService.insertInAnotherThread]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+  [tx] Acquired Connection [HikariProxyConnection@311765759 wrapping org.postgresql.jdbc.PgConnection@61f377d1] for JDBC transaction
+  [tx] Switching JDBC Connection [HikariProxyConnection@311765759 wrapping org.postgresql.jdbc.PgConnection@61f377d1] to manual commit
+  元のスレッド  : main pid=749 tx=true name=com.example.lab.ch23.ThreadService.insertInAnotherThread readOnly=false
+  別のスレッド  : ForkJoinPool.commonPool-worker-1 pid=750 tx=false
+  [tx] Initiating transaction rollback
+  [tx] Rolling back JDBC transaction on Connection [HikariProxyConnection@311765759 wrapping org.postgresql.jdbc.PgConnection@61f377d1]
+  [tx] Releasing JDBC Connection [HikariProxyConnection@311765759 wrapping org.postgresql.jdbc.PgConnection@61f377d1] after transaction
+  例外: 元のスレッドが失敗 → ロールバック
+  [スレッド実験の後] polls=4 participants=0

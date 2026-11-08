@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">2台構成での購読者名簿とLISTEN/NOTIFYによる橋渡し</title>
+  <desc id="d">ブラウザBは app1 にSSEでつながり、ブラウザAは app2 に投票を送る。各アプリは購読者名簿をメモリに持つので、app2 の名簿に載っているのはブラウザAだけ。app2 はトランザクションの中でイベント履歴の保存とpg_notifyを行い、PostgreSQLはコミット時に、LISTENしている全インスタンスへ通知する。app1 は通知を受けて履歴を読み直し、ブラウザBに送る。</desc>
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+    <marker id="arO" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6d3a"/>
+    </marker>
+    <marker id="arT" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#14b8a6"/>
+    </marker>
+  </defs>
+
+  <!-- ブラウザ -->
+  <g font-size="14" text-anchor="middle" fill="#7a8099">
+    <rect x="30" y="40" width="170" height="64" rx="8" fill="none" stroke="#7a8099" stroke-width="2"/>
+    <text x="115" y="66" font-weight="700">ブラウザ B（bob）</text>
+    <text x="115" y="88">SSEで聞いている</text>
+    <rect x="760" y="40" width="170" height="64" rx="8" fill="none" stroke="#7a8099" stroke-width="2"/>
+    <text x="845" y="66" font-weight="700">ブラウザ A（alice）</text>
+    <text x="845" y="88">投票ボタンを押す</text>
+  </g>
+
+  <!-- アプリ -->
+  <rect x="30" y="190" width="300" height="150" rx="10" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="180" y="216" font-size="16" font-weight="700" text-anchor="middle" fill="#7a8099">app1（JVM）</text>
+  <rect x="50" y="232" width="260" height="42" rx="6" fill="none" stroke="#7a8099"/>
+  <text x="180" y="258" font-size="14" text-anchor="middle" fill="#7a8099">購読者名簿（メモリ）: { bob }</text>
+  <rect x="50" y="284" width="260" height="42" rx="6" fill="none" stroke="#7a8099"/>
+  <text x="180" y="310" font-size="14" text-anchor="middle" fill="#7a8099">LISTEN 専用スレッド・専用接続</text>
+
+  <rect x="630" y="190" width="300" height="150" rx="10" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="780" y="216" font-size="16" font-weight="700" text-anchor="middle" fill="#7a8099">app2（JVM）</text>
+  <rect x="650" y="232" width="260" height="42" rx="6" fill="none" stroke="#7a8099"/>
+  <text x="780" y="258" font-size="14" text-anchor="middle" fill="#7a8099">購読者名簿（メモリ）: { alice }</text>
+  <rect x="650" y="284" width="260" height="42" rx="6" fill="none" stroke="#7a8099"/>
+  <text x="780" y="310" font-size="14" text-anchor="middle" fill="#7a8099">LISTEN 専用スレッド・専用接続</text>
+
+  <!-- DB -->
+  <rect x="280" y="420" width="400" height="96" rx="10" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="480" y="448" font-size="16" font-weight="700" text-anchor="middle" fill="#7a8099">PostgreSQL</text>
+  <text x="480" y="474" font-size="14" text-anchor="middle" fill="#7a8099">poll_events（履歴）／ polls.last_event_seq</text>
+  <text x="480" y="498" font-size="14" text-anchor="middle" fill="#7a8099">COMMIT のとき、LISTEN 中の全接続へ NOTIFY を配送</text>
+
+  <!-- 矢印 -->
+  <path d="M115,190 L115,108" stroke="#7a8099" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <text x="125" y="156" font-size="14" fill="#7a8099">⑤ 新しいイベントを送る</text>
+  <path d="M845,108 L845,190" stroke="#7a8099" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <text x="835" y="156" font-size="14" text-anchor="end" fill="#7a8099">① PUT /my-vote</text>
+  <path d="M700,340 C700,380 600,400 560,420" stroke="#ff6d3a" stroke-width="2.5" fill="none" marker-end="url(#arO)"/>
+  <text x="716" y="384" font-size="14" fill="#7a8099">② 同じ TX で履歴 INSERT</text>
+  <text x="716" y="402" font-size="14" fill="#7a8099">　 ＋ pg_notify → COMMIT</text>
+  <path d="M400,420 C330,400 220,380 200,330" stroke="#14b8a6" stroke-width="2.5" fill="none" marker-end="url(#arT)"/>
+  <text x="40" y="384" font-size="14" fill="#7a8099">③ NOTIFY が届く</text>
+  <text x="40" y="402" font-size="14" fill="#7a8099">④ 履歴を読み直す</text>
+  <path d="M560,420 C650,390 740,380 770,330" stroke="#14b8a6" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#arT)"/>
+  <text x="520" y="372" font-size="14" fill="#7a8099">自分のインスタンスにも届く</text>
+
+  <text x="350" y="150" font-size="14" fill="#7a8099">メモリだけで配信すると、</text>
+  <text x="350" y="170" font-size="14" fill="#7a8099">③④が無く、app1 の bob は知らない</text>
+</svg>

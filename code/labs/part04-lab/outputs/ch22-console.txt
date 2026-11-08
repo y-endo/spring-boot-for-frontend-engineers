@@ -1,0 +1,22 @@
+[開始前] polls=0 participants=0
+=== @Transactional なし: 2本のINSERTの間で例外 ===
+例外: 2本のINSERTの間で失敗した
+[なしで失敗した後] polls=1 participants=0
+=== @Transactional あり: 2本のINSERTの間で例外 ===
+Creating new transaction with name [com.example.lab.ch22.PollCreator.createWithTx]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+Acquired Connection [HikariProxyConnection@2145961947 wrapping org.postgresql.jdbc.PgConnection@541afb85] for JDBC transaction
+Switching JDBC Connection [HikariProxyConnection@2145961947 wrapping org.postgresql.jdbc.PgConnection@541afb85] to manual commit
+Initiating transaction rollback
+Rolling back JDBC transaction on Connection [HikariProxyConnection@2145961947 wrapping org.postgresql.jdbc.PgConnection@541afb85]
+Releasing JDBC Connection [HikariProxyConnection@2145961947 wrapping org.postgresql.jdbc.PgConnection@541afb85] after transaction
+例外: 2本のINSERTの間で失敗した
+[ありで失敗した後] polls=1 participants=0
+=== @Transactional あり: 例外なし ===
+Creating new transaction with name [com.example.lab.ch22.PollCreator.createWithTx]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+Acquired Connection [HikariProxyConnection@1036420486 wrapping org.postgresql.jdbc.PgConnection@541afb85] for JDBC transaction
+Switching JDBC Connection [HikariProxyConnection@1036420486 wrapping org.postgresql.jdbc.PgConnection@541afb85] to manual commit
+Initiating transaction commit
+Committing JDBC transaction on Connection [HikariProxyConnection@1036420486 wrapping org.postgresql.jdbc.PgConnection@541afb85]
+Releasing JDBC Connection [HikariProxyConnection@1036420486 wrapping org.postgresql.jdbc.PgConnection@541afb85] after transaction
+作成できた poll id = 3
+[成功した後] polls=2 participants=1

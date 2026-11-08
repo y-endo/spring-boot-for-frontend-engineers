@@ -1,0 +1,12 @@
+# 第26章: デッドロック。AはB投票→A投票の順、Bは逆の順にロックする。
+A> BEGIN;
+B> BEGIN;
+A> SELECT id FROM polls WHERE id = 1 FOR UPDATE;
+B> SELECT id FROM polls WHERE id = 2 FOR UPDATE;
+A> -- Aは2番を欲しがる(Bが持っている)
+A> SELECT id FROM polls WHERE id = 2 FOR UPDATE;
+B> -- Bは1番を欲しがる(Aが持っている) → 互いに待つ
+B> SELECT id FROM polls WHERE id = 1 FOR UPDATE;
+wait 2500
+A> ROLLBACK;
+B> ROLLBACK;

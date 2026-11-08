@@ -1,0 +1,15 @@
+hikaricp.connections.active [-] VALUE=0
+hikaricp.connections.idle [-] VALUE=10
+hikaricp.connections.max [-] VALUE=10
+hikaricp.connections.pending [-] VALUE=0
+hikaricp.connections.timeout [-] COUNT=0
+jvm.memory.used [bytes] VALUE=3.07041e+07
+jvm.memory.max [bytes] VALUE=1.25494e+10
+jvm.threads.live [threads] VALUE=42
+process.cpu.usage [-] VALUE=0
+system.cpu.count [-] VALUE=16
+http.server.requests.active [seconds] ACTIVE_TASKS=0, DURATION=0, MAX=0
+http.server.requests [seconds] COUNT=8, TOTAL_TIME=0.19927, MAX=0.0620885
+http.server.requests [seconds] COUNT=15, TOTAL_TIME=0.178942, MAX=0.0282715
+http.server.requests [seconds] COUNT=1, TOTAL_TIME=0.102684, MAX=0
+logback.events [events] COUNT=1

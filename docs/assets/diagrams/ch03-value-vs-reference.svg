@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">プリミティブ型と参照型のメモリのイメージ</title>
+  <desc id="d">左側の変数の箱の中に、intはそのまま値10が入る。ListとStringは矢印だけが入り、実体は右側の置き場にある。変数aとbは同じListを指している。</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6d3a"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="32" font-size="17" font-weight="700" fill="#7a8099">変数（箱）</text>
+  <text x="560" y="32" font-size="17" font-weight="700" fill="#7a8099">オブジェクトの置き場</text>
+  <line x1="480" y1="46" x2="480" y2="380" stroke="#7a8099" stroke-opacity="0.35" stroke-dasharray="6 6"/>
+
+  <!-- int n -->
+  <text x="20" y="84" font-size="16" fill="#7a8099">int n = 10;</text>
+  <rect x="180" y="58" width="150" height="40" rx="6" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="255" y="85" text-anchor="middle" font-size="17" font-weight="700" fill="#14b8a6">10</text>
+  <text x="345" y="85" font-size="14" fill="#14b8a6">← 値そのものが入る</text>
+
+  <!-- List a -->
+  <text x="20" y="168" font-size="16" fill="#7a8099">List a = new ArrayList();</text>
+  <rect x="270" y="142" width="60" height="40" rx="6" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="300" y="168" text-anchor="middle" font-size="15" font-weight="700" fill="#ff6d3a">a</text>
+
+  <!-- List b -->
+  <text x="20" y="228" font-size="16" fill="#7a8099">List b = a;</text>
+  <rect x="270" y="202" width="60" height="40" rx="6" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="300" y="228" text-anchor="middle" font-size="15" font-weight="700" fill="#ff6d3a">b</text>
+
+  <!-- ArrayList 実体 -->
+  <rect x="560" y="140" width="260" height="110" rx="10" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="690" y="170" text-anchor="middle" font-size="16" font-weight="700" fill="#ff6d3a">ArrayList オブジェクト</text>
+  <text x="690" y="200" text-anchor="middle" font-size="15" fill="#ff6d3a">["A", "B"]</text>
+  <text x="690" y="228" text-anchor="middle" font-size="14" fill="#ff6d3a">実体は 1 つだけ</text>
+
+  <path d="M330,162 C440,162 470,185 556,185" fill="none" stroke="#ff6d3a" stroke-width="2.5" marker-end="url(#a)"/>
+  <path d="M330,222 C440,222 470,205 556,205" fill="none" stroke="#ff6d3a" stroke-width="2.5" marker-end="url(#a)"/>
+
+  <!-- String -->
+  <text x="20" y="318" font-size="16" fill="#7a8099">String s = "QuickVote";</text>
+  <rect x="270" y="292" width="60" height="40" rx="6" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="300" y="318" text-anchor="middle" font-size="15" font-weight="700" fill="#ff6d3a">s</text>
+  <rect x="560" y="292" width="260" height="40" rx="10" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="690" y="318" text-anchor="middle" font-size="15" font-weight="700" fill="#ff6d3a">String "QuickVote"</text>
+  <path d="M330,312 L556,312" fill="none" stroke="#ff6d3a" stroke-width="2.5" marker-end="url(#a)"/>
+
+  <text x="20" y="378" font-size="14" fill="#7a8099">矢印の先を共有しているので、b.add("B") すると a から見ても [A, B] になる。</text>
+</svg>

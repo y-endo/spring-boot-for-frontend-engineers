@@ -1,0 +1,19 @@
+# 既定：テキストは自動判定し、リポジトリ内ではLFで保存する
+* text=auto
+
+# Unix で実行するスクリプトは常にLF（CRLFだと Mac・Linux・CI で動かない）
+*.sh text eol=lf
+mvnw text eol=lf
+gradlew text eol=lf
+
+# Windows のバッチは常にCRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# バイナリ
+*.mp4 binary
+*.jpg binary
+*.png binary
+*.webp binary
+*.ttf binary
+*.jar binary

@@ -1,0 +1,54 @@
+<svg viewBox="0 0 960 430" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans JP, sans-serif" font-size="15">
+  <defs>
+    <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6d3a"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="28" font-size="17" font-weight="bold" fill="#7a8099">① 外から呼ぶ：秘書（プロキシ）を通る</text>
+  <rect x="20" y="45" width="150" height="70" rx="8" fill="#7a809922" stroke="#7a8099" stroke-width="2"/>
+  <text x="95" y="75" text-anchor="middle" fill="#7a8099">Controller</text>
+  <text x="95" y="97" text-anchor="middle" font-size="13" fill="#7a8099">（呼ぶ側）</text>
+
+  <rect x="290" y="35" width="230" height="90" rx="8" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="405" y="62" text-anchor="middle" font-weight="bold" fill="#14b8a6">プロキシ（秘書）</text>
+  <text x="405" y="85" text-anchor="middle" font-size="13" fill="#14b8a6">PollService$$SpringCGLIB$$0</text>
+  <text x="405" y="107" text-anchor="middle" font-size="13" fill="#14b8a6">BEGIN … COMMIT / ROLLBACK</text>
+
+  <rect x="640" y="45" width="290" height="70" rx="8" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="785" y="75" text-anchor="middle" font-weight="bold" fill="#ff6d3a">本物の PollService（社長）</text>
+  <text x="785" y="97" text-anchor="middle" font-size="13" fill="#ff6d3a">join() / vote() の中身だけを書く</text>
+
+  <line x1="170" y1="80" x2="288" y2="80" stroke="#7a8099" stroke-width="2" marker-end="url(#a1)"/>
+  <text x="229" y="70" text-anchor="middle" font-size="13" fill="#7a8099">join()</text>
+  <line x1="520" y1="80" x2="638" y2="80" stroke="#ff6d3a" stroke-width="2" marker-end="url(#a2)"/>
+  <text x="579" y="70" text-anchor="middle" font-size="13" fill="#ff6d3a">呼ぶ</text>
+
+  <line x1="30" y1="150" x2="930" y2="150" stroke="#7a8099" stroke-dasharray="6 6"/>
+
+  <text x="20" y="188" font-size="17" font-weight="bold" fill="#7a8099">② 同じクラスの中から呼ぶ（自己呼び出し）：秘書の前を通らない</text>
+  <rect x="640" y="205" width="290" height="190" rx="8" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="785" y="232" text-anchor="middle" font-weight="bold" fill="#ff6d3a">本物のクラスの内側</text>
+  <rect x="665" y="250" width="240" height="46" rx="6" fill="none" stroke="#ff6d3a" stroke-width="1.5"/>
+  <text x="785" y="279" text-anchor="middle" fill="#ff6d3a">outer()  ← @Transactional なし</text>
+  <rect x="665" y="330" width="240" height="46" rx="6" fill="none" stroke="#ff6d3a" stroke-width="1.5"/>
+  <text x="785" y="359" text-anchor="middle" fill="#ff6d3a">inner()  ← @Transactional あり</text>
+  <line x1="785" y1="297" x2="785" y2="328" stroke="#ff6d3a" stroke-width="2" marker-end="url(#a2)"/>
+  <text x="700" y="318" text-anchor="end" font-size="13" fill="#ff6d3a">this.inner()</text>
+
+  <rect x="20" y="245" width="150" height="70" rx="8" fill="#7a809922" stroke="#7a8099" stroke-width="2"/>
+  <text x="95" y="275" text-anchor="middle" fill="#7a8099">Controller</text>
+  <rect x="290" y="235" width="230" height="90" rx="8" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="405" y="268" text-anchor="middle" font-weight="bold" fill="#14b8a6">プロキシ（秘書）</text>
+  <text x="405" y="293" text-anchor="middle" font-size="13" fill="#14b8a6">outer() には何も付いていない</text>
+  <text x="405" y="312" text-anchor="middle" font-size="13" fill="#14b8a6">→ BEGIN しない</text>
+  <line x1="170" y1="280" x2="288" y2="280" stroke="#7a8099" stroke-width="2" marker-end="url(#a1)"/>
+  <text x="229" y="270" text-anchor="middle" font-size="13" fill="#7a8099">outer()</text>
+  <line x1="520" y1="280" x2="663" y2="270" stroke="#ff6d3a" stroke-width="2" marker-end="url(#a2)"/>
+
+  <text x="405" y="385" text-anchor="middle" font-size="14" fill="#7a8099">社長が自分で自分の別メソッドを呼んでも、秘書には聞こえない</text>
+  <text x="405" y="408" text-anchor="middle" font-size="14" fill="#7a8099">→ inner() の @Transactional は無視される（tx=false）</text>
+</svg>

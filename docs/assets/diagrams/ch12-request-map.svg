@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">リクエストの旅の地図</title>
+  <desc id="d">ブラウザから来たリクエストは、Tomcatのスレッド、Filter、DispatcherServlet、Interceptor、引数の変換と検証、Controller、Service、Repositoryの順に進み、戻り値はJacksonでJSONに変換されて同じ道を戻る。全体を同じ1つのスレッドが運ぶ。第14章から第16章の各章がどこに当たるかを下に示す。</desc>
+
+  <!-- スレッドの帯 -->
+  <rect x="150" y="26" width="800" height="290" rx="14" fill="#ff6d3a" fill-opacity="0.07" stroke="#ff6d3a" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="166" y="50" font-size="15" font-weight="700" fill="#ff6d3a">同じ1つのスレッド（Tomcat のスレッドプールの1本）が、ここから戻るまで運ぶ</text>
+
+  <!-- ブラウザ -->
+  <rect x="14" y="110" width="116" height="90" rx="10" fill="#7a8099" fill-opacity="0.15" stroke="#7a8099" stroke-width="2"/>
+  <text x="72" y="148" font-size="16" font-weight="700" fill="#7a8099" text-anchor="middle">ブラウザ</text>
+  <text x="72" y="172" font-size="14" fill="#7a8099" text-anchor="middle">fetch()</text>
+
+  <!-- 行ごとのボックス：往路 -->
+  <g font-size="14" fill="#7a8099" text-anchor="middle">
+    <rect x="166" y="76" width="112" height="86" rx="8" fill="#7a8099" fill-opacity="0.15" stroke="#7a8099" stroke-width="2"/>
+    <text x="222" y="104" font-weight="700">Filter 列</text>
+    <text x="222" y="126" font-size="13">RequestId</text>
+    <text x="222" y="146" font-size="13">（Security）</text>
+
+    <rect x="296" y="76" width="130" height="86" rx="8" fill="#14b8a6" fill-opacity="0.22" stroke="#14b8a6" stroke-width="2"/>
+    <text x="361" y="104" font-weight="700">Dispatcher</text>
+    <text x="361" y="124" font-weight="700">Servlet</text>
+    <text x="361" y="146" font-size="13">宛先表で担当を選ぶ</text>
+
+    <rect x="444" y="76" width="112" height="86" rx="8" fill="#7a8099" fill-opacity="0.15" stroke="#7a8099" stroke-width="2"/>
+    <text x="500" y="104" font-weight="700">Interceptor</text>
+    <text x="500" y="126" font-size="13">前処理</text>
+
+    <rect x="574" y="76" width="150" height="86" rx="8" fill="#14b8a6" fill-opacity="0.22" stroke="#14b8a6" stroke-width="2"/>
+    <text x="649" y="98" font-weight="700">引数の組み立て</text>
+    <text x="649" y="118" font-size="13">Jackson で</text>
+    <text x="649" y="135" font-size="13">JSON → record</text>
+    <text x="649" y="152" font-size="13">＋ @Valid の検問</text>
+
+    <rect x="742" y="76" width="196" height="86" rx="8" fill="#ff6d3a" fill-opacity="0.28" stroke="#ff6d3a" stroke-width="2"/>
+    <text x="840" y="102" font-weight="700">Controller</text>
+    <text x="840" y="124" font-size="13">→ Service → Repository</text>
+    <text x="840" y="144" font-size="13">（ここだけが自分のコード）</text>
+  </g>
+
+  <!-- 往路の矢印 -->
+  <g stroke="#ff6d3a" stroke-width="2.5" fill="none">
+    <path d="M130 140 L166 120"/>
+    <path d="M278 119 L296 119"/>
+    <path d="M426 119 L444 119"/>
+    <path d="M556 119 L574 119"/>
+    <path d="M724 119 L742 119"/>
+  </g>
+
+  <!-- 復路 -->
+  <g font-size="14" fill="#7a8099" text-anchor="middle">
+    <rect x="574" y="198" width="150" height="62" rx="8" fill="#14b8a6" fill-opacity="0.22" stroke="#14b8a6" stroke-width="2"/>
+    <text x="649" y="224" font-weight="700">戻り値の変換</text>
+    <text x="649" y="246" font-size="13">Jackson で record → JSON</text>
+
+    <rect x="444" y="198" width="112" height="62" rx="8" fill="#7a8099" fill-opacity="0.15" stroke="#7a8099" stroke-width="2"/>
+    <text x="500" y="224" font-weight="700">Interceptor</text>
+    <text x="500" y="246" font-size="13">後処理</text>
+
+    <rect x="166" y="198" width="260" height="62" rx="8" fill="#7a8099" fill-opacity="0.15" stroke="#7a8099" stroke-width="2"/>
+    <text x="296" y="224" font-weight="700">Filter 列（逆順）→ Tomcat</text>
+    <text x="296" y="246" font-size="13">アクセスログを1行出して応答を返す</text>
+  </g>
+  <g stroke="#14b8a6" stroke-width="2.5" fill="none">
+    <path d="M840 162 L840 180 L724 229"/>
+    <path d="M574 229 L556 229"/>
+    <path d="M444 229 L426 229"/>
+    <path d="M166 229 L148 229 L148 205 L130 190"/>
+  </g>
+
+  <!-- 例外の道 -->
+  <text x="166" y="280" font-size="14" fill="#7a8099">例外が起きたら：Controller の外へ飛び出し、@RestControllerAdvice が ProblemDetail に変換（第14章）。</text>
+  <text x="166" y="298" font-size="14" fill="#7a8099">その後は、戻り値と同じ道（Jackson → Filter 列）で返る。</text>
+
+  <!-- 下段：章の対応 -->
+  <text x="14" y="334" font-size="16" font-weight="700" fill="#7a8099">この地図の「どこ」を、どの章で扱うか</text>
+  <g font-size="14" fill="#7a8099">
+    <rect x="14" y="350" width="296" height="70" rx="8" fill="none" stroke="#7a8099" stroke-width="1.5"/>
+    <text x="28" y="376" font-weight="700">第13章 API契約</text>
+    <text x="28" y="400" font-size="13">引数の組み立て・戻り値の変換の中身</text>
+
+    <rect x="332" y="350" width="296" height="70" rx="8" fill="none" stroke="#7a8099" stroke-width="1.5"/>
+    <text x="346" y="376" font-weight="700">第14章 入力検証とエラー</text>
+    <text x="346" y="400" font-size="13">「@Valid の検問」と「例外の道」</text>
+
+    <rect x="650" y="350" width="296" height="70" rx="8" fill="none" stroke="#7a8099" stroke-width="1.5"/>
+    <text x="664" y="376" font-weight="700">第31章・第23章など</text>
+    <text x="664" y="396" font-size="13">Filter 列 = Spring Security</text>
+    <text x="664" y="413" font-size="13">Service = @Transactional</text>
+
+    <rect x="14" y="436" width="614" height="70" rx="8" fill="none" stroke="#7a8099" stroke-width="1.5"/>
+    <text x="28" y="462" font-weight="700">第16章 APIをテストする</text>
+    <text x="28" y="486" font-size="13">どこまでを起動して確かめるか（Controllerだけ ／ 地図の全部 ／ 本物の Tomcat まで）を選ぶ</text>
+
+    <rect x="650" y="436" width="296" height="70" rx="8" fill="none" stroke="#7a8099" stroke-width="1.5"/>
+    <text x="664" y="462" font-weight="700">第24章 コネクションプール</text>
+    <text x="664" y="486" font-size="13">Repository の先でスレッドが「待つ」場所</text>
+  </g>
+</svg>

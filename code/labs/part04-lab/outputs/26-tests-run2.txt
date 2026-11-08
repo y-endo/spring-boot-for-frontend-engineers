@@ -1,0 +1,9 @@
+RETRYTEMPLATE: 失敗の型 = [PollFullException]
+SERIALIZABLE(再試行なし): 20人中 17 人が失敗。例外 = [CannotAcquireLockException]
+DEADLOCK: org.springframework.dao.PessimisticLockingFailureException
+SERIALIZABLE: 直列化の失敗(再試行された回数) = 19
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.23 s -- in com.example.lab.ConflictIT
+LUCK: 順番に実行 0/100 回が壊れた。2人がほぼ同時(0〜20msずれ) 2/100 回が壊れた。20人が完全に同時 100/100 回が壊れた
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.83 s -- in com.example.lab.JoinRaceIT
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" font-family="Noto Sans JP, sans-serif" font-size="15">
+  <title>リクエストの通り道と、待ちが発生する場所（番号は本文の表と対応）</title>
+  <defs>
+    <marker id="b1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+  </defs>
+
+  <!-- 上段：リクエストの通り道 -->
+  <g stroke="#7a8099" stroke-width="1.5">
+    <rect x="20" y="60" width="140" height="64" rx="8" fill="#7a809922"/>
+    <rect x="215" y="60" width="150" height="64" rx="8" fill="#ff6d3a22"/>
+    <rect x="420" y="60" width="150" height="64" rx="8" fill="#ff6d3a22"/>
+    <rect x="625" y="60" width="130" height="64" rx="8" fill="#14b8a622"/>
+    <rect x="810" y="60" width="130" height="64" rx="8" fill="#14b8a633"/>
+  </g>
+  <g fill="#7a8099" text-anchor="middle">
+    <text x="90" y="88">ブラウザ</text><text x="90" y="110" font-size="14">fetch / SSE</text>
+    <text x="290" y="88">Tomcat</text><text x="290" y="110" font-size="14">最大200スレッド</text>
+    <text x="495" y="88">リクエストの</text><text x="495" y="110">スレッド</text>
+    <text x="690" y="88">HikariCP</text><text x="690" y="110" font-size="14">最大10本</text>
+    <text x="875" y="88">PostgreSQL</text><text x="875" y="110" font-size="14">行ロック・SQL</text>
+  </g>
+  <g stroke="#7a8099" stroke-width="2" fill="none" marker-end="url(#b1)">
+    <line x1="162" y1="92" x2="213" y2="92"/>
+    <line x1="367" y1="92" x2="418" y2="92"/>
+    <line x1="572" y1="92" x2="623" y2="92"/>
+    <line x1="757" y1="92" x2="808" y2="92"/>
+  </g>
+
+  <!-- 番号 -->
+  <g font-weight="bold" fill="#ff6d3a" text-anchor="middle">
+    <circle cx="188" cy="48" r="14" fill="#ff6d3a22" stroke="#ff6d3a"/><text x="188" y="54">①</text>
+    <circle cx="598" cy="48" r="14" fill="#ff6d3a22" stroke="#ff6d3a"/><text x="598" y="54">②</text>
+    <circle cx="783" cy="48" r="14" fill="#ff6d3a22" stroke="#ff6d3a"/><text x="783" y="54">③</text>
+  </g>
+
+  <!-- 下段：説明 -->
+  <g fill="#7a8099" font-size="14">
+    <text x="20" y="176" font-weight="bold" font-size="15">① Tomcat connection-timeout 20秒</text>
+    <text x="20" y="198">ヘッダーを途中まで送って黙るクライアントを、20秒で切る</text>
+    <text x="20" y="236" font-weight="bold" font-size="15">② Hikari connection-timeout 30秒（既定）</text>
+    <text x="20" y="258">接続の空きを待つ時間。全員が待つと、全員が30秒止まる</text>
+    <text x="20" y="296" font-weight="bold" font-size="15">③ statement_timeout 0 = 無制限（QuickVote は未設定）</text>
+    <text x="20" y="318">SQL が終わらない／ロック待ちのとき、いつまで待つか</text>
+  </g>
+  <g fill="#7a8099" font-size="14">
+    <text x="500" y="176" font-weight="bold" font-size="15">④ HTTP クライアントの接続・読み取り</text>
+    <text x="500" y="198">外部 API を呼ぶとき（QuickVote は呼ばない）。決めないと待ち続けうる</text>
+    <text x="500" y="236" font-weight="bold" font-size="15">⑤ SSE の送信 send-timeout 10秒</text>
+    <text x="500" y="258">読み取りを止めた購読者を打ち切る。Tomcat 側の書き込みは20秒</text>
+    <text x="500" y="296" font-weight="bold" font-size="15">⑥ 停止の猶予 30秒（compose は40秒）</text>
+    <text x="500" y="318">処理中のリクエストが終わるのを待つ上限</text>
+  </g>
+  <text x="20" y="372" font-size="15" fill="#ff6d3a" font-weight="bold">原則：内側（DB）ほど短く、外側（ブラウザ）ほど長く。内側が先にあきらめれば、外側は理由を知って返事できる</text>
+</svg>

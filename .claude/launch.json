@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mkdocs",
+      "runtimeExecutable": "D:\\Workspace\\web\\java-study\\.venv\\Scripts\\mkdocs.exe",
+      "runtimeArgs": ["serve", "-a", "127.0.0.1:8000", "--livereload"],
+      "port": 8000
+    }
+  ]
+}

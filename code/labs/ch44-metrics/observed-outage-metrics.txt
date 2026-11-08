@@ -1,0 +1,11 @@
+--- 平常時
+t=+0s  active=0 pending=0 timeout(累計)=41
+--- DB 停止。同時に 15 本の API を投げる
+t=+6s  active=0 pending=15 timeout(累計)=41
+t=+20s  active=0 pending=17 timeout(累計)=41
+t=+40s  active=0 pending=2 timeout(累計)=57
+--- 応答（15本）:
+      1 500 30.012848s
+--- DB 起動後
+t=+56s  active=0 pending=2 timeout(累計)=58
+500 の件数: http.server.requests [seconds] COUNT=20, TOTAL_TIME=570.166, MAX=30.0111

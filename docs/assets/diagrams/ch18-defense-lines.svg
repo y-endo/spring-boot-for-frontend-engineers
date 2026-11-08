@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 330" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">前線と最終防衛線</title>
+  <desc id="d">入力は、ブラウザの検証、Bean Validation、Serviceの業務ルール、データベースの制約の順に4つの関門を通る。手前の関門ほど親切なエラーを返し、データベースの制約はどの経路から来ても最後に必ず守る。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7a8099"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="30" font-size="16" font-weight="700" fill="#7a8099">リクエストは4つの関門を通る（左が前線、右が最終防衛線）</text>
+
+  <g font-size="15" fill="#7a8099" text-anchor="middle">
+    <!-- 1 -->
+    <rect x="20" y="60" width="200" height="120" rx="10" fill="#7a809914" stroke="#7a8099" stroke-width="2"/>
+    <text x="120" y="92" font-weight="700">① ブラウザ</text>
+    <text x="120" y="120" font-size="14">入力欄の検証</text>
+    <text x="120" y="142" font-size="14">すぐ直せる</text>
+    <text x="120" y="164" font-size="14" fill="#ff6d3a" font-weight="700">信用しない</text>
+    <!-- 2 -->
+    <rect x="260" y="60" width="200" height="120" rx="10" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+    <text x="360" y="92" font-weight="700">② Bean Validation</text>
+    <text x="360" y="120" font-size="14">1件を見れば分かる</text>
+    <text x="360" y="142" font-size="14">形式・長さ・範囲</text>
+    <text x="360" y="164" font-size="14" fill="#14b8a6" font-weight="700">400</text>
+    <!-- 3 -->
+    <rect x="500" y="60" width="200" height="120" rx="10" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+    <text x="600" y="92" font-weight="700">③ Service</text>
+    <text x="600" y="120" font-size="14">今の状態を見る</text>
+    <text x="600" y="142" font-size="14">満員・締切・権限</text>
+    <text x="600" y="164" font-size="14" fill="#14b8a6" font-weight="700">403 / 404 / 409</text>
+    <!-- 4 -->
+    <rect x="740" y="60" width="200" height="120" rx="10" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="3"/>
+    <text x="840" y="92" font-weight="700">④ DBの制約</text>
+    <text x="840" y="120" font-size="14">どの経路でも最後に</text>
+    <text x="840" y="142" font-size="14">UNIQUE・CHECK・FK</text>
+    <text x="840" y="164" font-size="14" fill="#ff6d3a" font-weight="700">破れない</text>
+  </g>
+
+  <g stroke="#7a8099" stroke-width="2.5" marker-end="url(#arrow)">
+    <line x1="222" y1="120" x2="256" y2="120"/>
+    <line x1="462" y1="120" x2="496" y2="120"/>
+    <line x1="702" y1="120" x2="736" y2="120"/>
+  </g>
+
+  <g font-size="14" fill="#7a8099">
+    <text x="20" y="226" font-weight="700">手前ほど：</text>
+    <text x="100" y="226">利用者に親切な説明が返せる。ただし、②③は「アプリのコードを通った経路」しか守れない。</text>
+    <text x="20" y="256" font-weight="700">奥ほど：</text>
+    <text x="100" y="256" fill="#ff6d3a">Service を通らない経路（別のバッチ、手で打つSQL、将来の別機能、競合）も、同じように止める。</text>
+    <text x="20" y="290" font-weight="700">ただし：</text>
+    <text x="100" y="290">④は「1行を見れば分かる条件」と「決まった相手の行との関係」しか守れない（人数の上限などは③の仕事）。</text>
+  </g>
+</svg>

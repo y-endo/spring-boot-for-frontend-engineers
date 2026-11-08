@@ -1,0 +1,10 @@
+# 第26章: REPEATABLE READ は、数える → 挿入する の競合を防がない(両方コミットできてしまう)。
+A> BEGIN ISOLATION LEVEL REPEATABLE READ;
+B> BEGIN ISOLATION LEVEL REPEATABLE READ;
+A> SELECT count(*) FROM participants WHERE poll_id = 1;
+B> SELECT count(*) FROM participants WHERE poll_id = 1;
+A> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 50, 'MEMBER', now());
+B> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 51, 'MEMBER', now());
+A> COMMIT;
+B> COMMIT;
+A> SELECT count(*) FROM participants WHERE poll_id = 1;

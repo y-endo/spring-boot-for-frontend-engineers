@@ -1,0 +1,43 @@
+# アプリ本体＋PostgreSQL をコンテナで動かす（本番に近い構成の確認用）。
+#   docker compose -f compose.app.yaml up --build
+#   → http://localhost:8080
+# 開発中に使う compose.yaml（DBだけ）とは別ファイル。Spring Boot の compose 連携はこのファイルを読まない。
+services:
+  postgres:
+    image: 'postgres:18-alpine'
+    environment:
+      POSTGRES_DB: quickvote
+      POSTGRES_USER: quickvote
+      POSTGRES_PASSWORD: quickvote
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U quickvote -d quickvote']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # 接続先は環境変数で渡す（イメージにも Git にも秘密を入れない）。ここの値は開発用の使い捨て。
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/quickvote
+      SPRING_DATASOURCE_USERNAME: quickvote
+      SPRING_DATASOURCE_PASSWORD: quickvote
+      # prod プロファイルは Cookie を Secure にするが、この構成は HTTP(localhost) で動かすため false に戻す。
+      # 本番では HTTPS で公開し、この行を消す。
+      QUICKVOTE_VISITORCOOKIE_SECURE: 'false'
+    ports:
+      # 公開するのは本体の 8080 だけ。管理ポート（9090: health と metrics）は、コンテナの外に出さない。
+      - '8080:8080'
+    # readiness: DB につながり、リクエストを受けられる状態か（DB に届かなければ DOWN になる）。
+    # 管理ポート（prod プロファイルでは 9090）にコンテナの中から問い合わせる。
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://localhost:9090/actuator/health/readiness || exit 1']
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 30s
+    # SSE の接続を閉じて終了するための猶予（graceful shutdown）
+    stop_grace_period: 40s

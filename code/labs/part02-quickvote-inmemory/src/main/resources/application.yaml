@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: quickvote
+server:
+  port: 18012

@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: quickvote
+  autoconfigure:
+    exclude:
+      # ログインユーザーは使わない（完成形と同じ）。除外しないと使わないパスワードがログに出る。
+      - org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+server:
+  port: 18032
+
+# 「壊してみる」スイッチ（LabProperties）。既定値は正しい動作。
+# 例: --lab.save-context=false  --lab.rate-limit=raw-uri  --lab.csrf=false  --lab.join-code-length=3

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# 古い記事・AIの出力に混ざりやすい Spring Boot 3 以前の書き方を拾う grep
+grep -rnE 'javax\.(servlet|validation|persistence)|com\.fasterxml\.jackson\.(databind|core|datatype|module)|@MockBean|@SpyBean|WebSecurityConfigurerAdapter|\.and\(\)|antMatchers|mvcMatchers|authorizeRequests\(|@EnableGlobalMethodSecurity|org\.testcontainers\.containers\.PostgreSQLContainer|boot\.test\.autoconfigure\.web\.servlet|boot\.test\.mock\.mockito|spring-boot-starter-web<|spring-boot-starter-aop|org\.springframework\.lang\.Nullable|UNPROCESSABLE_ENTITY' "${1:-.}" --include='*.java' --include='pom.xml' --include='*.kts' --include='*.gradle'

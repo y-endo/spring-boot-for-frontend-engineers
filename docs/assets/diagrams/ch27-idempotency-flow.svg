@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">IdempotencyService.execute の分岐</title>
+  <desc id="d">期限切れの同じキーの記録を削除し、INSERT ON CONFLICT DO NOTHING で先取りする。1件挿入できたら業務処理を実行して応答を保存する。0件なら FOR SHARE で記録を読み、見つからなければ最初からやり直す。見つかってリクエストのハッシュが違えば422、同じなら保存済みの応答を返す。</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+  </defs>
+  <g font-size="14" fill="#7a8099" text-anchor="middle">
+    <!-- 開始 -->
+    <rect x="200" y="14" width="260" height="40" rx="20" fill="#7a809922" stroke="#7a8099"/>
+    <text x="330" y="39">execute(訪問者, キー, ハッシュ, 業務処理)</text>
+    <line x1="330" y1="54" x2="330" y2="80" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+
+    <!-- ① -->
+    <rect x="200" y="80" width="260" height="44" rx="6" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+    <text x="330" y="99">① 期限切れの同じキーの行を削除</text>
+    <text x="330" y="116" font-size="13">deleteExpired</text>
+    <line x1="330" y1="124" x2="330" y2="160" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+
+    <!-- ② 先取り -->
+    <polygon points="330,160 490,205 330,250 170,205" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+    <text x="330" y="192">② 先取り INSERT ...</text>
+    <text x="330" y="209" font-size="13">ON CONFLICT DO NOTHING</text>
+    <text x="330" y="227">は1件挿入できた？</text>
+
+    <!-- 1件：最初の実行者 -->
+    <path d="M170,205 L110,205 L110,290" fill="none" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="140" y="196" font-size="13">1件</text>
+    <rect x="20" y="290" width="240" height="72" rx="6" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+    <text x="140" y="314">③ 業務処理を実行</text>
+    <text x="140" y="334">④ 応答を同じ行に保存</text>
+    <text x="140" y="352" font-size="13">complete（同じトランザクション）</text>
+    <line x1="140" y1="362" x2="140" y2="400" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+    <rect x="20" y="400" width="240" height="40" rx="20" fill="#14b8a622" stroke="#14b8a6"/>
+    <text x="140" y="425">応答を返す（replayed = false）</text>
+
+    <!-- 0件：すでに記録がある -->
+    <path d="M490,205 L520,205" fill="none" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="505" y="196" font-size="13">0件</text>
+    <rect x="520" y="183" width="260" height="44" rx="6" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+    <text x="650" y="202">⑤ 記録を共有ロックして読む</text>
+    <text x="650" y="219" font-size="13">findForShare（FOR SHARE）</text>
+    <line x1="650" y1="227" x2="650" y2="264" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+
+    <polygon points="650,264 770,300 650,336 530,300" fill="#7a809911" stroke="#7a8099" stroke-width="2"/>
+    <text x="650" y="305">記録は見つかった？</text>
+
+    <!-- 見つからない：やり直し -->
+    <path d="M770,300 L915,300 L915,102 L460,102" fill="none" stroke="#ff6d3a" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+    <text x="840" y="292" font-size="13">いいえ</text>
+    <text x="690" y="94" font-size="13" fill="#ff6d3a">消えていた：①からやり直す（最大5回）</text>
+
+    <!-- 見つかった -->
+    <line x1="650" y1="336" x2="650" y2="394" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="680" y="369" font-size="13">はい</text>
+    <polygon points="650,394 770,430 650,466 530,430" fill="#7a809911" stroke="#7a8099" stroke-width="2"/>
+    <text x="650" y="435">ハッシュは同じ？</text>
+
+    <path d="M530,430 L500,430" fill="none" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="515" y="421" font-size="13">違う</text>
+    <rect x="270" y="410" width="230" height="40" rx="6" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+    <text x="385" y="435">422 IDEMPOTENCY_KEY_REUSED</text>
+
+    <path d="M770,430 L800,430" fill="none" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="785" y="421" font-size="13" text-anchor="middle">同じ</text>
+    <rect x="800" y="402" width="155" height="56" rx="6" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+    <text x="877" y="427">保存済みの応答を返す</text>
+    <text x="877" y="446" font-size="13">replayed = true</text>
+  </g>
+</svg>

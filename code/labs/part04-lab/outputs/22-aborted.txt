@@ -1,0 +1,17 @@
+ 0.4s A| BEGIN;
+ 0.4s A| BEGIN
+ 0.4s A| INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (2, 51, 'MEMBER', now());
+ 0.4s A| INSERT 0 1
+ 0.9s A| -- 存在しない訪問者(999)を参加させる → 外部キー違反
+ 1.2s A| INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (2, 999, 'MEMBER', now());
+ 1.2s A| ERROR:  insert or update on table "participants" violates foreign key constraint "participants_visitor_id_fkey"
+ 1.6s A| SELECT 1;
+ 1.6s A| ERROR:  current transaction is aborted, commands ignored until end of transaction block
+ 2.1s A| COMMIT;
+ 2.1s A| ROLLBACK
+ 2.5s A| SELECT count(*) FROM participants WHERE poll_id = 2;
+ 2.5s A|  count 
+ 2.5s A| -------
+ 2.5s A|      1
+ 2.5s A| (1 row)
+ 3.4s A| \q

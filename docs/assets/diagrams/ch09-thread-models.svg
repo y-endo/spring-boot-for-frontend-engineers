@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">3つの処理モデルの時間軸比較</title>
+  <desc id="d">リクエストA、B、Cがそれぞれ短い処理、DB待ち、短い処理を行う。Nodeは1本のスレッドが待ち時間に別の処理へ移る。Javaのリクエストごとのスレッドは3本が並行して待つ。1本のスレッドでブロックすると順番待ちになり、最も遅く終わる。</desc>
+  <defs>
+    <pattern id="wait" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="8" fill="#7a809911"/>
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#7a8099" stroke-width="2" stroke-opacity="0.55"/>
+    </pattern>
+  </defs>
+
+  <!-- 凡例 -->
+  <rect x="20" y="14" width="22" height="16" rx="3" fill="#ff6d3a" fill-opacity="0.85"/>
+  <text x="50" y="28" font-size="14" fill="#7a8099">CPUで処理している</text>
+  <rect x="200" y="14" width="22" height="16" rx="3" fill="url(#wait)" stroke="#7a8099"/>
+  <text x="230" y="28" font-size="14" fill="#7a8099">DBの返事を待っている</text>
+  <text x="420" y="28" font-size="14" fill="#7a8099">A, B, C = 同時に届いた3つのリクエスト（横軸は時間）</text>
+
+  <!-- 1. Node -->
+  <text x="20" y="64" font-size="16" font-weight="700" fill="#7a8099">① Node：スレッド1本が、待ち時間に別の仕事へ移る</text>
+  <text x="20" y="96" font-size="14" fill="#7a8099">スレッド1本</text>
+  <g font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">
+    <rect x="160" y="78" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="175" y="96">A</text>
+    <rect x="190" y="78" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="205" y="96">B</text>
+    <rect x="220" y="78" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="235" y="96">C</text>
+    <rect x="310" y="78" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="325" y="96">A</text>
+    <rect x="340" y="78" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="355" y="96">B</text>
+    <rect x="370" y="78" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="385" y="96">C</text>
+  </g>
+  <text x="20" y="130" font-size="14" fill="#7a8099">待ち（スレッド不要）</text>
+  <rect x="190" y="114" width="120" height="10" fill="url(#wait)" stroke="#7a8099"/>
+  <rect x="220" y="126" width="120" height="10" fill="url(#wait)" stroke="#7a8099"/>
+  <rect x="250" y="138" width="120" height="10" fill="url(#wait)" stroke="#7a8099"/>
+  <text x="420" y="96" font-size="14" fill="#14b8a6">全部終わるのは 時刻400</text>
+  <line x1="400" y1="70" x2="400" y2="152" stroke="#14b8a6" stroke-width="2" stroke-dasharray="4 4"/>
+
+  <!-- 2. Java thread per request -->
+  <text x="20" y="196" font-size="16" font-weight="700" fill="#7a8099">② Java（Tomcatの標準）：リクエストごとにスレッドが付き、待つ間も離れない</text>
+  <g font-size="14" fill="#7a8099">
+    <text x="20" y="228">スレッド1（A）</text>
+    <text x="20" y="262">スレッド2（B）</text>
+    <text x="20" y="296">スレッド3（C）</text>
+  </g>
+  <g font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">
+    <rect x="160" y="210" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="175" y="228">A</text>
+    <rect x="310" y="210" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="325" y="228">A</text>
+    <rect x="160" y="244" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="175" y="262">B</text>
+    <rect x="310" y="244" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="325" y="262">B</text>
+    <rect x="160" y="278" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="175" y="296">C</text>
+    <rect x="310" y="278" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="325" y="296">C</text>
+  </g>
+  <rect x="190" y="210" width="120" height="26" fill="url(#wait)" stroke="#7a8099"/>
+  <rect x="190" y="244" width="120" height="26" fill="url(#wait)" stroke="#7a8099"/>
+  <rect x="190" y="278" width="120" height="26" fill="url(#wait)" stroke="#7a8099"/>
+  <text x="420" y="262" font-size="14" fill="#14b8a6">全部終わるのは 時刻340</text>
+  <text x="420" y="284" font-size="14" fill="#7a8099">斜線の間、スレッドは占有されたまま（遊んでいる）</text>
+  <line x1="340" y1="204" x2="340" y2="312" stroke="#14b8a6" stroke-width="2" stroke-dasharray="4 4"/>
+
+  <!-- 3. Java 1 thread blocking -->
+  <text x="20" y="352" font-size="16" font-weight="700" fill="#7a8099">③ 比較用：Javaでスレッドが1本しかなく、待つ間も離れない場合</text>
+  <text x="20" y="388" font-size="14" fill="#7a8099">スレッド1本</text>
+  <g font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">
+    <rect x="160" y="370" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="175" y="388">A</text>
+    <rect x="310" y="370" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="325" y="388">A</text>
+    <rect x="340" y="370" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="355" y="388">B</text>
+    <rect x="490" y="370" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="505" y="388">B</text>
+    <rect x="520" y="370" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="535" y="388">C</text>
+    <rect x="670" y="370" width="30" height="26" fill="#ff6d3a" fill-opacity="0.85"/><text x="685" y="388">C</text>
+  </g>
+  <rect x="190" y="370" width="120" height="26" fill="url(#wait)" stroke="#7a8099"/>
+  <rect x="370" y="370" width="120" height="26" fill="url(#wait)" stroke="#7a8099"/>
+  <rect x="550" y="370" width="120" height="26" fill="url(#wait)" stroke="#7a8099"/>
+  <line x1="700" y1="364" x2="700" y2="402" stroke="#ff6d3a" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="716" y="388" font-size="14" fill="#ff6d3a">終わるのは 時刻700</text>
+
+  <!-- まとめ -->
+  <rect x="20" y="430" width="920" height="110" rx="12" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="40" y="460" font-size="16" font-weight="700" fill="#14b8a6">読み取り方</text>
+  <text x="40" y="486" font-size="15" fill="#14b8a6">・「待ち」が長い処理では、①も②も③よりずっと早い。①は賢く、②は力技で解決している。</text>
+  <text x="40" y="510" font-size="15" fill="#14b8a6">・②は 3 件ならよいが、同時 10,000 件なら 10,000 本のスレッドが必要になる（仮想スレッドの動機）。</text>
+  <text x="40" y="534" font-size="15" fill="#14b8a6">・②では A と B と C が同じオブジェクトを同時に触る。これが第9章後半の「共有状態の危険」。</text>
+</svg>

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" font-family="Noto Sans JP, sans-serif" font-size="15">
+  <title>イメージの地層：下ほど変わりにくく、上ほどよく変わる</title>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6d3a"/>
+    </marker>
+  </defs>
+
+  <!-- 見出し -->
+  <text x="30" y="30" font-size="16" font-weight="bold" fill="#7a8099">QuickVote イメージの層（docker history の実測値）</text>
+  <text x="30" y="52" font-size="14" fill="#7a8099">高さはサイズに比例させていません</text>
+
+  <!-- 地層：下から積む -->
+  <g stroke="#7a8099" stroke-width="1.5">
+    <rect x="30" y="360" width="470" height="52" fill="#7a809933"/>
+    <rect x="30" y="316" width="470" height="44" fill="#7a809926"/>
+    <rect x="30" y="268" width="470" height="48" fill="#14b8a633"/>
+    <rect x="30" y="226" width="470" height="42" fill="#14b8a622"/>
+    <rect x="30" y="184" width="470" height="42" fill="#14b8a622"/>
+    <rect x="30" y="142" width="470" height="42" fill="#ff6d3a22"/>
+    <rect x="30" y="86" width="470" height="56" fill="#ff6d3a55" stroke="#ff6d3a" stroke-width="2.5"/>
+  </g>
+  <g fill="#7a8099">
+    <text x="46" y="383" font-weight="bold">ベース eclipse-temurin:25-jre</text>
+    <text x="484" y="383" text-anchor="end">約 480 MB（OS ＋ JRE）</text>
+    <text x="46" y="343" font-weight="bold">curl（ヘルスチェック用）</text>
+    <text x="484" y="343" text-anchor="end">11.4 MB</text>
+    <text x="46" y="297" font-weight="bold">非rootユーザー app</text>
+    <text x="484" y="297" text-anchor="end">41 kB</text>
+  </g>
+  <text x="46" y="254" font-weight="bold" fill="#14b8a6">dependencies</text>
+  <text x="484" y="254" text-anchor="end" fill="#14b8a6">31.2 MB　ライブラリ（めったに変わらない）</text>
+  <text x="46" y="212" fill="#14b8a6">spring-boot-loader</text>
+  <text x="484" y="212" text-anchor="end" fill="#14b8a6">4 kB</text>
+  <text x="46" y="170" fill="#14b8a6">snapshot-dependencies</text>
+  <text x="484" y="170" text-anchor="end" fill="#14b8a6">4 kB</text>
+  <text x="46" y="120" font-weight="bold" fill="#ff6d3a">application</text>
+  <text x="484" y="120" text-anchor="end" fill="#ff6d3a">164 kB　自分のコード（毎日変わる）</text>
+
+  <!-- 変わりにくさの矢印 -->
+  <line x1="520" y1="400" x2="520" y2="96" stroke="#7a8099" stroke-width="1.5" marker-end="url(#arr)" stroke-dasharray="5 4"/>
+  <text x="532" y="250" font-size="14" fill="#7a8099" transform="rotate(90 532 250)" text-anchor="middle">上ほど、よく変わる</text>
+
+  <!-- 右側：変えたとき -->
+  <g stroke="#7a8099" stroke-width="1.5" fill="none">
+    <rect x="590" y="86" width="340" height="132" rx="8" fill="#ff6d3a11"/>
+    <rect x="590" y="244" width="340" height="168" rx="8" fill="#14b8a611"/>
+  </g>
+  <text x="606" y="114" font-weight="bold" fill="#ff6d3a">Javaのコードを1行直した</text>
+  <text x="606" y="142" fill="#7a8099">作り直す層：application だけ</text>
+  <text x="606" y="166" fill="#7a8099">実測の再ビルド：約 47 秒</text>
+  <text x="606" y="190" fill="#7a8099">（大半は Maven のコンパイル）</text>
+  <text x="606" y="210" font-size="14" fill="#7a8099">配る差分：約 164 kB</text>
+
+  <text x="606" y="272" font-weight="bold" fill="#14b8a6">ライブラリを更新した（pom.xml）</text>
+  <text x="606" y="300" fill="#7a8099">作り直す層：dependencies 以上</text>
+  <text x="606" y="324" fill="#7a8099">配る差分：約 31 MB</text>
+  <text x="606" y="356" font-size="14" fill="#7a8099">地層に分けない fat jar は、</text>
+  <text x="606" y="378" font-size="14" fill="#7a8099">コードを1行直しただけでも</text>
+  <text x="606" y="400" font-size="14" fill="#7a8099">毎回 約 31 MB の層が新しくなる</text>
+</svg>

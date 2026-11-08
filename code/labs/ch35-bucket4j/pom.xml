@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.1.2</version>
+		<relativePath/>
+	</parent>
+	<groupId>com.example</groupId>
+	<artifactId>bucket4jlab</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>bucket4jlab</name>
+	<description>第35章: Bucket4j の最小の使い方（自作トークンバケットとの対応を見る実験）</description>
+	<properties>
+		<java.version>25</java.version>
+	</properties>
+	<dependencies>
+		<!-- Bucket4j はBootのBOMの管理外。バージョンを自分で書く。JDK 17 以上用のアーティファクト名は bucket4j_jdk17-core -->
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>8.20.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

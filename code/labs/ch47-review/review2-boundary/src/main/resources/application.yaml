@@ -1,0 +1,7 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+logging:
+  level:
+    org.springframework: WARN

@@ -1,0 +1,9 @@
+# 第46章の実験用の上書き。code/quickvote/compose.app.yaml を土台に、ポートだけを付け替える。
+#   docker compose -p qv46 -f ../../quickvote/compose.app.yaml -f compose.lab.yaml up -d --build
+services:
+  postgres:
+    ports: !override
+      - '25446:5432'
+  app:
+    ports: !override
+      - '18046:8080'

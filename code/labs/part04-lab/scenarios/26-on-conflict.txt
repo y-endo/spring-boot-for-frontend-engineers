@@ -1,0 +1,19 @@
+# 第26章: 1人1票。UNIQUE(poll_id, participant_id) があるので、同じ人の2回目の挿入は衝突する。
+A> BEGIN;
+B> BEGIN;
+A> INSERT INTO votes (poll_id, participant_id, option_id, voted_at) VALUES (1, 2, 1, now()) ON CONFLICT (poll_id, participant_id) DO UPDATE SET option_id = EXCLUDED.option_id, voted_at = EXCLUDED.voted_at WHERE votes.option_id <> EXCLUDED.option_id;
+B> -- 同じ人(participant 2)が、別の端末から同時に投票
+B> INSERT INTO votes (poll_id, participant_id, option_id, voted_at) VALUES (1, 2, 2, now()) ON CONFLICT (poll_id, participant_id) DO UPDATE SET option_id = EXCLUDED.option_id, voted_at = EXCLUDED.voted_at WHERE votes.option_id <> EXCLUDED.option_id;
+wait 1500
+A> COMMIT;
+B> COMMIT;
+A> SELECT participant_id, option_id FROM votes WHERE poll_id = 1;
+A> -- ON CONFLICT を付けない素の INSERT だと、負けた側はエラーになる
+A> DELETE FROM votes;
+A> BEGIN;
+B> BEGIN;
+A> INSERT INTO votes (poll_id, participant_id, option_id, voted_at) VALUES (1, 2, 1, now());
+B> INSERT INTO votes (poll_id, participant_id, option_id, voted_at) VALUES (1, 2, 2, now());
+wait 1000
+A> COMMIT;
+B> ROLLBACK;

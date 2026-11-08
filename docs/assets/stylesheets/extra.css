@@ -1,0 +1,95 @@
+/* ===== フォント：Noto Sans JP（本文）＋ JetBrains Mono（コード） ===== */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap");
+
+:root {
+  --md-text-font: "Noto Sans JP";
+  --md-code-font: "JetBrains Mono";
+  --brand-orange: #ff6d3a;
+  --brand-teal: #14b8a6;
+  --card-bg: #ffffff;
+  --card-border: #e8e2dc;
+  --soft-bg: #fff7f2;
+}
+[data-md-color-scheme="slate"] {
+  --card-bg: #1f2230;
+  --card-border: #343a50;
+  --soft-bg: #252a3a;
+}
+
+body { font-feature-settings: "palt" 1; }
+.md-typeset { font-size: 0.86rem; line-height: 1.9; letter-spacing: 0.02em; }
+.md-typeset h1 { font-weight: 900; letter-spacing: 0.01em; }
+.md-typeset h2 {
+  font-weight: 700;
+  padding: 0.35em 0 0.35em 0.7em;
+  border-left: 6px solid var(--brand-orange);
+  background: linear-gradient(90deg, var(--soft-bg), transparent 70%);
+  border-radius: 2px;
+}
+.md-typeset h3 { font-weight: 700; }
+.md-typeset strong { font-weight: 700; }
+.md-typeset mark { background: linear-gradient(transparent 55%, rgba(255, 196, 0, 0.55) 55%); color: inherit; padding: 0 0.1em; }
+
+/* コードブロック */
+.md-typeset pre > code { font-size: 0.8rem; line-height: 1.65; }
+.md-typeset code { border-radius: 4px; }
+
+/* 表 */
+.md-typeset table:not([class]) { font-size: 0.8rem; border-radius: 8px; overflow: hidden; }
+.md-typeset table:not([class]) th { background: var(--soft-bg); font-weight: 700; }
+
+/* 画像・図 */
+.md-typeset img { border-radius: 10px; }
+.md-typeset .mermaid { margin: 1.5em 0; text-align: center; }
+.md-typeset figure figcaption { font-size: 0.75rem; opacity: 0.8; }
+
+/* 動画カード */
+.video-card {
+  margin: 1.8em 0;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--card-bg);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+.video-card video { display: block; width: 100%; height: auto; background: #0e1018; }
+.video-card .video-caption {
+  margin: 0;
+  padding: 0.7em 1em;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border-top: 3px solid var(--brand-orange);
+}
+.video-card .video-credit {
+  margin: 0;
+  padding: 0 1em 0.6em;
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+/* 章頭の「この章でできるようになること」 */
+.goal-box {
+  border-radius: 14px;
+  padding: 1em 1.3em;
+  margin: 1.2em 0 2em;
+  background: var(--soft-bg);
+  border: 2px dashed var(--brand-orange);
+}
+.goal-box > p:first-child { font-weight: 900; margin-top: 0; }
+
+/* トップページ */
+.hero-lead {
+  font-size: 1.05rem;
+  padding: 1.2em 1.5em;
+  margin: 1em 0 1.5em;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 109, 58, 0.12), rgba(20, 184, 166, 0.10));
+}
+.hero-lead p { margin: 0.4em 0; }
+
+/* 部の扉ページのカード */
+.md-typeset .grid.cards > ul > li { border-radius: 14px; }
+
+/* 用語 admonition を少し目立たせる */
+.md-typeset .admonition.note > .admonition-title,
+.md-typeset details.note > summary { font-weight: 700; }

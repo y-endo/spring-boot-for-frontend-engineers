@@ -1,0 +1,57 @@
+<svg viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans JP, sans-serif" role="img" aria-label="テストが見ていた範囲と、シニアレビューで見つかった18件の穴の方向">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+  </defs>
+
+  <!-- 中央：テストが見ていた範囲 -->
+  <rect x="330" y="210" width="300" height="130" rx="14" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="480" y="242" text-anchor="middle" font-size="17" font-weight="700" fill="#14b8a6">テストが見ていた範囲</text>
+  <text x="480" y="270" text-anchor="middle" font-size="15" fill="#7a8099">1人が・正しい入力で・順番に</text>
+  <text x="480" y="292" text-anchor="middle" font-size="15" fill="#7a8099">・いつもの表記で・相手は正常に</text>
+  <text x="480" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#14b8a6">152件、すべて合格</text>
+
+  <!-- A -->
+  <rect x="30" y="30" width="280" height="130" rx="12" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="170" y="60" text-anchor="middle" font-size="17" font-weight="700" fill="#ff6d3a">別の表記・別の入口から</text>
+  <text x="170" y="90" text-anchor="middle" font-size="15" fill="#7a8099">#1 URLをエンコードして制限をすり抜け</text>
+  <text x="170" y="112" text-anchor="middle" font-size="15" fill="#7a8099">#3 不正な作成で訪問者の行が増える</text>
+  <text x="170" y="134" text-anchor="middle" font-size="15" fill="#7a8099">#6 拒否後も偽Cookieでバケットが増える</text>
+
+  <!-- B -->
+  <rect x="340" y="12" width="280" height="130" rx="12" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="480" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#ff6d3a">同時に・重なって</text>
+  <text x="480" y="72" text-anchor="middle" font-size="15" fill="#7a8099">#4 SSEの登録と解除が競合して消える</text>
+  <text x="480" y="94" text-anchor="middle" font-size="15" fill="#7a8099">#7 掃除と消費が競合して制限が戻る</text>
+  <text x="480" y="116" text-anchor="middle" font-size="15" fill="#7a8099">#8 記録の削除と再送が交差して500</text>
+
+  <!-- C -->
+  <rect x="650" y="30" width="280" height="130" rx="12" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="790" y="60" text-anchor="middle" font-size="17" font-weight="700" fill="#ff6d3a">時間・順序がずれて</text>
+  <text x="790" y="90" text-anchor="middle" font-size="15" fill="#7a8099">#5 未送信が500件を超えると再送が止まる</text>
+  <text x="790" y="112" text-anchor="middle" font-size="15" fill="#7a8099">#10 応答の順番が入れ替わり古い画面</text>
+  <text x="790" y="134" text-anchor="middle" font-size="15" fill="#7a8099">#14 「5分後」が通信時間で5分を割る</text>
+
+  <!-- D -->
+  <rect x="90" y="400" width="360" height="130" rx="12" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="270" y="430" text-anchor="middle" font-size="17" font-weight="700" fill="#ff6d3a">遅い相手・壊れる相手</text>
+  <text x="270" y="460" text-anchor="middle" font-size="15" fill="#7a8099">#9 遅いSSE接続が全体の配信と停止を止める</text>
+  <text x="270" y="482" text-anchor="middle" font-size="15" fill="#7a8099">#11 DBが止まってもreadinessがUP</text>
+  <text x="270" y="504" text-anchor="middle" font-size="15" fill="#7a8099">#18 SSE終了時に認可エラーがERRORで出る</text>
+
+  <!-- E -->
+  <rect x="510" y="400" width="400" height="140" rx="12" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="710" y="428" text-anchor="middle" font-size="17" font-weight="700" fill="#ff6d3a">仕様・設定・外から見えるもの</text>
+  <text x="710" y="454" text-anchor="middle" font-size="15" fill="#7a8099">#2 DBエラーの行の中身がログに出る</text>
+  <text x="710" y="474" text-anchor="middle" font-size="15" fill="#7a8099">#12 metricsが無認証で見える　#13 不要な独自フィルタ</text>
+  <text x="710" y="494" text-anchor="middle" font-size="15" fill="#7a8099">#15 文字数の単位がずれる　#16 期間設定を検証しない</text>
+  <text x="710" y="514" text-anchor="middle" font-size="15" fill="#7a8099">#17 締切後の招待受諾の仕様が不明</text>
+
+  <!-- 矢印：テストの範囲の外へ -->
+  <line x1="380" y1="210" x2="250" y2="165" stroke="#7a8099" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="480" y1="210" x2="480" y2="148" stroke="#7a8099" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="580" y1="210" x2="710" y2="165" stroke="#7a8099" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="400" y1="340" x2="320" y2="395" stroke="#7a8099" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="560" y1="340" x2="640" y2="395" stroke="#7a8099" stroke-width="2" marker-end="url(#a)"/>
+</svg>

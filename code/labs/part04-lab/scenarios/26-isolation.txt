@@ -1,0 +1,16 @@
+# 第26章: 分離レベル。READ COMMITTED(既定)と REPEATABLE READ で、同じトランザクションの中から何が見えるか。
+A> -- READ COMMITTED (PostgreSQLの既定)
+A> BEGIN;
+A> SELECT count(*) FROM participants WHERE poll_id = 1;
+B> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 50, 'MEMBER', now());
+A> SELECT count(*) FROM participants WHERE poll_id = 1;
+A> COMMIT;
+A> -- REPEATABLE READ
+A> BEGIN ISOLATION LEVEL REPEATABLE READ;
+A> SELECT count(*) FROM participants WHERE poll_id = 1;
+B> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 51, 'MEMBER', now());
+A> SELECT count(*) FROM participants WHERE poll_id = 1;
+A> -- 同じ行を B が先に更新してコミットした後に、A(REPEATABLE READ)が同じ行を更新しようとすると
+B> UPDATE polls SET title = 'Bが先に更新' WHERE id = 1;
+A> UPDATE polls SET title = 'Aが後から更新' WHERE id = 1;
+A> ROLLBACK;

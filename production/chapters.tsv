@@ -1,0 +1,49 @@
+part00	はじめに	ch00-how-to-learn	この教材の歩き方
+part00	はじめに	ch01-setup	開発環境を整える
+part01	TypeScript脳で読むJava	ch02-how-java-runs	Javaが動くまで：JVM・コンパイル・main
+part01	TypeScript脳で読むJava	ch03-types	型の世界：名前で決まる型
+part01	TypeScript脳で読むJava	ch04-data-shapes	データの形：record・enum・sealed・switch
+part01	TypeScript脳で読むJava	ch05-null-exceptions	nullと例外
+part01	TypeScript脳で読むJava	ch06-collections-streams	コレクション・ジェネリクス・ラムダ・Stream
+part01	TypeScript脳で読むJava	ch07-value-pitfalls	値の落とし穴：equals・数値・時刻・文字
+part01	TypeScript脳で読むJava	ch08-junit	JUnitで最初のテスト
+part01	TypeScript脳で読むJava	ch09-threads	スレッドと共有状態：サーバーは同時に動く
+part02	Spring Bootの心臓部	ch10-spring-boot	Spring Bootとは：最初のAPIと起動の裏側
+part02	Spring Bootの心臓部	ch11-di-container	DIコンテナとBean
+part02	Spring Bootの心臓部	ch12-request-journey	リクエストの旅
+part02	Spring Bootの心臓部	ch13-api-contract	API契約：DTOとJSON
+part02	Spring Bootの心臓部	ch14-validation-errors	入力検証とエラーの設計
+part02	Spring Bootの心臓部	ch15-configuration	設定・プロファイル・秘密
+part02	Spring Bootの心臓部	ch16-api-testing	APIをテストする
+part03	PostgreSQLに正しく保存する	ch17-postgres-flyway	PostgreSQLとFlyway：スキーマをコードで育てる
+part03	PostgreSQLに正しく保存する	ch18-data-modeling	データモデルと制約設計
+part03	PostgreSQLに正しく保存する	ch19-jdbcclient	JdbcClientでSQLを書く
+part03	PostgreSQLに正しく保存する	ch20-query-index	検索・ページング・インデックス
+part03	PostgreSQLに正しく保存する	ch21-testcontainers	実PostgreSQLでテストする
+part04	トランザクションと同時実行	ch22-transactions	トランザクションの境界
+part04	トランザクションと同時実行	ch23-transactional-proxy	@Transactionalの正体：プロキシ
+part04	トランザクションと同時実行	ch24-connection-pool	スレッドとコネクションプール
+part04	トランザクションと同時実行	ch25-locking	上限を守る：同時参加の競合とロック
+part04	トランザクションと同時実行	ch26-concurrency-testing	競合の別解と並行性テスト
+part05	再送・期限・定期処理	ch27-idempotency	冪等性：応答が消えても二重登録しない
+part05	再送・期限・定期処理	ch28-time-expiry	期限と時刻を設計する
+part05	再送・期限・定期処理	ch29-scheduling	定期処理：失敗しても続けられるジョブ
+part06	匿名利用者と認可	ch30-authz-design	認証・識別・認可を分ける
+part06	匿名利用者と認可	ch31-spring-security	Spring Securityの地図
+part06	匿名利用者と認可	ch32-anonymous-session	匿名セッション：Cookieで利用主体を識別する
+part06	匿名利用者と認可	ch33-invites-brute-force	招待・参加コード・総当たり対策
+part06	匿名利用者と認可	ch34-browser-boundary	ブラウザとの境界：Cookie属性・CSRF・CORS・HTTPS
+part06	匿名利用者と認可	ch35-rate-limiting	レート制限と資源の保護
+part07	リアルタイム通知	ch36-sse	SSE入門
+part07	リアルタイム通知	ch37-event-history	取りこぼしを防ぐ：イベント履歴とLast-Event-ID
+part07	リアルタイム通知	ch38-multi-instance	2台構成で起きること
+part08	JPAを理解して使い分ける	ch39-jpa-basics	JPAは何を肩代わりするのか
+part08	JPAを理解して使い分ける	ch40-n-plus-one	N+1と取得戦略
+part08	JPAを理解して使い分ける	ch41-sql-vs-jpa	SQLとJPAの使い分けとレビュー
+part09	運用：公開後に責任を持つ	ch42-docker	Dockerでパッケージング
+part09	運用：公開後に責任を持つ	ch43-logging	ログ：あとから原因を追えるように
+part09	運用：公開後に責任を持つ	ch44-metrics	メトリクスとヘルスチェック
+part09	運用：公開後に責任を持つ	ch45-performance	性能と堅牢性：タイムアウト・負荷・停止
+part09	運用：公開後に責任を持つ	ch46-release	リリースと復旧
+part10	卒業	ch47-ai-review	AIと組むレビュー術
+part10	卒業	ch48-capstone	卒業制作：自分のサービスを設計する

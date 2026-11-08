@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">採番の順とコミットの順が食い違うと、読み手が1番を取りこぼす</title>
+  <desc id="d">上段はシーケンスで採番した場合。トランザクションAが先に1番を取り、遅れてコミットする。Bは2番を取ってすぐコミットする。読み手はBのコミット後に「2番まで読んだ」と記憶するので、Aが1番をコミットしても、2番より後だけを読む読み手には1番が見えない。下段は親の行を更新して採番した場合。Aの行ロックがコミットまで続くのでBは待たされ、2番はAのコミットの後にコミットされる。読み手は1番と2番をこの順に見る。</desc>
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+  </defs>
+
+  <!-- 上段 -->
+  <text x="20" y="28" font-size="17" font-weight="700" fill="#ff6d3a">① シーケンスで採番：1番が、2番より遅く見える</text>
+  <text x="20" y="62" font-size="14" fill="#7a8099">トランザクション A</text>
+  <text x="20" y="108" font-size="14" fill="#7a8099">トランザクション B</text>
+  <text x="20" y="154" font-size="14" fill="#7a8099">読み手</text>
+  <line x1="170" y1="176" x2="940" y2="176" stroke="#7a8099" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="900" y="196" font-size="14" fill="#7a8099">時間</text>
+
+  <rect x="190" y="44" width="110" height="28" rx="5" fill="#ff6d3a33" stroke="#ff6d3a"/>
+  <text x="245" y="63" font-size="14" text-anchor="middle" fill="#7a8099">nextval → 1</text>
+  <rect x="300" y="44" width="360" height="28" rx="5" fill="none" stroke="#7a8099" stroke-dasharray="5 4"/>
+  <text x="480" y="63" font-size="14" text-anchor="middle" fill="#7a8099">処理中（まだコミットしていない）</text>
+  <rect x="660" y="44" width="110" height="28" rx="5" fill="#ff6d3a" fill-opacity="0.85"/>
+  <text x="715" y="63" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">COMMIT</text>
+
+  <rect x="300" y="90" width="110" height="28" rx="5" fill="#ff6d3a33" stroke="#ff6d3a"/>
+  <text x="355" y="109" font-size="14" text-anchor="middle" fill="#7a8099">nextval → 2</text>
+  <rect x="410" y="90" width="110" height="28" rx="5" fill="#14b8a6" fill-opacity="0.85"/>
+  <text x="465" y="109" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">COMMIT</text>
+
+  <rect x="545" y="136" width="170" height="28" rx="5" fill="#14b8a622" stroke="#14b8a6"/>
+  <text x="630" y="155" font-size="14" text-anchor="middle" fill="#7a8099">seq &gt; 0 → [2]　覚える: 2</text>
+  <rect x="740" y="136" width="190" height="28" rx="5" fill="#ff6d3a33" stroke="#ff6d3a"/>
+  <text x="835" y="155" font-size="14" text-anchor="middle" fill="#7a8099">seq &gt; 2 → []　1番は来ない</text>
+
+  <!-- 下段 -->
+  <text x="20" y="250" font-size="17" font-weight="700" fill="#14b8a6">② 親の行を UPDATE して採番：Bは待たされ、順番が守られる</text>
+  <text x="20" y="284" font-size="14" fill="#7a8099">トランザクション A</text>
+  <text x="20" y="330" font-size="14" fill="#7a8099">トランザクション B</text>
+  <text x="20" y="376" font-size="14" fill="#7a8099">読み手</text>
+  <line x1="170" y1="398" x2="940" y2="398" stroke="#7a8099" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="900" y="418" font-size="14" fill="#7a8099">時間</text>
+
+  <rect x="190" y="266" width="170" height="28" rx="5" fill="#14b8a633" stroke="#14b8a6"/>
+  <text x="275" y="285" font-size="14" text-anchor="middle" fill="#7a8099">UPDATE … → 1（行ロック）</text>
+  <rect x="360" y="266" width="300" height="28" rx="5" fill="none" stroke="#7a8099" stroke-dasharray="5 4"/>
+  <text x="510" y="285" font-size="14" text-anchor="middle" fill="#7a8099">処理中（ロックを持ち続ける）</text>
+  <rect x="660" y="266" width="110" height="28" rx="5" fill="#14b8a6" fill-opacity="0.85"/>
+  <text x="715" y="285" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">COMMIT</text>
+
+  <rect x="300" y="312" width="360" height="28" rx="5" fill="#ff6d3a22" stroke="#ff6d3a" stroke-dasharray="5 4"/>
+  <text x="480" y="331" font-size="14" text-anchor="middle" fill="#7a8099">UPDATE … ロック待ち（Aのコミットまで進めない）</text>
+  <rect x="660" y="312" width="150" height="28" rx="5" fill="#14b8a633" stroke="#14b8a6"/>
+  <text x="735" y="331" font-size="14" text-anchor="middle" fill="#7a8099">→ 2 ／ COMMIT</text>
+
+  <rect x="545" y="358" width="130" height="28" rx="5" fill="none" stroke="#7a8099" stroke-dasharray="5 4"/>
+  <text x="610" y="377" font-size="14" text-anchor="middle" fill="#7a8099">seq &gt; 0 → []</text>
+  <rect x="740" y="358" width="200" height="28" rx="5" fill="#14b8a622" stroke="#14b8a6"/>
+  <text x="840" y="377" font-size="14" text-anchor="middle" fill="#7a8099">seq &gt; 0 → [1, 2]　順番どおり</text>
+
+  <text x="20" y="470" font-size="14" fill="#7a8099">代償：同じ投票への書き込みは直列になる（QuickVote は1投票あたり最大50人なので許容）。別の投票は並行して進む。</text>
+  <text x="20" y="494" font-size="14" fill="#7a8099">シーケンスが悪いのではなく、「採番した順 = コミットされる順」が保証されないことが問題。</text>
+</svg>

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" font-family="Noto Sans JP, sans-serif" role="img" aria-label="QuickVoteのSecurityFilterChainに並ぶフィルタ12個の順番。自作は2つ、認可は最後">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+  </defs>
+  <rect x="20" y="14" width="220" height="40" rx="8" fill="#7a809922" stroke="#7a8099"/>
+  <text x="130" y="40" font-size="15" text-anchor="middle" fill="#7a8099">Tomcat（リクエストを受ける）</text>
+  <line x1="240" y1="34" x2="290" y2="34" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="290" y="14" width="300" height="40" rx="8" fill="#7a809922" stroke="#7a8099"/>
+  <text x="440" y="40" font-size="15" text-anchor="middle" fill="#7a8099">FilterChainProxy（チェーンを選ぶ）</text>
+  <line x1="440" y1="54" x2="440" y2="80" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="20" y="80" width="920" height="560" rx="12" fill="none" stroke="#7a8099" stroke-dasharray="6 5"/>
+  <text x="40" y="104" font-size="14" fill="#7a8099">SecurityFilterChain（上から順に通る。QuickVote の実際の並び）</text>
+  <line x1="36" y1="124" x2="36" y2="610" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+  <g font-size="14">
+    <rect x="56" y="118" width="390" height="34" rx="6" fill="#7a809914" stroke="#7a8099" stroke-width="1"/>
+    <text x="68" y="140" fill="#7a8099">1  DisableEncodeUrlFilter</text>
+    <text x="462" y="140" fill="#7a8099">URLに ;jsessionid を付けさせない</text>
+    <rect x="56" y="158" width="390" height="34" rx="6" fill="#7a809914" stroke="#7a8099" stroke-width="1"/>
+    <text x="68" y="180" fill="#7a8099">2  WebAsyncManagerIntegrationFilter</text>
+    <text x="462" y="180" fill="#7a8099">非同期処理に認証を引き継ぐ橋</text>
+    <rect x="56" y="198" width="390" height="34" rx="6" fill="#14b8a622" stroke="#14b8a6" stroke-width="1"/>
+    <text x="68" y="220" fill="#14b8a6">3  SecurityContextHolderFilter</text>
+    <text x="462" y="220" fill="#14b8a6">「誰か」の置き場を用意し、最後に片付ける</text>
+    <rect x="56" y="238" width="390" height="34" rx="6" fill="#7a809914" stroke="#7a8099" stroke-width="1"/>
+    <text x="68" y="260" fill="#7a8099">4  HeaderWriterFilter</text>
+    <text x="462" y="260" fill="#7a8099">セキュリティヘッダーを応答に付ける（第34章）</text>
+    <rect x="56" y="278" width="390" height="34" rx="6" fill="#14b8a622" stroke="#14b8a6" stroke-width="1"/>
+    <text x="68" y="300" fill="#14b8a6">5  CsrfFilter</text>
+    <text x="462" y="300" fill="#14b8a6">更新系にトークンを要求する（第34章）</text>
+    <rect x="56" y="318" width="390" height="34" rx="6" fill="#ff6d3a33" stroke="#ff6d3a" stroke-width="2"/>
+    <text x="68" y="340" fill="#ff6d3a" font-weight="700">6  RateLimitFilter（自作）</text>
+    <text x="462" y="340" fill="#ff6d3a" font-weight="700">試行回数を数えて 429 を返す（第35章）</text>
+    <rect x="56" y="358" width="390" height="34" rx="6" fill="#7a809914" stroke="#7a8099" stroke-width="1"/>
+    <text x="68" y="380" fill="#7a8099">7  SecurityContextHolderAwareRequestFilter</text>
+    <text x="462" y="380" fill="#7a8099">getUserPrincipal() などを使えるようにする</text>
+    <rect x="56" y="398" width="390" height="34" rx="6" fill="#ff6d3a33" stroke="#ff6d3a" stroke-width="2"/>
+    <text x="68" y="420" fill="#ff6d3a" font-weight="700">8  VisitorAuthenticationFilter（自作）</text>
+    <text x="462" y="420" fill="#ff6d3a" font-weight="700">Cookie から訪問者を特定して載せる（第32章）</text>
+    <rect x="56" y="438" width="390" height="34" rx="6" fill="#14b8a622" stroke="#14b8a6" stroke-width="1"/>
+    <text x="68" y="460" fill="#14b8a6">9  AnonymousAuthenticationFilter</text>
+    <text x="462" y="460" fill="#14b8a6">誰も特定できていなければ「匿名」を載せる</text>
+    <rect x="56" y="478" width="390" height="34" rx="6" fill="#7a809914" stroke="#7a8099" stroke-width="1"/>
+    <text x="68" y="500" fill="#7a8099">10  SessionManagementFilter</text>
+    <text x="462" y="500" fill="#7a8099">新しい認証を検知する（第32章で再訪）</text>
+    <rect x="56" y="518" width="390" height="34" rx="6" fill="#14b8a622" stroke="#14b8a6" stroke-width="1"/>
+    <text x="68" y="540" fill="#14b8a6">11  ExceptionTranslationFilter</text>
+    <text x="462" y="540" fill="#14b8a6">拒否の例外を 401 / 403 に変える</text>
+    <rect x="56" y="558" width="390" height="34" rx="6" fill="#14b8a633" stroke="#14b8a6" stroke-width="2"/>
+    <text x="68" y="580" fill="#14b8a6" font-weight="700">12  AuthorizationFilter</text>
+    <text x="462" y="580" fill="#14b8a6" font-weight="700">authorizeHttpRequests の判定はここ</text>
+  </g>
+  <line x1="440" y1="640" x2="440" y2="660" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="230" y="662" width="420" height="40" rx="8" fill="#7a809922" stroke="#7a8099"/>
+  <text x="440" y="688" font-size="15" text-anchor="middle" fill="#7a8099">DispatcherServlet → Controller（第12章）</text>
+  <g font-size="14">
+    <rect x="690" y="668" width="14" height="14" fill="#ff6d3a33" stroke="#ff6d3a"/>
+    <text x="710" y="680" fill="#ff6d3a">自作</text>
+    <rect x="760" y="668" width="14" height="14" fill="#14b8a622" stroke="#14b8a6"/>
+    <text x="780" y="680" fill="#14b8a6">この部の主役</text>
+    <rect x="690" y="690" width="14" height="14" fill="#7a809914" stroke="#7a8099"/>
+    <text x="710" y="702" fill="#7a8099">標準（普段は気にしない）</text>
+  </g>
+</svg>

@@ -1,0 +1,17 @@
+# 開発用の PostgreSQL。./mvnw spring-boot:run で Spring Boot が自動で起動する（spring-boot-docker-compose）。
+# ホスト側のポートは 25419（第3部のラボ用。完成形 code/quickvote は 15432）。
+# 資格情報は開発用の使い捨てで、本番では使わない。
+services:
+  postgres:
+    image: 'postgres:18-alpine'
+    environment:
+      POSTGRES_DB: quickvote
+      POSTGRES_USER: quickvote
+      POSTGRES_PASSWORD: quickvote
+    ports:
+      - '25419:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U quickvote -d quickvote']
+      interval: 5s
+      timeout: 3s
+      retries: 10

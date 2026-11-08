@@ -1,0 +1,35 @@
+ 0.5s B| BEGIN;
+ 0.5s B| BEGIN
+ 0.5s A| BEGIN;
+ 0.5s A| BEGIN
+ 0.9s A| SELECT id FROM polls WHERE id = 1 FOR UPDATE;
+ 0.9s A|  id 
+ 0.9s A| ----
+ 0.9s A|   1
+ 0.9s A| (1 row)
+ 1.3s A| SELECT count(*) FROM participants WHERE poll_id = 1;
+ 1.3s A|  count 
+ 1.3s A| -------
+ 1.3s A|     49
+ 1.3s A| (1 row)
+ 1.7s B| -- 鍵を取らないので、待たされずに数えられる
+ 2.1s B| SELECT count(*) FROM participants WHERE poll_id = 1;
+ 2.1s B|  count 
+ 2.1s B| -------
+ 2.1s B|     49
+ 2.1s B| (1 row)
+ 2.5s A| INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 50, 'MEMBER', now());
+ 2.5s A| INSERT 0 1
+ 2.9s B| INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 51, 'HOST', now());
+ 3.4s A| COMMIT;
+ 3.4s A| COMMIT
+ 3.4s B| INSERT 0 1
+ 3.7s B| COMMIT;
+ 3.7s B| COMMIT
+ 4.2s A| SELECT count(*) FROM participants WHERE poll_id = 1;
+ 4.2s A|  count 
+ 4.2s A| -------
+ 4.2s A|     51
+ 4.2s A| (1 row)
+ 5.1s A| \q
+ 5.1s B| \q

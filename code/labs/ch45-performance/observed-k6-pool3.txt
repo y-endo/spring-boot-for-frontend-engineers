@@ -1,0 +1,54 @@
+
+
+  █ THRESHOLDS 
+
+    http_req_duration{kind:detail}
+    ✓ 'p(95)<300' p(95)=289.86ms
+    ✓ 'p(99)<800' p(99)=453.38ms
+
+    http_req_duration{kind:vote}
+    ✗ 'p(95)<300' p(95)=311ms
+    ✓ 'p(99)<800' p(99)=614.15ms
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 9428    311.648574/s
+    checks_succeeded...: 100.00% 9428 out of 9428
+    checks_failed......: 0.00%   0 out of 9428
+
+    ✓ 投票を作れた
+    ✓ 参加できた
+    ✓ 投票できた
+    ✓ 詳細を取得できた
+
+    HTTP
+    http_req_duration..............: avg=155.35ms med=133.76ms p(90)=250.86ms p(95)=307.81ms p(99)=599.45ms max=1.01s  
+      { expected_response:true }...: avg=155.35ms med=133.76ms p(90)=250.86ms p(95)=307.81ms p(99)=599.45ms max=1.01s  
+      { kind:detail }..............: avg=147.53ms med=129.03ms p(90)=240.91ms p(95)=289.86ms p(99)=453.38ms max=1.01s  
+      { kind:vote }................: avg=159.88ms med=138.04ms p(90)=255.45ms p(95)=311ms    p(99)=614.15ms max=968.2ms
+    http_req_failed................: 0.00%  0 out of 9478
+    http_reqs......................: 9478   313.301356/s
+
+    EXECUTION
+    iteration_duration.............: avg=311.11ms med=276.11ms p(90)=456.37ms p(95)=572.29ms p(99)=919.23ms max=1.31s  
+    iterations.....................: 4738   156.617623/s
+    vus............................: 49     min=49        max=49
+    vus_max........................: 49     min=49        max=49
+
+    NETWORK
+    data_received..................: 6.5 MB 216 kB/s
+    data_sent......................: 2.7 MB 89 kB/s
+
+
+
+time="2026-11-07T23:56:11Z" level=error msg="thresholds on metrics 'http_req_duration{kind:vote}' have been crossed"
+sample +1x5s  hikari active=3 pending=46  app cpu=104.64%
+sample +2x5s  hikari active=3 pending=47  app cpu=93.01%
+sample +3x5s  hikari active=3 pending=46  app cpu=146.65%
+sample +4x5s  hikari active=3 pending=47  app cpu=65.82%
+sample +5x5s  hikari active=1 pending=0  app cpu=0.11%
+sample +6x5s  hikari active=1 pending=0  app cpu=0.11%

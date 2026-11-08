@@ -1,0 +1,171 @@
+site_name: ゼロからプロへ Java × Spring Boot バックエンド
+site_description: フロントエンドエンジニアのための、Java 25 / Spring Boot 4 / Spring Security / PostgreSQL 実践教材
+site_url: https://y-endo.github.io/spring-boot-for-frontend-engineers/
+repo_url: https://github.com/y-endo/spring-boot-for-frontend-engineers
+repo_name: y-endo/spring-boot-for-frontend-engineers
+edit_uri: ""
+copyright: 本文・コード：CC BY 4.0 ／ 動画音声：VOICEVOX:冥鳴ひまり
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  language: ja
+  font: false
+  icon:
+    logo: material/coffee-outline
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep orange
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: ダークモードに切り替え
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep orange
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: ライトモードに切り替え
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - navigation.path
+    - navigation.tracking
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+plugins:
+  - search:
+      lang: ja
+  - glightbox
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.critic
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - ホーム: index.md
+  - 第0部 はじめに:
+    - part00/index.md
+    - "第0章 この教材の歩き方": part00/ch00-how-to-learn.md
+    - "第1章 開発環境を整える": part00/ch01-setup.md
+  - 第1部 TypeScript脳で読むJava:
+    - part01/index.md
+    - "第2章 Javaが動くまで：JVM・コンパイル・main": part01/ch02-how-java-runs.md
+    - "第3章 型の世界：名前で決まる型": part01/ch03-types.md
+    - "第4章 データの形：record・enum・sealed・switch": part01/ch04-data-shapes.md
+    - "第5章 nullと例外": part01/ch05-null-exceptions.md
+    - "第6章 コレクション・ジェネリクス・ラムダ・Stream": part01/ch06-collections-streams.md
+    - "第7章 値の落とし穴：equals・数値・時刻・文字": part01/ch07-value-pitfalls.md
+    - "第8章 JUnitで最初のテスト": part01/ch08-junit.md
+    - "第9章 スレッドと共有状態：サーバーは同時に動く": part01/ch09-threads.md
+  - 第2部 Spring Bootの心臓部:
+    - part02/index.md
+    - "第10章 Spring Bootとは：最初のAPIと起動の裏側": part02/ch10-spring-boot.md
+    - "第11章 DIコンテナとBean": part02/ch11-di-container.md
+    - "第12章 リクエストの旅": part02/ch12-request-journey.md
+    - "第13章 API契約：DTOとJSON": part02/ch13-api-contract.md
+    - "第14章 入力検証とエラーの設計": part02/ch14-validation-errors.md
+    - "第15章 設定・プロファイル・秘密": part02/ch15-configuration.md
+    - "第16章 APIをテストする": part02/ch16-api-testing.md
+  - 第3部 PostgreSQLに正しく保存する:
+    - part03/index.md
+    - "第17章 PostgreSQLとFlyway：スキーマをコードで育てる": part03/ch17-postgres-flyway.md
+    - "第18章 データモデルと制約設計": part03/ch18-data-modeling.md
+    - "第19章 JdbcClientでSQLを書く": part03/ch19-jdbcclient.md
+    - "第20章 検索・ページング・インデックス": part03/ch20-query-index.md
+    - "第21章 実PostgreSQLでテストする": part03/ch21-testcontainers.md
+  - 第4部 トランザクションと同時実行:
+    - part04/index.md
+    - "第22章 トランザクションの境界": part04/ch22-transactions.md
+    - "第23章 @Transactionalの正体：プロキシ": part04/ch23-transactional-proxy.md
+    - "第24章 スレッドとコネクションプール": part04/ch24-connection-pool.md
+    - "第25章 上限を守る：同時参加の競合とロック": part04/ch25-locking.md
+    - "第26章 競合の別解と並行性テスト": part04/ch26-concurrency-testing.md
+  - 第5部 再送・期限・定期処理:
+    - part05/index.md
+    - "第27章 冪等性：応答が消えても二重登録しない": part05/ch27-idempotency.md
+    - "第28章 期限と時刻を設計する": part05/ch28-time-expiry.md
+    - "第29章 定期処理：失敗しても続けられるジョブ": part05/ch29-scheduling.md
+  - 第6部 匿名利用者と認可:
+    - part06/index.md
+    - "第30章 認証・識別・認可を分ける": part06/ch30-authz-design.md
+    - "第31章 Spring Securityの地図": part06/ch31-spring-security.md
+    - "第32章 匿名セッション：Cookieで利用主体を識別する": part06/ch32-anonymous-session.md
+    - "第33章 招待・参加コード・総当たり対策": part06/ch33-invites-brute-force.md
+    - "第34章 ブラウザとの境界：Cookie属性・CSRF・CORS・HTTPS": part06/ch34-browser-boundary.md
+    - "第35章 レート制限と資源の保護": part06/ch35-rate-limiting.md
+  - 第7部 リアルタイム通知:
+    - part07/index.md
+    - "第36章 SSE入門": part07/ch36-sse.md
+    - "第37章 取りこぼしを防ぐ：イベント履歴とLast-Event-ID": part07/ch37-event-history.md
+    - "第38章 2台構成で起きること": part07/ch38-multi-instance.md
+  - 第8部 JPAを理解して使い分ける:
+    - part08/index.md
+    - "第39章 JPAは何を肩代わりするのか": part08/ch39-jpa-basics.md
+    - "第40章 N+1と取得戦略": part08/ch40-n-plus-one.md
+    - "第41章 SQLとJPAの使い分けとレビュー": part08/ch41-sql-vs-jpa.md
+  - 第9部 運用：公開後に責任を持つ:
+    - part09/index.md
+    - "第42章 Dockerでパッケージング": part09/ch42-docker.md
+    - "第43章 ログ：あとから原因を追えるように": part09/ch43-logging.md
+    - "第44章 メトリクスとヘルスチェック": part09/ch44-metrics.md
+    - "第45章 性能と堅牢性：タイムアウト・負荷・停止": part09/ch45-performance.md
+    - "第46章 リリースと復旧": part09/ch46-release.md
+  - 第10部 卒業:
+    - part10/index.md
+    - "第47章 AIと組むレビュー術": part10/ch47-ai-review.md
+    - "第48章 卒業制作：自分のサービスを設計する": part10/ch48-capstone.md
+  - 付録:
+    - appendix/index.md
+    - TypeScript ↔ Java 対応表: appendix/ts-java.md
+    - Spring Boot 3→4 差分カード: appendix/boot3-to-4.md
+    - Gradle 対訳: appendix/gradle.md
+    - ログイン型認証の概観: appendix/login-auth.md
+    - トラブルシューティング: appendix/troubleshooting.md
+    - 用語集: appendix/glossary.md

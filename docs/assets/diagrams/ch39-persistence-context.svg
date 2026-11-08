@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">永続コンテキストが変更を見つける仕組み</title>
+  <desc id="d">findByIdでPostgreSQLから読んだ行は、永続コンテキスト（レジのカゴ）に、読んだ時点のスナップショットと、いまの値の2つとして入る。setterで変えるのはいまの値だけ。コミットの直前に2つを比べ、違う列があればUPDATEを発行する。</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+    <marker id="arrO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6d3a"/>
+    </marker>
+  </defs>
+
+  <!-- 列見出し -->
+  <text x="20" y="30" font-size="16" font-weight="700" fill="#7a8099">Javaのコード</text>
+  <text x="340" y="30" font-size="16" font-weight="700" fill="#7a8099">永続コンテキスト（レジのカゴ）</text>
+  <text x="760" y="30" font-size="16" font-weight="700" fill="#7a8099">PostgreSQL</text>
+
+  <!-- カゴ -->
+  <rect x="320" y="44" width="380" height="470" rx="14" fill="#14b8a622" stroke="#14b8a6" stroke-width="2" stroke-dasharray="6 4"/>
+
+  <!-- DB -->
+  <rect x="740" y="44" width="200" height="470" rx="14" fill="#7a809911" stroke="#7a8099" stroke-width="2"/>
+  <text x="840" y="80" font-size="14" text-anchor="middle" fill="#7a8099">polls テーブル</text>
+
+  <!-- ステップ1 -->
+  <rect x="20" y="70" width="270" height="76" rx="8" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="1.5"/>
+  <text x="34" y="96" font-size="14" font-weight="700" fill="#ff6d3a">① 読む</text>
+  <text x="34" y="120" font-size="14" fill="#7a8099" font-family="monospace">poll = repo.findById(1)</text>
+  <line x1="290" y1="108" x2="740" y2="108" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="515" y="100" font-size="14" text-anchor="middle" fill="#7a8099">SELECT ... WHERE id=1</text>
+
+  <!-- DB 行 -->
+  <rect x="756" y="96" width="168" height="48" rx="6" fill="#7a809922" stroke="#7a8099"/>
+  <text x="840" y="116" font-size="14" text-anchor="middle" fill="#7a8099">id=1</text>
+  <text x="840" y="135" font-size="14" text-anchor="middle" fill="#7a8099">title=朝食は何がいい？</text>
+
+  <!-- カゴの中: スナップショット -->
+  <rect x="340" y="156" width="340" height="62" rx="8" fill="#7a809922" stroke="#7a8099"/>
+  <text x="352" y="180" font-size="14" font-weight="700" fill="#7a8099">読んだ時の値（スナップショット）</text>
+  <text x="352" y="204" font-size="14" fill="#7a8099">title = 朝食は何がいい？</text>
+  <!-- カゴの中: 現在 -->
+  <rect x="340" y="230" width="340" height="62" rx="8" fill="#ff6d3a22" stroke="#ff6d3a"/>
+  <text x="352" y="254" font-size="14" font-weight="700" fill="#ff6d3a">いまの値（Entityオブジェクト）</text>
+  <text x="352" y="278" font-size="14" fill="#7a8099">title = 昼食は何がいい？ ← ② で変わった</text>
+  <line x1="740" y1="136" x2="690" y2="170" stroke="#7a8099" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="716" y="168" font-size="13" fill="#7a8099">コピー</text>
+
+  <!-- ステップ2 -->
+  <rect x="20" y="238" width="270" height="76" rx="8" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="1.5"/>
+  <text x="34" y="264" font-size="14" font-weight="700" fill="#ff6d3a">② 書き換える</text>
+  <text x="34" y="288" font-size="14" fill="#7a8099" font-family="monospace">poll.rename("昼食…")</text>
+  <line x1="290" y1="262" x2="338" y2="262" stroke="#ff6d3a" stroke-width="2" marker-end="url(#arrO)"/>
+  <text x="34" y="306" font-size="13" fill="#7a8099">（SQLは出ない。いまの値だけが変わる）</text>
+
+  <!-- ステップ3 -->
+  <rect x="20" y="380" width="270" height="76" rx="8" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="1.5"/>
+  <text x="34" y="406" font-size="14" font-weight="700" fill="#ff6d3a">③ メソッドを抜ける</text>
+  <text x="34" y="430" font-size="14" fill="#7a8099">@Transactional の COMMIT</text>
+  <line x1="290" y1="418" x2="338" y2="418" stroke="#ff6d3a" stroke-width="2" marker-end="url(#arrO)"/>
+
+  <!-- 比較 -->
+  <rect x="340" y="350" width="340" height="140" rx="8" fill="#ff6d3a11" stroke="#ff6d3a"/>
+  <text x="352" y="376" font-size="14" font-weight="700" fill="#ff6d3a">flush：2つを比べる</text>
+  <text x="352" y="402" font-size="14" fill="#7a8099">スナップショット title = 朝食…</text>
+  <text x="352" y="424" font-size="14" fill="#7a8099">いまの値         title = 昼食…</text>
+  <text x="352" y="452" font-size="14" font-weight="700" fill="#ff6d3a">違う → UPDATE を発行</text>
+  <text x="352" y="476" font-size="13" fill="#7a8099">（同じなら SQL は出ない）</text>
+
+  <path d="M680,430 L740,430" stroke="#ff6d3a" stroke-width="2" marker-end="url(#arrO)" fill="none"/>
+  <text x="710" y="420" font-size="13" text-anchor="middle" fill="#ff6d3a">UPDATE</text>
+  <rect x="756" y="400" width="168" height="62" rx="6" fill="#ff6d3a22" stroke="#ff6d3a"/>
+  <text x="840" y="424" font-size="14" text-anchor="middle" fill="#7a8099">id=1</text>
+  <text x="840" y="446" font-size="14" text-anchor="middle" fill="#ff6d3a">title=昼食は何がいい？</text>
+
+  <text x="480" y="540" font-size="14" text-anchor="middle" fill="#7a8099">カゴの外（トランザクションの外）で書き換えても、このスナップショットとの比較は行われない</text>
+</svg>

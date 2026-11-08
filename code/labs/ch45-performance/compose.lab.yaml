@@ -1,0 +1,19 @@
+# 第45章の実験用の上書き。code/quickvote/compose.app.yaml を土台に、ポートの付け替えと、資源の制限を足す。
+#   POOL=10 docker compose -p qv45 -f ../../quickvote/compose.app.yaml -f compose.lab.yaml up -d --build
+services:
+  postgres:
+    ports: !override
+      - '25445:5432'
+  app:
+    ports: !override
+      - '18045:8080'
+    # 制限を決めて負荷試験をする（第42章: 制限なしだとヒープ上限がホスト全体になる）
+    mem_limit: 768m
+    cpus: 2
+    environment:
+      # HikariCP のプールの大きさ。実験で変える（環境変数 POOL。省略時は既定の 10）
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: ${POOL:-10}
+      # 接続先 URL。DB_OPTIONS で、接続ごとの PostgreSQL の設定（statement_timeout など）を足せる
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/quickvote${DB_OPTIONS:-}
+      # Hikari の接続取得のタイムアウト（ミリ秒）。既定は 30000
+      SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT: ${HIKARI_TIMEOUT:-30000}

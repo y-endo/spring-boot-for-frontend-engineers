@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">Javaサーバーの層構造</title>
+  <desc id="d">下から順に、OS、JVM、Tomcat、Spring Framework、Spring Boot、自分のコードの6層。Spring Bootは下の層を配線して、自分のコードだけを書けば動く状態にする。</desc>
+
+  <!-- 左：積層 -->
+  <g font-size="16" font-weight="700">
+    <rect x="30" y="30" width="470" height="70" rx="10" fill="#ff6d3a" fill-opacity="0.30" stroke="#ff6d3a" stroke-width="2"/>
+    <text x="50" y="58" fill="#7a8099">自分のコード</text>
+    <text x="50" y="84" font-size="14" font-weight="400" fill="#7a8099">Controller / Service / Repository / record</text>
+
+    <rect x="30" y="108" width="470" height="70" rx="10" fill="#14b8a6" fill-opacity="0.30" stroke="#14b8a6" stroke-width="2"/>
+    <text x="50" y="136" fill="#7a8099">Spring Boot 4.1</text>
+    <text x="50" y="162" font-size="14" font-weight="400" fill="#7a8099">起動・自動構成・スターター・設定ファイル・バージョン表（BOM）</text>
+
+    <rect x="30" y="186" width="470" height="70" rx="10" fill="#7a8099" fill-opacity="0.18" stroke="#7a8099" stroke-width="2"/>
+    <text x="50" y="214" fill="#7a8099">Spring Framework 7（Spring MVC ほか）</text>
+    <text x="50" y="240" font-size="14" font-weight="400" fill="#7a8099">DIコンテナ・DispatcherServlet・検証・テスト支援</text>
+
+    <rect x="30" y="264" width="470" height="70" rx="10" fill="#7a8099" fill-opacity="0.18" stroke="#7a8099" stroke-width="2"/>
+    <text x="50" y="292" fill="#7a8099">Tomcat 11（Servlet コンテナ）</text>
+    <text x="50" y="318" font-size="14" font-weight="400" fill="#7a8099">HTTPを受ける・スレッドプール・Servlet / Filter の実行</text>
+
+    <rect x="30" y="342" width="470" height="70" rx="10" fill="#7a8099" fill-opacity="0.18" stroke="#7a8099" stroke-width="2"/>
+    <text x="50" y="370" fill="#7a8099">JVM（Java 25）</text>
+    <text x="50" y="396" font-size="14" font-weight="400" fill="#7a8099">バイトコードを実行・メモリ管理・スレッド</text>
+
+    <rect x="30" y="420" width="470" height="70" rx="10" fill="#7a8099" fill-opacity="0.10" stroke="#7a8099" stroke-width="2" stroke-dasharray="6 4"/>
+    <text x="50" y="448" fill="#7a8099">OS（Windows / Linux）</text>
+    <text x="50" y="474" font-size="14" font-weight="400" fill="#7a8099">ソケット・ファイル・プロセス</text>
+  </g>
+
+  <!-- 右：Node との対応 -->
+  <g font-size="14" fill="#7a8099">
+    <text x="540" y="52" font-size="16" font-weight="700">Node / TypeScript で言うと</text>
+    <line x1="500" y1="65" x2="540" y2="65" stroke="#ff6d3a" stroke-width="2"/>
+    <text x="548" y="70">あなたが書く app.ts / routes / services</text>
+
+    <line x1="500" y1="143" x2="540" y2="143" stroke="#14b8a6" stroke-width="2"/>
+    <text x="548" y="140">create-next-app が作る土台 ＋ package.json の</text>
+    <text x="548" y="160">依存と設定を一括で決めてくれる仕組み</text>
+
+    <line x1="500" y1="221" x2="540" y2="221" stroke="#7a8099" stroke-width="2"/>
+    <text x="548" y="218">Express や Nest のようなフレームワーク本体</text>
+    <text x="548" y="238">＋ 依存性注入（NestのDI）</text>
+
+    <line x1="500" y1="299" x2="540" y2="299" stroke="#7a8099" stroke-width="2"/>
+    <text x="548" y="296">Node の http モジュール（ただし</text>
+    <text x="548" y="316">1リクエスト1スレッドで動かす）</text>
+
+    <line x1="500" y1="377" x2="540" y2="377" stroke="#7a8099" stroke-width="2"/>
+    <text x="548" y="374">Node.js（V8）そのもの</text>
+  </g>
+
+  <!-- 下：1つのjar -->
+  <rect x="30" y="512" width="900" height="64" rx="10" fill="none" stroke="#ff6d3a" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="50" y="540" font-size="16" font-weight="700" fill="#ff6d3a">配るもの：ひとつの jar</text>
+  <text x="50" y="564" font-size="14" fill="#7a8099">自分のコード・Spring・Tomcat を全部まとめた1ファイル。JVM があれば「java -jar」だけで動く（Tomcat を別に入れない）。</text>
+</svg>

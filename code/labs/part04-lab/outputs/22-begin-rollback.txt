@@ -1,0 +1,51 @@
+ 0.6s B| SELECT count(*) FROM participants WHERE poll_id = 2;
+ 0.6s B|  count 
+ 0.6s B| -------
+ 0.6s B|      1
+ 0.6s B| (1 row)
+ 0.6s A| BEGIN;
+ 0.6s A| BEGIN
+ 0.9s A| INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (2, 51, 'MEMBER', now());
+ 0.9s A| INSERT 0 1
+ 1.3s A| SELECT count(*) FROM participants WHERE poll_id = 2;
+ 1.3s A|  count 
+ 1.3s A| -------
+ 1.3s A|      2
+ 1.3s A| (1 row)
+ 1.7s B| -- Bから見ると、Aの挿入はまだ見えない
+ 2.1s B| SELECT count(*) FROM participants WHERE poll_id = 2;
+ 2.1s B|  count 
+ 2.1s B| -------
+ 2.1s B|      1
+ 2.1s B| (1 row)
+ 2.5s B| SELECT state, left(query, 32) AS last_query FROM pg_stat_activity WHERE application_name = 'psql' AND pid <> pg_backend_pid();
+ 2.5s B|         state        |            last_query            
+ 2.5s B| ---------------------+----------------------------------
+ 2.5s B|  idle in transaction | SELECT count(*) FROM participant
+ 2.5s B| (1 row)
+ 2.9s A| ROLLBACK;
+ 2.9s A| ROLLBACK
+ 3.3s B| SELECT count(*) FROM participants WHERE poll_id = 2;
+ 3.3s B|  count 
+ 3.3s B| -------
+ 3.3s B|      1
+ 3.3s B| (1 row)
+ 3.7s A| -- もう一度。今度は COMMIT
+ 4.1s A| BEGIN;
+ 4.1s A| BEGIN
+ 4.5s A| INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (2, 51, 'MEMBER', now());
+ 4.5s A| INSERT 0 1
+ 4.9s B| SELECT count(*) FROM participants WHERE poll_id = 2;
+ 4.9s B|  count 
+ 4.9s B| -------
+ 4.9s B|      1
+ 4.9s B| (1 row)
+ 5.3s A| COMMIT;
+ 5.6s A| COMMIT
+ 5.7s B| SELECT count(*) FROM participants WHERE poll_id = 2;
+ 5.7s B|  count 
+ 5.7s B| -------
+ 5.7s B|      2
+ 5.7s B| (1 row)
+ 6.6s A| \q
+ 6.6s B| \q

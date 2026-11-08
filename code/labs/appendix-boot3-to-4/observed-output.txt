@@ -1,0 +1,28 @@
+## use-jackson2-defaults=true
+FAIL_ON_UNKNOWN_PROPERTIES = false
+FAIL_ON_NULL_FOR_PRIMITIVES = false
+SORT_PROPERTIES_ALPHABETICALLY = false
+WRITE_DATES_AS_TIMESTAMPS = false
+unknown   : accepted
+null->prim: accepted
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.794 s -- in com.example.boot34.Jackson2CompatTest
+## 素の JsonMapper.builder().build()
+FAIL_ON_UNKNOWN_PROPERTIES = false
+FAIL_ON_NULL_FOR_PRIMITIVES = true
+SORT_PROPERTIES_ALPHABETICALLY = true
+WRITE_DATES_AS_TIMESTAMPS = false
+pojo unknown: accepted
+unknown   : accepted
+null->prim: rejected (MismatchedInputException)
+## Spring Boot が構成した JsonMapper
+FAIL_ON_UNKNOWN_PROPERTIES = false
+FAIL_ON_NULL_FOR_PRIMITIVES = true
+SORT_PROPERTIES_ALPHABETICALLY = true
+WRITE_DATES_AS_TIMESTAMPS = false
+pojo unknown: accepted
+unknown   : accepted
+null->prim: rejected (MismatchedInputException)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.556 s -- in com.example.boot34.JacksonDefaultsTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.019 s -- in com.example.boot34.NewTestFormsTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

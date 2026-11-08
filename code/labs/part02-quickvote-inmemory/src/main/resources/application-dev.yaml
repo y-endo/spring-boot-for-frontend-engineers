@@ -1,0 +1,5 @@
+# 開発用。--spring.profiles.active=dev で有効になる。
+quickvote:
+  demo:
+    seed: true
+    members: 3

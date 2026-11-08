@@ -1,0 +1,43 @@
+### 制限なし（Docker Desktop の VM 全体 約15.6GiB が見える）
+      int ActiveProcessorCount                     = -1                                        {product} {default}
+   size_t MaxHeapSize                              = 4181721088                                {product} {ergonomic}
+   double MaxRAMPercentage                         = 25.000000                                 {product} {default}
+     bool UseG1GC                                  = true                                      {product} {ergonomic}
+     bool UseSerialGC                              = false                                     {product} {default}
+### -m 512m（既定の MaxRAMPercentage=25）
+      int ActiveProcessorCount                     = -1                                        {product} {default}
+   size_t MaxHeapSize                              = 134217728                                 {product} {ergonomic}
+   double MaxRAMPercentage                         = 25.000000                                 {product} {default}
+     bool UseG1GC                                  = false                                     {product} {default}
+     bool UseSerialGC                              = true                                      {product} {ergonomic}
+### -m 512m -XX:MaxRAMPercentage=75
+      int ActiveProcessorCount                     = -1                                        {product} {default}
+   size_t MaxHeapSize                              = 402653184                                 {product} {ergonomic}
+   double MaxRAMPercentage                         = 75.000000                                 {product} {environment}
+     bool UseG1GC                                  = false                                     {product} {default}
+     bool UseSerialGC                              = true                                      {product} {ergonomic}
+### -m 512m --cpus 1（CPU 1個だと G1 ではなく Serial が選ばれる）
+      int ActiveProcessorCount                     = -1                                        {product} {default}
+   size_t MaxHeapSize                              = 402653184                                 {product} {ergonomic}
+   double MaxRAMPercentage                         = 75.000000                                 {product} {environment}
+     bool UseG1GC                                  = false                                     {product} {default}
+     bool UseSerialGC                              = true                                      {product} {ergonomic}
+### -m 2g --cpus 2
+      int ActiveProcessorCount                     = -1                                        {product} {default}
+   size_t MaxHeapSize                              = 1610612736                                {product} {ergonomic}
+   double MaxRAMPercentage                         = 75.000000                                 {product} {environment}
+     bool UseG1GC                                  = true                                      {product} {ergonomic}
+     bool UseSerialGC                              = false                                     {product} {default}
+### JVM が見ているコンテナ情報
+Operating System Metrics:
+    Provider: cgroupv2
+    Effective CPU Count: 2
+    CPU Period: 100000us
+    CPU Quota: 150000us
+    CPU Shares: -1
+    List of Processors: N/A
+    List of Effective Processors, 16 total: 
+    0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 
+    List of Memory Nodes: N/A
+    List of Available Memory Nodes, 1 total: 
+    0 

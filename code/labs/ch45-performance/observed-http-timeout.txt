@@ -1,0 +1,2 @@
+(1) タイムアウトなし: 5.0 秒たっても 戻らない（スレッドは待ち続けている）
+(2) 期限あり: 2.0 秒で java.net.http.HttpTimeoutException

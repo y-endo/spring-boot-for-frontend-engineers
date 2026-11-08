@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" font-family="Noto Sans JP, sans-serif" role="img" aria-label="トークンバケット。容量10のバケツに、6秒に1個ずつトークンが補充され、リクエストが1個ずつ使う。空なら429">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+    <marker id="arrO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6d3a"/>
+    </marker>
+  </defs>
+
+  <!-- 補充 -->
+  <text x="150" y="34" font-size="16" text-anchor="middle" fill="#14b8a6" font-weight="700">補充：6秒に1個</text>
+  <text x="150" y="56" font-size="14" text-anchor="middle" fill="#14b8a6">（毎分10個）</text>
+  <line x1="140" y1="66" x2="140" y2="116" stroke="#14b8a6" stroke-width="3" marker-end="url(#arr)"/>
+
+  <!-- バケツ -->
+  <path d="M60,120 L60,330 Q60,350 80,350 L200,350 Q220,350 220,330 L220,120" fill="none" stroke="#7a8099" stroke-width="3"/>
+  <text x="140" y="378" font-size="15" text-anchor="middle" fill="#7a8099">バケツ（容量 10）</text>
+  <!-- トークン（満タン 10 個を 3列で…ここでは 7 個が入っている状態） -->
+  <g fill="#14b8a655" stroke="#14b8a6" stroke-width="2">
+    <circle cx="90" cy="330" r="14"/><circle cx="125" cy="330" r="14"/><circle cx="160" cy="330" r="14"/><circle cx="195" cy="330" r="14"/>
+    <circle cx="107" cy="298" r="14"/><circle cx="142" cy="298" r="14"/><circle cx="177" cy="298" r="14"/>
+  </g>
+  <text x="140" y="262" font-size="14" text-anchor="middle" fill="#7a8099">いま 7 個</text>
+
+  <!-- 消費 -->
+  <line x1="220" y1="260" x2="330" y2="260" stroke="#ff6d3a" stroke-width="3" marker-end="url(#arrO)"/>
+  <text x="275" y="244" font-size="14" text-anchor="middle" fill="#ff6d3a">1回 = 1個</text>
+  <rect x="340" y="226" width="170" height="68" rx="8" fill="#ff6d3a22" stroke="#ff6d3a"/>
+  <text x="425" y="254" font-size="15" text-anchor="middle" fill="#ff6d3a">取れた → 通す</text>
+  <text x="425" y="278" font-size="15" text-anchor="middle" fill="#ff6d3a">空 → 429</text>
+
+  <!-- 表 -->
+  <g font-size="14" fill="#7a8099">
+    <text x="560" y="40" font-size="15" font-weight="700">容量10・毎分10個の例</text>
+    <line x1="560" y1="50" x2="930" y2="50" stroke="#7a8099"/>
+    <text x="560" y="78">0秒　　10回まとめて → 全部通る</text>
+    <text x="560" y="106">0.1秒　11回目 → 429（Retry-After: 6）</text>
+    <text x="560" y="134">6秒　　1個貯まる → 1回通る</text>
+    <text x="560" y="162">12秒　　もう1個 → 1回通る</text>
+    <text x="560" y="190">60秒　　放置 → 満タンに戻る</text>
+    <line x1="560" y1="208" x2="930" y2="208" stroke="#7a8099"/>
+    <text x="560" y="238" fill="#ff6d3a" font-weight="700">容量 ＝ 一度に許す量（バースト）</text>
+    <text x="560" y="264" fill="#ff6d3a" font-weight="700">補充 ＝ 長い目で見た許容レート</text>
+    <text x="560" y="304">満タンのバケツは「しばらく使われていない」印。</text>
+    <text x="560" y="326">掃除はそれを捨てる（次に来たら満タンから）。</text>
+    <text x="560" y="348">捨てるタイミングを誤ると制限がリセットされる。</text>
+  </g>
+</svg>

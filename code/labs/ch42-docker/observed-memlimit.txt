@@ -1,0 +1,15 @@
+=== -m 256m : started 
+Started QuickvoteApplication in 8.192 seconds
+OOMKilled=false ExitCode=0
+mem=182.8MiB / 256MiB
+=== -m 384m : started 
+Started QuickvoteApplication in 12.504 seconds
+OOMKilled=false ExitCode=0
+mem=187.2MiB / 384MiB
+=== -m 512m : started 
+Started QuickvoteApplication in 11.534 seconds
+OOMKilled=false ExitCode=0
+mem=220.8MiB / 512MiB
+=== -m 128m : 起動して動き続ける（アイドル時）
+=== -m 96m  : 起動したが約26秒後に OOMKilled=true ExitCode=137（Java のログは何も残らない）
+=== -m 64m  : 約3秒で OOMKilled=true ExitCode=137

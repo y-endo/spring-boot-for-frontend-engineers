@@ -1,0 +1,26 @@
+"http-nio-8080-exec-1" #26 [28] daemon prio=5 os_prio=0 cpu=48.04ms elapsed=29.98s tid=0x00007e28791d6930 nid=28 runnable  [0x00007e287ccaf000]
+   java.lang.Thread.State: RUNNABLE
+	at sun.nio.ch.Net.poll(java.base@25.0.5/Native Method)
+	at sun.nio.ch.NioSocketImpl.park(java.base@25.0.5/Unknown Source)
+	at org.postgresql.core.PGStream.receiveChar(PGStream.java:480)
+	at com.example.quickvote.poll.PollRepository.lockByJoinCode(PollRepository.java:84)
+	at com.example.quickvote.poll.PollRepository$$SpringCGLIB$$0.lockByJoinCode(<generated>)
+	at com.example.quickvote.poll.JoinService.join(JoinService.java:44)
+	at com.example.quickvote.poll.JoinService$$SpringCGLIB$$0.join(<generated>)
+	at com.example.quickvote.poll.JoinController.join(JoinController.java:24)
+	at com.example.quickvote.security.VisitorAuthenticationFilter.doFilterInternal(VisitorAuthenticationFilter.java:91)
+	at com.example.quickvote.security.RateLimitFilter.doFilterInternal(RateLimitFilter.java:54)
+	at com.example.quickvote.common.RequestIdFilter.doFilterInternal(RequestIdFilter.java:53)
+
+"http-nio-8080-exec-9" #34 [36] daemon prio=5 os_prio=0 cpu=41.38ms elapsed=29.98s tid=0x00007e28791e0040 nid=36 waiting on condition  [0x00007e287c4af000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+	at jdk.internal.misc.Unsafe.park(java.base@25.0.5/Native Method)
+	- parking to wait for  <0x00000000e928cba0> (a java.util.concurrent.SynchronousQueue$Transferer)
+	at com.zaxxer.hikari.util.ConcurrentBag.borrow(ConcurrentBag.java:163)
+	at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:160)
+	at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:142)
+	at com.example.quickvote.poll.JoinService$$SpringCGLIB$$0.join(<generated>)
+	at com.example.quickvote.poll.JoinController.join(JoinController.java:24)
+	at com.example.quickvote.security.VisitorAuthenticationFilter.doFilterInternal(VisitorAuthenticationFilter.java:91)
+	at com.example.quickvote.security.RateLimitFilter.doFilterInternal(RateLimitFilter.java:54)
+	at com.example.quickvote.common.RequestIdFilter.doFilterInternal(RequestIdFilter.java:53)

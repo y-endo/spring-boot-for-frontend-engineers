@@ -1,0 +1,31 @@
+���[: HTTP 200
+### 1. バックアップ（pg_dump -Fc : カスタム形式。圧縮され、pg_restore で部分復元もできる）
+ダンプのサイズ: 50427 byte
+元のDB: 288 polls / 324 options / 2 votes / 96 visitors / 6 migrations
+--- pg_restore --list の先頭（ダンプの目次）
+219; 1259 16385 TABLE public flyway_schema_history quickvote
+229; 1259 16511 TABLE public idempotency_records quickvote
+231; 1259 16530 TABLE public invites quickvote
+223; 1259 16428 TABLE public options quickvote
+227; 1259 16460 TABLE public participants quickvote
+232; 1259 16557 TABLE public poll_events quickvote
+
+### 2. 復元先として、空のPostgreSQLを別に起動する
+復元前のテーブル数: 0
+
+### 3. 復元（pg_restore）
+pg_restore 終了コード 0
+復元後: 288 polls / 324 options / 2 votes / 96 visitors / 6 migrations
+
+### 4. 復元したDBでアプリを起動する（Flyway はマイグレーションを再実行しない）
+Database: jdbc:postgresql://qv46-restore:5432/quickvote (PostgreSQL 18.6)
+Successfully validated 6 migrations (execution time 00:00.028s)
+Schema "public" is up to date. No migration necessary.
+--- 元のアプリで作った投票を、元の Cookie のまま、復元したアプリで取得する
+HTTP 200
+title = 復元テスト用の投票 / role = HOST / myVote = 337 / options = [('カレー', 1), ('ラーメン', 0)]
+
+# 参考（別の実行で観察）: 5本のマイグレーションしか知らない古いイメージ(qv42-app)を、V6 まで適用済みのDBに向けて起動すると、
+#   Schema "public" has a version (6) that is newer than the latest available migration (5) !
+#   Schema "public" is up to date. No migration necessary.
+# という警告だけで起動し、API も HTTP 200 で動いた（Flyway は止めない）。ロールバック時の「古いアプリ × 新しいスキーマ」がこの状態。

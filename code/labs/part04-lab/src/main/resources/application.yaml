@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: part04-lab
+  datasource:
+    # compose.yaml の PostgreSQL（LAB_DB_PORT 既定 25420）。実験ごとに --spring.datasource.hikari.* で上書きする。
+    url: jdbc:postgresql://localhost:${LAB_DB_PORT:25420}/lab
+    username: lab
+    password: lab
+  threads:
+    virtual:
+      enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+
+server:
+  port: ${LAB_APP_PORT:18022}

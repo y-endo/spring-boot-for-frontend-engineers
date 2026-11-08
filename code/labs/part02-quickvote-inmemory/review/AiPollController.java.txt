@@ -1,0 +1,40 @@
+package com.example.quickvote.poll;
+
+import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class AiPollController {
+
+    @Autowired
+    private PollRepository pollRepository;
+
+    private String lastVisitor;
+
+    @GetMapping("/ai/polls/{id}")
+    public Poll get(@PathVariable long id, @RequestHeader("X-Visitor-Id") String visitor) {
+        lastVisitor = visitor;
+        return pollRepository.findById(id).orElse(null);
+    }
+
+    @PostMapping("/ai/polls")
+    public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
+        try {
+            long id = pollRepository.insert(UUID.randomUUID(), (String) body.get("title"), "ABCDEFGH", false,
+                    Instant.parse((String) body.get("closesAt")), Instant.now());
+            return ResponseEntity.ok(id);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
+}

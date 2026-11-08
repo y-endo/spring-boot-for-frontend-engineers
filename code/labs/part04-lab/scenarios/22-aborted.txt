@@ -1,0 +1,8 @@
+# 第22章: トランザクションの途中で SQL が失敗すると、そのトランザクションはもう使えない（PostgreSQL）。
+A> BEGIN;
+A> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (2, 51, 'MEMBER', now());
+A> -- 存在しない訪問者(999)を参加させる → 外部キー違反
+A> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (2, 999, 'MEMBER', now());
+A> SELECT 1;
+A> COMMIT;
+A> SELECT count(*) FROM participants WHERE poll_id = 2;

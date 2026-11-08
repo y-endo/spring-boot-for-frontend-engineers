@@ -1,0 +1,7 @@
+--- 投票A の行を 40 秒ロックする
+--- 25人が同時に参加（投票A）
+--- +5s: HikariCP  active=10  pending=7
+���֌W�ȓ��[B �̏ڍ�: HTTP 200  0.385164 �b
+--- (7 秒経過) HikariCP  active=8  pending=0  timeout(累計)=0
+--- 参加リクエスト 25本の結果
+HTTP 500: 25 本（3.1 〜 8.9 秒）

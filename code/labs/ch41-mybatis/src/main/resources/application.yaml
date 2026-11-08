@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: mybatis-lab
+
+mybatis:
+  # XML の置き場所と、DTO の型名を短く書くための別名の対象パッケージ
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.mybatislab
+  configuration:
+    # 列名 poll_id → プロパティ名 pollId の自動変換
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    # Mapper に対応する SQL（Preparing）とパラメータ（Parameters）をログに出す
+    com.example.mybatislab.PollMapper: TRACE

@@ -1,0 +1,29 @@
+ 0.2s A| BEGIN ISOLATION LEVEL SERIALIZABLE;
+ 0.2s A| BEGIN
+ 0.5s B| BEGIN ISOLATION LEVEL SERIALIZABLE;
+ 0.5s B| BEGIN
+ 0.9s A| SELECT count(*) FROM participants WHERE poll_id = 1;
+ 0.9s A|  count 
+ 0.9s A| -------
+ 0.9s A|     49
+ 0.9s A| (1 row)
+ 1.3s B| SELECT count(*) FROM participants WHERE poll_id = 1;
+ 1.3s B|  count 
+ 1.3s B| -------
+ 1.3s B|     49
+ 1.3s B| (1 row)
+ 1.7s A| INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 50, 'MEMBER', now());
+ 1.7s A| INSERT 0 1
+ 2.1s B| INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 51, 'MEMBER', now());
+ 2.1s B| INSERT 0 1
+ 2.5s A| COMMIT;
+ 2.5s A| COMMIT
+ 2.9s B| COMMIT;
+ 2.9s B| ERROR:  could not serialize access due to read/write dependencies among transactions
+ 3.3s A| SELECT count(*) FROM participants WHERE poll_id = 1;
+ 3.3s A|  count 
+ 3.3s A| -------
+ 3.3s A|     50
+ 3.3s A| (1 row)
+ 4.2s A| \q
+ 4.2s B| \q

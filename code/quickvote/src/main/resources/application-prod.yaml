@@ -1,0 +1,26 @@
+# 本番用の上書き。SPRING_PROFILES_ACTIVE=prod で有効になる。
+# 接続先などの秘密は、ここに書かず環境変数で渡す:
+#   SPRING_DATASOURCE_URL / SPRING_DATASOURCE_USERNAME / SPRING_DATASOURCE_PASSWORD
+spring:
+  docker:
+    compose:
+      # コンテナの中には docker コマンドがない。compose 連携は開発専用なので切る。
+      enabled: false
+
+server:
+  forward-headers-strategy: none
+
+quickvote:
+  visitor-cookie:
+    # HTTPS 前提。Cookie が平文のHTTPで送られないようにする。
+    secure: true
+
+management:
+  server:
+    # Actuator を、アプリ本体（8080、利用者向け）とは別のポートで公開する。
+    # 管理ポートを設定すると、Actuator のエンドポイントは管理ポートだけで提供され、本体のポートからは見えなくなる。
+    # このポート（9090）は外部に公開しない（compose.app.yaml でも ports に出していない）。
+    # 監視（メトリクスの収集）やヘルスチェックは、内部ネットワークからこのポートに対して行う。
+    # metrics は稼働状況・資源使用量が見えるので、利用者が届く場所に出してはいけない
+    # （「認証あり」にしても、誰でも訪問者 Cookie を取れる匿名サービスでは、管理者だけに絞れない）。
+    port: 9090

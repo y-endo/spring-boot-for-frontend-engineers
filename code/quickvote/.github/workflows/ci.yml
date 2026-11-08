@@ -1,0 +1,67 @@
+# QuickVote の CI。push と pull request のたびに、テスト（単体＋実PostgreSQLの統合テスト）と Docker ビルドを確かめる。
+# ubuntu-latest には Docker が入っているので、Testcontainers（*IT）がそのまま動く。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Actions の画面から手動でも実行できるようにしておく
+  workflow_dispatch:
+
+# 権限は最小に。このワークフローはリポジトリを読むだけで、書き込みはしない。
+permissions:
+  contents: read
+
+# 同じブランチで新しい push が来たら、古い実行は止める（待ち時間と課金の節約）。
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: ./mvnw verify
+    runs-on: ubuntu-latest
+    # テストが固まっても、6時間（既定）使い切らないようにする。ふだんは 4〜8 分。
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          # ~/.m2 を pom.xml のハッシュをキーにキャッシュする
+          cache: maven
+
+      # Windows で作ったファイルを Git 経由で受け取ると実行権限が落ちていることがある
+      - name: Make Maven Wrapper executable
+        run: chmod +x mvnw
+
+      # surefire（*Test）→ failsafe（*IT, Testcontainers）の順に、すべて実行する
+      - name: Build and test
+        run: ./mvnw -B -ntp verify
+
+      # 失敗したときだけ、原因を調べるためのレポートを残す
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
+          retention-days: 7
+
+  docker:
+    name: docker build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # テストが通ったコードだけをイメージにする
+    needs: verify
+    steps:
+      - uses: actions/checkout@v7
+
+      # push はしない。「Dockerfile が壊れていないか」を確かめるだけ。
+      - name: Build image
+        run: docker build -t quickvote:ci .

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatislab.PollMapper">
+
+    <!-- QuickVote の OptionRepository.findWithVoteCounts と同じ SQL。#{pollId} がバインド変数（? になる） -->
+    <select id="findWithVoteCounts" resultType="OptionCount">
+        SELECT o.id, o.label, count(v.participant_id) AS votes
+        FROM options o
+        LEFT JOIN votes v ON v.option_id = o.id
+        WHERE o.poll_id = #{pollId}
+        GROUP BY o.id, o.label
+        ORDER BY o.id
+    </select>
+
+    <!-- QuickVote の VoteRepository.upsert と同じ SQL。戻り値は更新件数 -->
+    <insert id="upsertVote">
+        INSERT INTO votes (poll_id, participant_id, option_id, voted_at)
+        VALUES (#{pollId}, #{participantId}, #{optionId}, now())
+        ON CONFLICT (poll_id, participant_id) DO UPDATE
+           SET option_id = EXCLUDED.option_id, voted_at = EXCLUDED.voted_at
+           WHERE votes.option_id &lt;&gt; EXCLUDED.option_id
+    </insert>
+
+    <!-- (A) 入れ子の select: 親を1本で取り、親ごとに selectOptionsByPollId を実行する（1 + N） -->
+    <resultMap id="pollWithOptionsNested" type="PollWithOptions">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <collection property="options" ofType="OptionRow" column="id" select="selectOptionsByPollId"/>
+    </resultMap>
+
+    <select id="listWithOptionsNested" resultMap="pollWithOptionsNested">
+        SELECT id, title FROM polls ORDER BY id
+    </select>
+
+    <select id="selectOptionsByPollId" resultType="OptionRow">
+        SELECT id, label FROM options WHERE poll_id = #{id} ORDER BY id
+    </select>
+
+    <!-- (B) JOIN の結果を collection に詰め直す（1 本）。列名の別名（option_id）が衝突回避の鍵 -->
+    <resultMap id="pollWithOptionsJoin" type="PollWithOptions">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <collection property="options" ofType="OptionRow">
+            <id property="id" column="option_id"/>
+            <result property="label" column="label"/>
+        </collection>
+    </resultMap>
+
+    <select id="listWithOptionsJoin" resultMap="pollWithOptionsJoin">
+        SELECT p.id, p.title, o.id AS option_id, o.label
+        FROM polls p
+        JOIN options o ON o.poll_id = p.id
+        ORDER BY p.id, o.id
+    </select>
+
+    <!-- 動的SQL: 条件に合わせて WHERE を組み立てる。${orderBy} は文字列がそのまま埋め込まれる（#{} と違い、バインド変数にならない） -->
+    <select id="search" resultType="PollRow">
+        SELECT id, title, status FROM polls
+        <where>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="keyword != null">AND title LIKE concat('%', #{keyword}, '%')</if>
+        </where>
+        ORDER BY ${orderBy}
+    </select>
+
+</mapper>

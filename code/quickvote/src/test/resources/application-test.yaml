@@ -1,0 +1,13 @@
+# テスト用の上書き（@ActiveProfiles("test")）
+logging:
+  level:
+    root: WARN
+    com.example.quickvote: INFO
+
+quickvote:
+  cleanup:
+    # テスト中にスケジューラが勝手に走らないようにする（削除は runOnce() をテストから直接呼ぶ）
+    interval: 1h
+  sse:
+    # 設定の許容範囲（上限5分）のうち最長にして、テスト中に勝手に送られないようにする（送りたいときは hub.sendHeartbeats() を呼ぶ）
+    heartbeat-interval: 5m

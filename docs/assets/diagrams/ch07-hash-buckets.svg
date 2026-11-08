@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 430" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">HashSetの仕組みとhashCodeの役割</title>
+  <desc id="d">左はhashCodeを書かない場合。同じ値の2つのオブジェクトが別の棚に入り、equalsが呼ばれない。右はhashCodeを値から作る場合。同じ棚に入りequalsで重複が見つかる。</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6d3a"/>
+    </marker>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#14b8a6"/>
+    </marker>
+  </defs>
+
+  <!-- 左：hashCode なし -->
+  <text x="20" y="32" font-size="17" font-weight="700" fill="#ff6d3a">equals だけ書いた場合</text>
+  <text x="20" y="56" font-size="14" fill="#7a8099">hashCode は「オブジェクトの場所」由来 → 別の値になる</text>
+
+  <rect x="20" y="80" width="170" height="44" rx="8" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="105" y="108" text-anchor="middle" font-size="15" fill="#ff6d3a">add(“AB12CD34”)①</text>
+  <rect x="20" y="150" width="170" height="44" rx="8" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="105" y="178" text-anchor="middle" font-size="15" fill="#ff6d3a">add(“AB12CD34”)②</text>
+
+  <text x="215" y="104" font-size="14" fill="#ff6d3a">hash=7 →</text>
+  <text x="215" y="174" font-size="14" fill="#ff6d3a">hash=2 →</text>
+
+  <g font-size="14" fill="#7a8099">
+    <rect x="300" y="80"  width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="310" y="102">棚 0</text>
+    <rect x="300" y="114" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="310" y="136">棚 1</text>
+    <rect x="300" y="148" width="150" height="34" rx="4" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/><text x="310" y="170" fill="#ff6d3a">棚 2 : ②</text>
+    <rect x="300" y="182" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="310" y="204">棚 3</text>
+    <rect x="300" y="216" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="310" y="238">棚 4</text>
+    <rect x="300" y="250" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="310" y="272">棚 5</text>
+    <rect x="300" y="284" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="310" y="306">棚 6</text>
+    <rect x="300" y="318" width="150" height="34" rx="4" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/><text x="310" y="340" fill="#ff6d3a">棚 7 : ①</text>
+  </g>
+  <text x="20" y="392" font-size="15" font-weight="700" fill="#ff6d3a">棚が違うので equals は呼ばれない → 重複が 2 件入る</text>
+
+  <line x1="480" y1="70" x2="480" y2="410" stroke="#7a8099" stroke-opacity="0.35" stroke-dasharray="6 6"/>
+
+  <!-- 右：hashCode あり -->
+  <text x="510" y="32" font-size="17" font-weight="700" fill="#14b8a6">equals と hashCode をセットで書いた場合</text>
+  <text x="510" y="56" font-size="14" fill="#7a8099">hashCode は「値」から計算する → 同じ値なら同じ棚</text>
+
+  <rect x="510" y="80" width="170" height="44" rx="8" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="595" y="108" text-anchor="middle" font-size="15" fill="#14b8a6">add(“AB12CD34”)①</text>
+  <rect x="510" y="150" width="170" height="44" rx="8" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="595" y="178" text-anchor="middle" font-size="15" fill="#14b8a6">add(“AB12CD34”)②</text>
+
+  <text x="700" y="104" font-size="14" fill="#14b8a6">hash=5 →</text>
+  <text x="700" y="174" font-size="14" fill="#14b8a6">hash=5 →</text>
+
+  <g font-size="14" fill="#7a8099">
+    <rect x="790" y="80"  width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="800" y="102">棚 0</text>
+    <rect x="790" y="114" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="800" y="136">棚 1</text>
+    <rect x="790" y="148" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="800" y="170">棚 2</text>
+    <rect x="790" y="182" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="800" y="204">棚 3</text>
+    <rect x="790" y="216" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="800" y="238">棚 4</text>
+    <rect x="790" y="250" width="150" height="34" rx="4" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/><text x="800" y="272" fill="#14b8a6">棚 5 : ①</text>
+    <rect x="790" y="284" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="800" y="306">棚 6</text>
+    <rect x="790" y="318" width="150" height="34" rx="4" fill="none" stroke="#7a8099"/><text x="800" y="340">棚 7</text>
+  </g>
+  <path d="M680,172 C740,172 740,268 786,268" fill="none" stroke="#14b8a6" stroke-width="2.5" marker-end="url(#g)"/>
+  <text x="510" y="392" font-size="15" font-weight="700" fill="#14b8a6">同じ棚で equals が呼ばれ、同じ値と分かる → 1 件のまま</text>
+</svg>

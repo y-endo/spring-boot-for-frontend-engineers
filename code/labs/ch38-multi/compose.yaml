@@ -1,0 +1,60 @@
+# 第38章の実験環境: PostgreSQL ＋ アプリ2台 ＋ nginx。
+#   ./build.sh                       … jars/ に reference.jar などを作る（初回のみ）
+#   APP_JAR=naive docker compose up -d   … メモリ配信のみの版で起動
+#   docker compose down -v           … 終わったら必ず止める
+# ポート: nginx 18038 / app1 18138 / app2 18238 / PostgreSQL 25438（他の章の実験と衝突しない番号）
+name: ch38-multi
+
+x-app: &app
+  image: eclipse-temurin:25-jre
+  working_dir: /jars
+  volumes:
+    - ./jars:/jars:ro
+  command: ["java", "-jar", "/jars/${APP_JAR:-reference}.jar"]
+  environment: &appenv
+    SPRING_DOCKER_COMPOSE_ENABLED: 'false'
+    SPRING_DATASOURCE_URL: jdbc:postgresql://pg:5432/quickvote
+    SPRING_DATASOURCE_USERNAME: quickvote
+    SPRING_DATASOURCE_PASSWORD: quickvote
+    # 観察しやすいよう、ハートビートを短くする
+    QUICKVOTE_SSE_HEARTBEATINTERVAL: ${HEARTBEAT:-15s}
+    QUICKVOTE_CLEANUP_INTERVAL: ${CLEANUP:-5m}
+  depends_on:
+    pg:
+      condition: service_healthy
+  stop_grace_period: 60s
+
+services:
+  pg:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: quickvote
+      POSTGRES_USER: quickvote
+      POSTGRES_PASSWORD: quickvote
+    ports:
+      - '25438:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U quickvote -d quickvote']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app1:
+    <<: *app
+    ports:
+      - '18138:8080'
+
+  app2:
+    <<: *app
+    ports:
+      - '18238:8080'
+
+  nginx:
+    image: nginx:1.29-alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - '18038:80'
+    depends_on:
+      - app1
+      - app2

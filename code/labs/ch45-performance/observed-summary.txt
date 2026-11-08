@@ -1,0 +1,17 @@
+# 第45章の実測まとめ（Windows 10 / Docker Desktop・16 CPU の VM。app は mem_limit 768m・cpus 2。他のプロセスも動いている PC なので数字は揺れる）
+# k6: 49 VU（+主催者1人＝参加者50人）が1つの投票で 投票(PUT)→詳細(GET) を休みなしで30秒繰り返す
+pool  req/s   detail p95/p99      vote p95/p99        vote max   hikari(active/pending)   app CPU(2コア=200%)  失敗
+ 2    -       -                   -                   -          起動できない（Flyway が接続を2本握って3本目を待ち、30秒で起動失敗）
+ 3    313     290 / 453 ms        311 / 614 ms        968 ms     3 / 46-47                66-147%              0
+10    286     268 / 400 ms        358 / 598 ms        960 ms     10 / 38-40               71-185%              0
+10*   170     395 / 560 ms        598 / 802 ms        1.08 s     (未採取)                 (未採取)             0     (* 同じ設定の最初の1回。同条件でも 170〜286 req/s と揺れた)
+30    312     133 / 214 ms        733 / 1430 ms       2.91 s     30 / 18-20               78-187%              0
+# ロック保持（lock-hold.sh、40秒保持・参加25本・Hikari既定プール10）
+既定            : 無関係な投票B の詳細 → HTTP 500 / 30.0 秒（Hikari の connection-timeout）。参加 25本: 200 が9本(約38秒待って成功)、500 が16本(30.0秒)。HikariCP active=10 pending=17、timeout 累計が +18
+statement_timeout=3s : 無関係な投票B の詳細 → HTTP 200 / 0.39 秒。参加 25本: すべて 500（3.1〜8.9秒）。SQLSTATE=57014。timeout(Hikari)=0
+# graceful shutdown
+SSE 1本接続中 docker stop : 1.27 秒、終了コード 143
+処理中リクエスト(ロック待ち)あり: docker stop 9.46 秒。Commencing 00:05:40.109 → Graceful shutdown complete 00:05:48.896（8.8秒）。参加リクエストは HTTP 200（11.1秒）
+# Tomcat connection-timeout: ヘッダーの途中で黙るクライアント → 20.0 秒後に切断
+# スレッドダンプ（docker kill -s QUIT）: ロック待ち中の exec スレッド 26 本のうち、DB応答待ち 9、Hikari接続待ち 17
+# jcmd: JRE イメージに無い。別の JDK コンテナから --pid 共有で attach → 失敗（/tmp/.java_pid1 を開けない）

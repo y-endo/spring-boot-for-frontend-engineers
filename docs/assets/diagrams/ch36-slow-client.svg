@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">遅いクライアントが配信全体を止める仕組みと、専用プールでの対策</title>
+  <desc id="d">左は、1本のスレッドが購読者に順番に書き込む素朴な設計。読み取りを止めた購読者Bへの書き込みでスレッドが止まり、後ろのCにも、次のイベントにも届かない。右は、購読者ごとに「頼まれ事」を数え、専用の配信プールで書き込む設計。Bが詰まっても占有されるのはスレッド1つだけで、AとCは届き続け、10秒を超えた書き込みはハートビートの定期処理が打ち切る。</desc>
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+    <marker id="arO" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6d3a"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="30" font-size="17" font-weight="700" fill="#ff6d3a">① 素朴な設計：1本のスレッドが順番に書く</text>
+  <text x="500" y="30" font-size="17" font-weight="700" fill="#14b8a6">② QuickVote：専用プール＋購読者ごとに直列</text>
+  <line x1="480" y1="44" x2="480" y2="480" stroke="#7a8099" stroke-opacity="0.5" stroke-dasharray="4 6"/>
+
+  <!-- 左 -->
+  <rect x="20" y="60" width="150" height="56" rx="8" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="95" y="84" font-size="15" font-weight="700" text-anchor="middle" fill="#7a8099">通知を受ける</text>
+  <text x="95" y="104" font-size="14" text-anchor="middle" fill="#7a8099">スレッド（1本）</text>
+  <g font-size="14" text-anchor="middle" fill="#7a8099">
+    <rect x="250" y="56" width="190" height="44" rx="8" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+    <text x="345" y="83">購読者A（速い）→ 届く</text>
+    <rect x="250" y="116" width="190" height="44" rx="8" fill="#ff6d3a33" stroke="#ff6d3a" stroke-width="2"/>
+    <text x="345" y="143">購読者B（読まない）</text>
+    <rect x="250" y="176" width="190" height="44" rx="8" fill="none" stroke="#7a8099" stroke-dasharray="5 4"/>
+    <text x="345" y="203">購読者C（速い）→ 待機</text>
+  </g>
+  <path d="M170,78 L250,78" stroke="#7a8099" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <path d="M170,92 C205,92 205,138 250,138" stroke="#ff6d3a" stroke-width="2.5" fill="none" marker-end="url(#arO)"/>
+  <path d="M170,104 C195,104 195,198 250,198" stroke="#7a8099" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#ar)"/>
+  <text x="20" y="150" font-size="14" fill="#ff6d3a">書き込みが戻らない</text>
+
+  <text x="20" y="260" font-size="15" font-weight="700" fill="#7a8099">何が起きるか（ch36-sse の実験）</text>
+  <g font-size="14" fill="#7a8099">
+    <text x="20" y="288">・Bの受信バッファが満杯になった時点で send() が戻らなくなる</text>
+    <text x="20" y="312">・同じスレッドが担う C への配信も、次のイベントも止まる</text>
+    <text x="20" y="336">・LISTEN／ハートビート／停止処理に使うスレッドなら、</text>
+    <text x="34" y="358">それらまで巻き込む</text>
+  </g>
+  <rect x="20" y="380" width="430" height="84" rx="8" fill="#ff6d3a22" stroke="#ff6d3a"/>
+  <text x="34" y="408" font-size="15" font-weight="700" fill="#7a8099">実測：配信 #56 に 27,686 ms</text>
+  <text x="34" y="432" font-size="14" fill="#7a8099">速いクライアントは #56 のあと約28秒間、何も受け取れなかった</text>
+  <text x="34" y="452" font-size="14" fill="#7a8099">（64KBのイベントを0.2秒ごとに送り、Bは毎秒2KBしか読まない）</text>
+
+  <!-- 右 -->
+  <rect x="500" y="60" width="130" height="56" rx="8" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="565" y="84" font-size="15" font-weight="700" text-anchor="middle" fill="#7a8099">onNotify</text>
+  <text x="565" y="104" font-size="14" text-anchor="middle" fill="#7a8099">頼むだけで即戻る</text>
+  <rect x="680" y="60" width="140" height="160" rx="8" fill="none" stroke="#7a8099" stroke-width="2"/>
+  <text x="750" y="82" font-size="14" font-weight="700" text-anchor="middle" fill="#7a8099">配信プール（4本）</text>
+  <g font-size="14" text-anchor="middle" fill="#7a8099">
+    <rect x="692" y="94" width="116" height="30" rx="6" fill="#14b8a633" stroke="#14b8a6"/>
+    <text x="750" y="114">A を担当</text>
+    <rect x="692" y="132" width="116" height="30" rx="6" fill="#ff6d3a44" stroke="#ff6d3a"/>
+    <text x="750" y="152">B で占有</text>
+    <rect x="692" y="170" width="116" height="30" rx="6" fill="#14b8a633" stroke="#14b8a6"/>
+    <text x="750" y="190">C を担当</text>
+  </g>
+  <path d="M630,88 L680,88" stroke="#7a8099" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <rect x="860" y="94" width="80" height="30" rx="6" fill="#14b8a622" stroke="#14b8a6"/>
+  <text x="900" y="114" font-size="14" text-anchor="middle" fill="#7a8099">A 届く</text>
+  <rect x="860" y="132" width="80" height="30" rx="6" fill="#ff6d3a22" stroke="#ff6d3a"/>
+  <text x="900" y="152" font-size="14" text-anchor="middle" fill="#7a8099">B 詰まる</text>
+  <rect x="860" y="170" width="80" height="30" rx="6" fill="#14b8a622" stroke="#14b8a6"/>
+  <text x="900" y="190" font-size="14" text-anchor="middle" fill="#7a8099">C 届く</text>
+  <path d="M808,109 L860,109" stroke="#7a8099" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <path d="M808,147 L860,147" stroke="#ff6d3a" stroke-width="2.5" fill="none" marker-end="url(#arO)"/>
+  <path d="M808,185 L860,185" stroke="#7a8099" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+
+  <text x="500" y="260" font-size="15" font-weight="700" fill="#7a8099">4つの約束</text>
+  <g font-size="14" fill="#7a8099">
+    <text x="500" y="288">① 購読者ごとに同時に配信するのは1つだけ（順序を守る）</text>
+    <text x="500" y="312">② 頼まれ事は数えて束ねる（通知が重なっても取りこぼさない）</text>
+    <text x="500" y="336">③ 書き込みが10秒を超えたら、ハートビートの定期処理が</text>
+    <text x="514" y="358">名簿から外す（定期処理は書き込まないので止まらない）</text>
+    <text x="500" y="382">④ 停止時は接続ごとに別の仮想スレッドで閉じる（待つのは最大3秒）</text>
+  </g>
+  <rect x="500" y="404" width="440" height="60" rx="8" fill="#14b8a622" stroke="#14b8a6"/>
+  <text x="514" y="430" font-size="14" fill="#7a8099">詰まった購読者が占有するスレッドは最大1つ。</text>
+  <text x="514" y="450" font-size="14" fill="#7a8099">同時に詰まった数が4を超えると、その間は配信が遅れる。</text>
+</svg>

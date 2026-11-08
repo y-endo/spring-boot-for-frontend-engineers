@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: quickvote
+  autoconfigure:
+    exclude:
+      # ログインユーザーは使わない。除外しないと「Using generated security password」という
+      # 使い道のないパスワードがログに出る（秘密をログに出す悪い例にもなる）。
+      - org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+  threads:
+    virtual:
+      # 第36章までは OFF。SSE の章で true にして挙動の差を観察する。
+      enabled: false
+  task:
+    scheduling:
+      pool:
+        # @Scheduled のスレッド数（既定は1）。1本だと、期限切れ削除（DBを使うので数秒かかりうる）が走っている間、
+        # SSE のハートビート（詰まった接続の打ち切りも兼ねる）や、レート制限の掃除が待たされる。
+        size: 3
+  jackson:
+    factory:
+      constraints:
+        read:
+          # リクエストボディの最大サイズ（バイト/文字）。巨大なJSONでメモリを使い切られないための上限。
+          # 超えると JSON の読み取りが失敗し、400（MALFORMED）になる。
+          max-document-length: 16384
+  docker:
+    compose:
+      # ./mvnw spring-boot:run で compose.yaml の PostgreSQL を自動起動する（テスト時は自動で無効）
+      lifecycle-management: start-only
+
+server:
+  # 終了時に処理中のリクエストの完了を待つ
+  shutdown: graceful
+  tomcat:
+    # SSE の書き込みが詰まったとき（クライアントが読み取りを止めた）に、Tomcat が書き込みを諦めるまでの時間。
+    # これが過ぎると書き込みが IOException で終わり、配信スレッドが解放される（アプリ側でも sendTimeout で購読を打ち切る）。
+    connection-timeout: 20s
+  # リバースプロキシ（nginx など）の後ろで X-Forwarded-For を使う場合は、信頼できるプロキシに限って設定する。
+  # forward-headers-strategy: native
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # 公開するのは health と metrics だけ。env / beans / heapdump などは公開しない。
+        include: health,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true # /actuator/health/liveness と /actuator/health/readiness
+      show-details: never
+      group:
+        readiness:
+          # probes.enabled=true だけでは、readiness は readinessState（アプリが起動済みで、停止中でないか）しか見ない。
+          # DB に届かないのに「準備完了」と答えないよう、db を含める。
+          # （liveness は含めない: DB の障害でアプリを再起動しても直らないので、再起動の判断に使わせない）
+          include: readinessState,db
+
+logging:
+  structured:
+    format:
+      # 構造化ログ（Elastic Common Schema 形式のJSON）。MDC の requestId も出力される。
+      console: ecs
+
+quickvote:
+  visitor-cookie:
+    # 開発(HTTP)では false。本番(HTTPS)は application-prod.yaml で true にする。
+    secure: false

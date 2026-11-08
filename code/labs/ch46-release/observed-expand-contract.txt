@@ -1,0 +1,32 @@
+[0] 変更前                                   → 詳細の取得=200  投票の作成=201
+
+### A. 悪い例：稼働中に列の名前を変える（options.label → text）
+ALTER TABLE
+[A] RENAME 直後（古いアプリが動いたまま）    → 詳細の取得=500  投票の作成=500
+ALTER TABLE
+[A] 元に戻した後                             → 詳細の取得=200  投票の作成=201
+
+### B. expand：列を足すだけ（V7）。古いアプリは何も知らずに動く
+ALTER TABLE
+UPDATE 291
+[B] V7 適用後（name 列が増えた）             → 詳細の取得=500  投票の作成=201
+[B] もう一度                                 → 詳細の取得=200  投票の作成=201
+
+### C. contract を早まる：全部のアプリが name を書く前に NOT NULL（V8）
+(V7 のあとも古いアプリは name の入っていない行を作り続ける)
+ name_is_null 
+--------------
+            2
+(1 row)
+
+--- そのまま V8 を当てると:
+ERROR:  column "name" of relation "polls" contains null values
+--- 急いでもう一度バックフィルしてから V8 を当てると:
+UPDATE 2
+ALTER TABLE
+ALTER TABLE
+[C] V8 適用後（古いアプリは name を書かない） → 詳細の取得=200  投票の作成=500
+ALTER TABLE
+ALTER TABLE
+[C] V8 を取り消した後                        → 詳細の取得=200  投票の作成=201
+ALTER TABLE

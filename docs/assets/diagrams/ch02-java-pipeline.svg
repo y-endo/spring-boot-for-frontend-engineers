@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 470" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">TypeScript/Nodeの流れとJavaの流れの対応</title>
+  <desc id="d">上段はapp.tsからtscでapp.jsになりNodeのV8で動く流れ。下段はHello.javaからjavacでHello.classになり、JVMがクラスパスから読み込んで実行する流れ。</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+    <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6d3a"/>
+    </marker>
+  </defs>
+
+  <!-- レーン見出し -->
+  <text x="20" y="34" font-size="17" font-weight="700" fill="#7a8099">TypeScript / Node</text>
+  <text x="20" y="220" font-size="17" font-weight="700" fill="#ff6d3a">Java</text>
+  <line x1="20" y1="190" x2="940" y2="190" stroke="#7a8099" stroke-opacity="0.35" stroke-dasharray="6 6"/>
+
+  <!-- 上段 -->
+  <rect x="20"  y="50" width="170" height="70" rx="10" fill="#7a809922" stroke="#7a8099" stroke-width="2"/>
+  <text x="105" y="80" text-anchor="middle" font-size="16" font-weight="700" fill="#7a8099">app.ts</text>
+  <text x="105" y="104" text-anchor="middle" font-size="14" fill="#7a8099">ソースコード</text>
+
+  <line x1="190" y1="85" x2="285" y2="85" stroke="#7a8099" stroke-width="2" marker-end="url(#a)"/>
+  <text x="238" y="72" text-anchor="middle" font-size="14" fill="#7a8099">tsc</text>
+
+  <rect x="290" y="50" width="170" height="70" rx="10" fill="#7a809922" stroke="#7a8099" stroke-width="2"/>
+  <text x="375" y="80" text-anchor="middle" font-size="16" font-weight="700" fill="#7a8099">app.js</text>
+  <text x="375" y="104" text-anchor="middle" font-size="14" fill="#7a8099">JavaScript</text>
+
+  <line x1="460" y1="85" x2="555" y2="85" stroke="#7a8099" stroke-width="2" marker-end="url(#a)"/>
+  <text x="508" y="72" text-anchor="middle" font-size="14" fill="#7a8099">node</text>
+
+  <rect x="560" y="50" width="230" height="70" rx="10" fill="#7a809922" stroke="#7a8099" stroke-width="2"/>
+  <text x="675" y="80" text-anchor="middle" font-size="16" font-weight="700" fill="#7a8099">V8エンジン</text>
+  <text x="675" y="104" text-anchor="middle" font-size="14" fill="#7a8099">読み込み＋JIT＋実行</text>
+
+  <line x1="790" y1="85" x2="845" y2="85" stroke="#7a8099" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="850" y="50" width="90" height="70" rx="10" fill="none" stroke="#7a8099" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="895" y="91" text-anchor="middle" font-size="16" fill="#7a8099">OS</text>
+
+  <!-- 下段 -->
+  <rect x="20" y="240" width="170" height="70" rx="10" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="105" y="270" text-anchor="middle" font-size="16" font-weight="700" fill="#ff6d3a">Hello.java</text>
+  <text x="105" y="294" text-anchor="middle" font-size="14" fill="#ff6d3a">ソースコード</text>
+
+  <line x1="190" y1="275" x2="285" y2="275" stroke="#ff6d3a" stroke-width="2" marker-end="url(#o)"/>
+  <text x="238" y="262" text-anchor="middle" font-size="14" fill="#ff6d3a">javac</text>
+
+  <rect x="290" y="240" width="170" height="70" rx="10" fill="#ff6d3a22" stroke="#ff6d3a" stroke-width="2"/>
+  <text x="375" y="270" text-anchor="middle" font-size="16" font-weight="700" fill="#ff6d3a">Hello.class</text>
+  <text x="375" y="294" text-anchor="middle" font-size="14" fill="#ff6d3a">バイトコード</text>
+
+  <line x1="460" y1="275" x2="555" y2="275" stroke="#ff6d3a" stroke-width="2" marker-end="url(#o)"/>
+  <text x="508" y="262" text-anchor="middle" font-size="14" fill="#ff6d3a">java</text>
+
+  <rect x="560" y="226" width="230" height="98" rx="10" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="675" y="254" text-anchor="middle" font-size="16" font-weight="700" fill="#14b8a6">JVM</text>
+  <text x="675" y="278" text-anchor="middle" font-size="14" fill="#14b8a6">クラスローダ（探して読む）</text>
+  <text x="675" y="298" text-anchor="middle" font-size="14" fill="#14b8a6">インタプリタ＋JIT（実行）</text>
+  <text x="675" y="316" text-anchor="middle" font-size="14" fill="#14b8a6">GC（メモリ掃除）</text>
+
+  <line x1="790" y1="275" x2="845" y2="275" stroke="#ff6d3a" stroke-width="2" marker-end="url(#o)"/>
+  <rect x="850" y="240" width="90" height="70" rx="10" fill="none" stroke="#7a8099" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="895" y="281" text-anchor="middle" font-size="16" fill="#7a8099">OS</text>
+
+  <!-- jar とクラスパス -->
+  <rect x="290" y="372" width="170" height="64" rx="10" fill="#ff6d3a11" stroke="#ff6d3a" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="375" y="400" text-anchor="middle" font-size="16" font-weight="700" fill="#ff6d3a">app.jar</text>
+  <text x="375" y="422" text-anchor="middle" font-size="14" fill="#ff6d3a">.class を zip にしたもの</text>
+  <line x1="375" y1="372" x2="375" y2="318" stroke="#ff6d3a" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#o)"/>
+
+  <rect x="560" y="372" width="230" height="64" rx="10" fill="none" stroke="#14b8a6" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="675" y="400" text-anchor="middle" font-size="16" font-weight="700" fill="#14b8a6">クラスパス</text>
+  <text x="675" y="422" text-anchor="middle" font-size="14" fill="#14b8a6">「.class を探す場所」の一覧</text>
+  <line x1="675" y1="372" x2="675" y2="328" stroke="#14b8a6" stroke-width="2" marker-end="url(#a)"/>
+  <text x="690" y="352" font-size="14" fill="#14b8a6">-cp / -jar</text>
+
+  <!-- 対応の注記 -->
+  <text x="490" y="168" text-anchor="middle" font-size="14" fill="#7a8099">tsc は型を消すだけ。javac は「実行できる形（バイトコード）」まで作る</text>
+</svg>

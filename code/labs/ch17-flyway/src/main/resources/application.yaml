@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: flyway-lab
+  docker:
+    compose:
+      # アプリを止めても DB のコンテナは動かしたままにする（既定は start_and_stop＝アプリ停止で docker compose stop）
+      lifecycle-management: start-only

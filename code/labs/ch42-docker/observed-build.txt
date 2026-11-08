@@ -1,0 +1,12 @@
+# 第42章で実測した値（Windows 10 / Docker Desktop 29.9.2 / Docker VM は 16 CPU・約 15.6GiB）
+cold build (--no-cache, Maven の依存取得を含む)      : 86 s
+変更なしの再ビルド（全ステップ CACHED）                : 3.8 s
+Java コードを1行直した再ビルド                         : 47 s（うち ./mvnw package が 34.7 s、dependencies の COPY は CACHED）
+イメージのサイズ（docker images）                      : 550 MB（ベース eclipse-temurin:25-jre が 480 MB）
+レイヤー（docker history）: application 164 kB / snapshot-dependencies 4.1 kB / spring-boot-loader 4.1 kB / dependencies 31.2 MB / curl 11.4 MB
+地層に分けない fat jar（Dockerfile.naive）              : 31.4 MB の層が、コードを直すたびに別の層になる（層の ID が変わる）
+起動（Started QuickvoteApplication）                    : 初回 17.3 s（Flyway が全マイグレーション（V1〜V6）を適用）、2回目以降 7.9〜11.4 s
+docker compose up -d --build（キャッシュあり）→ healthy : 約 51 s（DB 起動待ちと start_period を含む）
+再起動 → healthy                                        : 11 s
+実行ユーザー                                            : uid=999(app) gid=999(app)
+メモリ（docker stats、アイドル）                         : app 424.5MiB（制限なし。ヒープ上限は 12.5GB＝VM の 75%）

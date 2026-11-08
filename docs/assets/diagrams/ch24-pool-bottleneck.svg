@@ -1,0 +1,49 @@
+<svg viewBox="0 0 960 400" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans JP, sans-serif" font-size="15">
+  <defs>
+    <marker id="b1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a8099"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="28" font-size="17" font-weight="bold" fill="#7a8099">リクエストの数と、DBに同時に届く数は別物</text>
+
+  <!-- request threads -->
+  <rect x="20" y="50" width="250" height="300" rx="10" fill="#7a809915" stroke="#7a8099" stroke-width="2"/>
+  <text x="145" y="80" text-anchor="middle" font-weight="bold" fill="#7a8099">リクエストを処理するスレッド</text>
+  <text x="145" y="102" text-anchor="middle" font-size="13" fill="#7a8099">Tomcat既定 200本 / 仮想スレッドなら事実上無制限</text>
+  <g fill="#7a809933" stroke="#7a8099" stroke-width="1.5">
+    <rect x="45" y="125" width="90" height="28" rx="5"/><rect x="155" y="125" width="90" height="28" rx="5"/>
+    <rect x="45" y="165" width="90" height="28" rx="5"/><rect x="155" y="165" width="90" height="28" rx="5"/>
+    <rect x="45" y="205" width="90" height="28" rx="5"/><rect x="155" y="205" width="90" height="28" rx="5"/>
+    <rect x="45" y="245" width="90" height="28" rx="5"/><rect x="155" y="245" width="90" height="28" rx="5"/>
+    <rect x="45" y="285" width="90" height="28" rx="5"/><rect x="155" y="285" width="90" height="28" rx="5"/>
+  </g>
+  <text x="145" y="338" text-anchor="middle" font-size="13" fill="#7a8099">20本が同時にDBを使いたい</text>
+
+  <!-- pool -->
+  <rect x="380" y="130" width="200" height="190" rx="10" fill="#ff6d3a15" stroke="#ff6d3a" stroke-width="2.5"/>
+  <text x="480" y="160" text-anchor="middle" font-weight="bold" fill="#ff6d3a">コネクションプール</text>
+  <text x="480" y="182" text-anchor="middle" font-size="13" fill="#ff6d3a">HikariCP 既定 10本 / 例は 3本</text>
+  <g fill="#ff6d3a44" stroke="#ff6d3a" stroke-width="2">
+    <rect x="410" y="205" width="40" height="70" rx="6"/>
+    <rect x="460" y="205" width="40" height="70" rx="6"/>
+    <rect x="510" y="205" width="40" height="70" rx="6"/>
+  </g>
+  <text x="480" y="300" text-anchor="middle" font-size="13" fill="#ff6d3a">傘（接続）は3本だけ</text>
+
+  <!-- waiting line -->
+  <text x="325" y="118" text-anchor="middle" font-size="13" fill="#7a8099">残り17本は</text>
+  <text x="325" y="136" text-anchor="middle" font-size="13" fill="#7a8099">ここで行列</text>
+  <line x1="272" y1="200" x2="378" y2="200" stroke="#7a8099" stroke-width="2.5" stroke-dasharray="3 5" marker-end="url(#b1)"/>
+  <text x="325" y="228" text-anchor="middle" font-size="13" fill="#7a8099">30秒（既定）</text>
+  <text x="325" y="246" text-anchor="middle" font-size="13" fill="#7a8099">待つと失敗</text>
+
+  <!-- DB -->
+  <rect x="690" y="150" width="250" height="150" rx="10" fill="#14b8a622" stroke="#14b8a6" stroke-width="2"/>
+  <text x="815" y="190" text-anchor="middle" font-weight="bold" fill="#14b8a6">PostgreSQL</text>
+  <text x="815" y="216" text-anchor="middle" font-size="13" fill="#14b8a6">同時に動くSQLは最大3本</text>
+  <text x="815" y="238" text-anchor="middle" font-size="13" fill="#14b8a6">（max_connections の上限もある）</text>
+  <line x1="582" y1="240" x2="688" y2="240" stroke="#7a8099" stroke-width="2.5" marker-end="url(#b1)"/>
+
+  <text x="480" y="378" text-anchor="middle" font-size="14" fill="#7a8099">スレッドを増やしても（仮想スレッドでも）、傘の本数は増えない</text>
+</svg>

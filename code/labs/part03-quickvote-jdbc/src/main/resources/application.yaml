@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: quickvote
+  docker:
+    compose:
+      # ./mvnw spring-boot:run で compose.yaml の PostgreSQL を自動起動する（テスト時は自動で無効）。
+      # アプリを止めても DB は動かしたまま（データも残る）。止めるなら docker compose down（データも消すなら -v）。
+      lifecycle-management: start-only
+server:
+  port: 18019

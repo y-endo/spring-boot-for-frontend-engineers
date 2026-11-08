@@ -1,0 +1,11 @@
+spring:
+  sql:
+    init:
+      mode: always            # schema.sql を起動時に流す（演習用。本番はFlyway）
+logging:
+  level:
+    org.springframework: WARN
+    com.zaxxer: WARN
+    org.testcontainers: WARN
+    tc: WARN
+    com.github.dockerjava: WARN

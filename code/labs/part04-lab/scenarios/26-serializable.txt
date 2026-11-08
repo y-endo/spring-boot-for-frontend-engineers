@@ -1,0 +1,10 @@
+# 第26章: SERIALIZABLE なら、同じ競合でどちらかがコミットに失敗する(ロックを書かなくても守られる)。
+A> BEGIN ISOLATION LEVEL SERIALIZABLE;
+B> BEGIN ISOLATION LEVEL SERIALIZABLE;
+A> SELECT count(*) FROM participants WHERE poll_id = 1;
+B> SELECT count(*) FROM participants WHERE poll_id = 1;
+A> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 50, 'MEMBER', now());
+B> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 51, 'MEMBER', now());
+A> COMMIT;
+B> COMMIT;
+A> SELECT count(*) FROM participants WHERE poll_id = 1;

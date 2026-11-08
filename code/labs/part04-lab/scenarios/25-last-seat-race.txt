@@ -1,0 +1,12 @@
+# 第25章: 残り1枠(49/50人)に2人が同時に参加する。数える → 挿入する。ロックなし。
+A> BEGIN;
+B> BEGIN;
+A> SELECT count(*) FROM participants WHERE poll_id = 1;
+B> SELECT count(*) FROM participants WHERE poll_id = 1;
+A> -- 49人なので、入れる
+A> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 50, 'MEMBER', now());
+B> -- Bも49人と見たので、入れる
+B> INSERT INTO participants (poll_id, visitor_id, role, joined_at) VALUES (1, 51, 'MEMBER', now());
+A> COMMIT;
+B> COMMIT;
+A> SELECT count(*) FROM participants WHERE poll_id = 1;

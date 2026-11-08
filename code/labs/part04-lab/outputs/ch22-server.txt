@@ -1,0 +1,9 @@
+23:22:21.334 [52427] INSERT INTO visitors (token_hash, created_at, last_seen_at)
+23:22:21.389 [52427] INSERT INTO polls (public_id, title, status, join_code, allow_member_options,
+23:22:21.430 [52427] BEGIN
+23:22:21.430 [52427] INSERT INTO polls (public_id, title, status, join_code, allow_member_options,
+23:22:21.433 [52427] ROLLBACK
+23:22:21.442 [52427] BEGIN
+23:22:21.442 [52427] INSERT INTO polls (public_id, title, status, join_code, allow_member_options,
+23:22:21.447 [52427] INSERT INTO participants (poll_id, visitor_id, role, joined_at)
+23:22:21.452 [52427] COMMIT

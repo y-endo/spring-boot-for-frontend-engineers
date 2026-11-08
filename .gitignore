@@ -1,0 +1,41 @@
+# Python（MkDocs の仮想環境とキャッシュ）
+.venv/
+__pycache__/
+
+# MkDocs のビルド出力
+site/
+
+# Java / Maven / Gradle のビルド生成物
+target/
+.gradle/
+build/
+*.class
+hs_err_pid*.log
+
+# 動画の中間生成物（フレーム画像・音声・ログ）。完成品は docs/assets/videos/ にある
+production/video/build/
+
+# 挿絵の生成元PNG（docs/assets/illustrations/ のWebPから使う。必要なら再生成できる）
+production/illustrations/raw/
+
+# このPC固有の設定・ログ
+production/.voicevox-engine-path
+*.log
+
+# 実験で作る大きな生成物
+.work/
+jars/
+
+# エディタ・OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# 個人のメモと、それを元にした設計依頼書（公開しない）
+java-study-notes.md
+production/design/brief.md
+
+# 動画字幕用フォント（Noto Sans JP から生成する。production/fonts/README.md を参照）
+production/fonts/*.ttf

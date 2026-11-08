@@ -1,0 +1,6 @@
+# custom-meter（Spring Boot 4.1.2・Java 25・-Xmx512m）で、タグに投票ID（UUID）を入れた指標を作り続けた結果
+開始時                        : heap=23.5 MiB   系列数=0       /actuator/prometheus 62,735 byte    0.078 s
+悪いタグ +1万回                : heap=45.5 MiB   系列数=10,000   scrape 843,270 byte                  0.104 s
+悪いタグ 累計11万回            : heap=146.9 MiB  系列数=110,000  scrape 8,543,278 byte                0.680 s
+悪いタグ 累計41万回            : heap=307.9 MiB  系列数=410,000  scrape 31,643,947 byte               2.247 s
+良いタグ（result=changed|same）: 50回呼んで系列は2本のまま

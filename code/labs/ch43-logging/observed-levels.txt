@@ -1,0 +1,11 @@
+=== 既定（INFO・ECS JSON） : 26 行
+{"@timestamp":"2026-11-07T23:19:49.941428986Z","log":{"level":"INFO","logger":"com.example.quickvote.poll.ExpiredDataCleaner"},"process":{"pid":1,"thread":{"name":"scheduling-2"}},"service":{"name":"quickvote","version":"0.0.1-SNA
+{"@timestamp":"2026-11-07T23:19:59.961235131Z","log":{"level":"INFO","logger":"com.example.quickvote.poll.ExpiredDataCleaner"},"process":{"pid":1,"thread":{"name":"scheduling-2"}},"service":{"name":"quickvote","version":"0.0.1-SNA
+=== ルートを WARN に : 1 行
+Picked up JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75
+=== 自分のパッケージだけ DEBUG : 32 行
+{"@timestamp":"2026-11-07T23:21:11.483488076Z","log":{"level":"DEBUG","logger":"com.example.quickvote.poll.ExpiredDataCleaner"},"process":{"pid":1,"thread":{"name":"scheduling-1"}},"service":{"name":"quickvote","version":"0.0.1-SN
+{"@timestamp":"2026-11-07T23:21:11.492216399Z","log":{"level":"INFO","logger":"com.example.quickvote.poll.ExpiredDataCleaner"},"process":{"pid":1,"thread":{"name":"scheduling-1"}},"service":{"name":"quickvote","version":"0.0.1-SNA
+=== JSON をやめて人間向けの形式に : 27 行
+2026-11-07T23:21:34.643Z  INFO 1 --- [quickvote] [   scheduling-2] c.e.quickvote.poll.ExpiredDataCleaner    : 期限切れデータを削除しました: polls=0 idempotencyRecords=0 invites=0 visitors=0
+2026-11-07T23:21:44.650Z  INFO 1 --- [quickvote] [   scheduling-1] c.e.quickvote.poll.ExpiredDataCleaner    : 期限切れデータを削除しました: polls=0 idempotencyRecords=0 invites=0 visitors=0

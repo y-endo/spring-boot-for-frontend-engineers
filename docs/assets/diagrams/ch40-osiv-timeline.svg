@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" role="img" aria-labelledby="t d" font-family="Noto Sans JP, sans-serif">
+  <title id="t">open-in-viewがtrueとfalseで、DB接続を持つ時間が違う</title>
+  <desc id="d">1つのリクエストを時間軸で表す。open-in-viewがtrueだと、Serviceのトランザクションが終わったあとも、Controllerでの遅延ロードやJSON化が終わるまでDB接続を握り続ける。falseだとServiceのトランザクションの間だけ接続を使う。</desc>
+
+  <!-- 凡例 -->
+  <rect x="20" y="12" width="22" height="16" rx="3" fill="#7a809933" stroke="#7a8099"/>
+  <text x="50" y="26" font-size="14" fill="#7a8099">リクエスト処理中</text>
+  <rect x="190" y="12" width="22" height="16" rx="3" fill="#ff6d3a" fill-opacity="0.85"/>
+  <text x="220" y="26" font-size="14" fill="#7a8099">DB接続を持っている（プールの1本を占有）</text>
+
+  <!-- 区間の見出し -->
+  <g font-size="14" fill="#7a8099" text-anchor="middle">
+    <text x="205" y="62">Controller</text>
+    <text x="380" y="62">Service（@Transactional）</text>
+    <text x="580" y="62">Controllerに戻る</text>
+    <text x="760" y="62">JSON化</text>
+    <text x="885" y="62">応答</text>
+  </g>
+  <g stroke="#7a8099" stroke-opacity="0.5" stroke-dasharray="4 4">
+    <line x1="290" y1="70" x2="290" y2="350"/>
+    <line x1="470" y1="70" x2="470" y2="350"/>
+    <line x1="690" y1="70" x2="690" y2="350"/>
+    <line x1="830" y1="70" x2="830" y2="350"/>
+  </g>
+
+  <!-- true -->
+  <text x="20" y="104" font-size="16" font-weight="700" fill="#ff6d3a">open-in-view = true（Spring Bootの既定）</text>
+  <rect x="120" y="116" width="780" height="30" rx="4" fill="#7a809922" stroke="#7a8099"/>
+  <rect x="300" y="152" width="590" height="30" rx="4" fill="#ff6d3a" fill-opacity="0.85"/>
+  <text x="595" y="173" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">トランザクション終了後も、応答が終わるまで接続を握る</text>
+  <text x="120" y="204" font-size="14" fill="#7a8099">Controllerの poll.getOptions() の遅延ロードが「動いてしまう」。遅いJSON化の間も、接続は戻らない。</text>
+
+  <!-- false -->
+  <text x="20" y="262" font-size="16" font-weight="700" fill="#14b8a6">open-in-view = false</text>
+  <rect x="120" y="274" width="780" height="30" rx="4" fill="#7a809922" stroke="#7a8099"/>
+  <rect x="300" y="310" width="165" height="30" rx="4" fill="#ff6d3a" fill-opacity="0.85"/>
+  <text x="382" y="331" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">接続を使うのはここだけ</text>
+  <text x="120" y="366" font-size="14" fill="#7a8099">Serviceを出たら接続は戻る。遅延ロードを外で使うと LazyInitializationException になり、すぐ気づける。</text>
+  <text x="120" y="388" font-size="14" fill="#7a8099">（実測：Controller に戻った時点の「使用中の接続数」は true で 1、false で 0）</text>
+</svg>

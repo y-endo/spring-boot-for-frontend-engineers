@@ -1,0 +1,2 @@
+ERROR:  new row for relation "polls" violates check constraint "demo_never_closed"
+DETAIL:  Failing row contains (8, dadcb443-411d-4ce3-91ad-982111a30560, 社外秘のタイトル-T1, CLOSED, EBY3HUEU, t, 2026-11-08 00:13:38.034771+00, 2026-11-14 23:13:38.034771+00, 2026-11-07 23:13:38.034771+00, 0).

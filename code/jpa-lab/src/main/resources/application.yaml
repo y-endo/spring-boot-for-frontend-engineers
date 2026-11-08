@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: jpa-lab
+  jpa:
+    hibernate:
+      # スキーマは Flyway が作る。Hibernate は「Entity とテーブルが合っているか」を起動時に検証するだけ（create / update にしない）。
+      ddl-auto: validate
+    properties:
+      hibernate:
+        # SQL本数の実測用。Statistics API と、セッション終了時の "Session Metrics" ログが有効になる。
+        generate_statistics: true
+    # open-in-view は、わざと書かない。Spring Boot の既定値（true）と、その警告ログを観察するため（第40章）。
+
+logging:
+  level:
+    # 発行されるSQLを1本ずつログに出す（show-sql より、ログの仕組みに乗るのでこちらを使う）
+    org.hibernate.SQL: DEBUG

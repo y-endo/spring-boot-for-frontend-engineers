@@ -1,0 +1,29 @@
+ 0.3s A| BEGIN;
+ 0.3s A| BEGIN
+ 0.4s B| BEGIN;
+ 0.4s B| BEGIN
+ 0.8s A| SELECT id FROM polls WHERE id = 1 FOR UPDATE;
+ 0.9s A|  id 
+ 0.9s A| ----
+ 0.9s A|   1
+ 0.9s A| (1 row)
+ 1.3s B| SELECT id FROM polls WHERE id = 2 FOR UPDATE;
+ 1.3s B|  id 
+ 1.3s B| ----
+ 1.3s B|   2
+ 1.3s B| (1 row)
+ 1.6s A| -- Aは2番を欲しがる(Bが持っている)
+ 2.0s A| SELECT id FROM polls WHERE id = 2 FOR UPDATE;
+ 2.4s B| -- Bは1番を欲しがる(Aが持っている) → 互いに待つ
+ 2.9s B| SELECT id FROM polls WHERE id = 1 FOR UPDATE;
+ 3.1s A| ERROR:  deadlock detected
+ 3.1s B|  id 
+ 3.1s B| ----
+ 3.1s B|   1
+ 3.1s B| (1 row)
+ 5.8s A| ROLLBACK;
+ 5.8s A| ROLLBACK
+ 6.2s B| ROLLBACK;
+ 6.2s B| ROLLBACK
+ 7.1s B| \q
+ 7.1s A| \q

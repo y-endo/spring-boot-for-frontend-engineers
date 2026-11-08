@@ -1,0 +1,43 @@
+ 0.2s A| SELECT body, version FROM lab_memos WHERE id = 1;
+ 0.2s A|  body | version 
+ 0.2s A| ------+---------
+ 0.2s A|  最初 |       0
+ 0.2s A| (1 row)
+ 0.4s B| SELECT body, version FROM lab_memos WHERE id = 1;
+ 0.4s B|  body | version 
+ 0.4s B| ------+---------
+ 0.4s B|  最初 |       0
+ 0.4s B| (1 row)
+ 0.8s A| UPDATE lab_memos SET body = '最初 + Aの追記' WHERE id = 1;
+ 0.8s A| UPDATE 1
+ 1.2s B| UPDATE lab_memos SET body = '最初 + Bの追記' WHERE id = 1;
+ 1.2s B| UPDATE 1
+ 1.6s A| SELECT body, version FROM lab_memos WHERE id = 1;
+ 1.6s A|       body      | version 
+ 1.6s A| ----------------+---------
+ 1.6s A|  最初 + Bの追記 |       0
+ 1.6s A| (1 row)
+ 2.0s A| -- ↑ Aの追記は消えた。エラーは出ていない
+ 2.4s A| -- 後半: 楽観ロック。「読んだときの version のままなら更新する」を WHERE に書く
+ 2.8s A| UPDATE lab_memos SET body = 'メモ', version = 0 WHERE id = 1;
+ 2.9s A| UPDATE 1
+ 3.2s A| SELECT body, version FROM lab_memos WHERE id = 1;
+ 3.2s A|  body | version 
+ 3.2s A| ------+---------
+ 3.2s A|  メモ |       0
+ 3.2s A| (1 row)
+ 3.7s A| BEGIN;
+ 3.7s A| BEGIN
+ 4.1s A| UPDATE lab_memos SET body = 'Aの版', version = version + 1 WHERE id = 1 AND version = 0;
+ 4.1s A| UPDATE 1
+ 4.5s B| UPDATE lab_memos SET body = 'Bの版', version = version + 1 WHERE id = 1 AND version = 0;
+ 6.4s A| COMMIT;
+ 6.4s A| COMMIT
+ 6.4s B| UPDATE 0
+ 6.8s A| SELECT body, version FROM lab_memos WHERE id = 1;
+ 6.8s A|  body  | version 
+ 6.8s A| -------+---------
+ 6.8s A|  Aの版 |       1
+ 6.8s A| (1 row)
+ 7.7s A| \q
+ 7.7s B| \q

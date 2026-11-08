@@ -1,0 +1,132 @@
+=== old/OldEndpointRequest.java
+old\OldEndpointRequest.java:1: error: package org.springframework.boot.actuate.autoconfigure.security.servlet does not exist
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+old\OldEndpointRequest.java:4: error: cannot find symbol
+    Object m = EndpointRequest.toAnyEndpoint();
+  symbol:   variable EndpointRequest
+  location: class OldEndpointRequest
+=== old/OldJackson2.java
+old\OldJackson2.java:1: error: package com.fasterxml.jackson.databind does not exist
+import com.fasterxml.jackson.databind.ObjectMapper;
+old\OldJackson2.java:4: error: cannot find symbol
+    ObjectMapper mapper = new ObjectMapper();
+  symbol:   class ObjectMapper
+  location: class OldJackson2
+=== old/OldJavax.java
+old\OldJavax.java:1: error: package javax.servlet.http does not exist
+import javax.servlet.http.HttpServletRequest;
+old\OldJavax.java:4: error: cannot find symbol
+    HttpServletRequest request;
+  symbol:   class HttpServletRequest
+  location: class OldJavax
+=== old/OldJavaxValidation.java
+old\OldJavaxValidation.java:1: error: package javax.validation.constraints does not exist
+import javax.validation.constraints.NotNull;
+old\OldJavaxValidation.java:4: error: cannot find symbol
+    @NotNull String name;
+  symbol:   class NotNull
+  location: class OldJavaxValidation
+=== old/OldJdbcConnectionDetails.java
+old\OldJdbcConnectionDetails.java:1: error: package org.springframework.boot.autoconfigure.jdbc does not exist
+import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
+old\OldJdbcConnectionDetails.java:4: error: cannot find symbol
+    JdbcConnectionDetails details;
+  symbol:   class JdbcConnectionDetails
+  location: class OldJdbcConnectionDetails
+=== old/OldJsonComponent.java
+old\OldJsonComponent.java:1: error: cannot find symbol
+import org.springframework.boot.jackson.JsonComponent;
+  symbol:   class JsonComponent
+  location: package org.springframework.boot.jackson
+old\OldJsonComponent.java:3: error: cannot find symbol
+@JsonComponent
+=== old/OldMethodSecurity.java
+old\OldMethodSecurity.java:3: warning: [deprecation] EnableGlobalMethodSecurity in org.springframework.security.config.annotation.method.configuration has been deprecated
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+1 warning
+=== old/OldMockBean.java
+old\OldMockBean.java:1: error: package org.springframework.boot.test.mock.mockito does not exist
+import org.springframework.boot.test.mock.mockito.MockBean;
+old\OldMockBean.java:4: error: cannot find symbol
+    @MockBean Runnable service;
+  symbol:   class MockBean
+  location: class OldMockBean
+=== old/OldSecurityAdapter.java
+old\OldSecurityAdapter.java:1: error: cannot find symbol
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+  symbol:   class WebSecurityConfigurerAdapter
+  location: package org.springframework.security.config.annotation.web.configuration
+old\OldSecurityAdapter.java:3: error: cannot find symbol
+class OldSecurityAdapter extends WebSecurityConfigurerAdapter {}
+=== old/OldSecurityAnd.java
+old\OldSecurityAnd.java:5: error: cannot find symbol
+        http.formLogin(f -> {}).and().httpBasic(b -> {});
+  symbol:   method and()
+  location: class HttpSecurity
+1 error
+=== old/OldSecurityAntMatcherChain.java
+old\OldSecurityAntMatcherChain.java:5: error: cannot find symbol
+        http.antMatcher("/api/**");
+  symbol:   method antMatcher(String)
+  location: variable http of type HttpSecurity
+1 error
+=== old/OldSecurityAntMatchers.java
+old\OldSecurityAntMatchers.java:5: error: cannot find symbol
+        http.authorizeHttpRequests(a -> a.antMatchers("/api/**").authenticated());
+  symbol:   method antMatchers(String)
+  location: variable a of type AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry
+1 error
+=== old/OldSecurityAuthorizeHttpRequests.java
+old\OldSecurityAuthorizeHttpRequests.java:6: error: method authorizeHttpRequests in class HttpSecurity cannot be applied to given types;
+        http.authorizeHttpRequests()
+  required: Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+1 error
+=== old/OldSecurityAuthorizeRequests.java
+old\OldSecurityAuthorizeRequests.java:5: error: cannot find symbol
+        http.authorizeRequests();
+  symbol:   method authorizeRequests()
+  location: variable http of type HttpSecurity
+1 error
+=== old/OldSecurityCsrfChain.java
+old\OldSecurityCsrfChain.java:5: error: method csrf in class HttpSecurity cannot be applied to given types;
+        http.csrf().disable();
+  required: Customizer<CsrfConfigurer<HttpSecurity>>
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+1 error
+=== old/OldSecurityMvcMatchers.java
+old\OldSecurityMvcMatchers.java:5: error: cannot find symbol
+        http.authorizeHttpRequests(a -> a.mvcMatchers("/api/**").authenticated());
+  symbol:   method mvcMatchers(String)
+  location: variable a of type AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry
+1 error
+=== old/OldSpringNullable.java
+old\OldSpringNullable.java:4: warning: [deprecation] Nullable in org.springframework.lang has been deprecated
+    @Nullable String name;
+1 warning
+=== old/OldTestRestTemplate.java
+old\OldTestRestTemplate.java:1: error: package org.springframework.boot.test.web.client does not exist
+import org.springframework.boot.test.web.client.TestRestTemplate;
+old\OldTestRestTemplate.java:4: error: cannot find symbol
+    TestRestTemplate rest;
+  symbol:   class TestRestTemplate
+  location: class OldTestRestTemplate
+=== old/OldTestcontainers.java
+old\OldTestcontainers.java:4: warning: [deprecation] PostgreSQLContainer in org.testcontainers.containers has been deprecated
+    PostgreSQLContainer<?> db = new PostgreSQLContainer<>("postgres:18");
+old\OldTestcontainers.java:4: warning: [deprecation] PostgreSQLContainer in org.testcontainers.containers has been deprecated
+    PostgreSQLContainer<?> db = new PostgreSQLContainer<>("postgres:18");
+2 warnings
+=== old/OldUnprocessable.java
+old\OldUnprocessable.java:4: warning: [deprecation] UNPROCESSABLE_ENTITY in HttpStatus has been deprecated
+    HttpStatus s = HttpStatus.UNPROCESSABLE_ENTITY;
+1 warning
+=== old/OldWebMvcTest.java
+old\OldWebMvcTest.java:1: error: package org.springframework.boot.test.autoconfigure.web.servlet does not exist
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+old\OldWebMvcTest.java:3: error: cannot find symbol
+@WebMvcTest
+  symbol: class WebMvcTest
+2 errors

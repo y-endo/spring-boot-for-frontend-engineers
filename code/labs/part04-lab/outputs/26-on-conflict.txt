@@ -1,0 +1,35 @@
+ 0.2s A| BEGIN;
+ 0.2s A| BEGIN
+ 0.4s B| BEGIN;
+ 0.4s B| BEGIN
+ 0.8s A| INSERT INTO votes (poll_id, participant_id, option_id, voted_at) VALUES (1, 2, 1, now()) ON CONFLICT (poll_id, participant_id) DO UPDATE SET option_id = EXCLUDED.option_id, voted_at = EXCLUDED.voted_at WHERE votes.option_id <> EXCLUDED.option_id;
+ 0.9s A| INSERT 0 1
+ 1.2s B| -- 同じ人(participant 2)が、別の端末から同時に投票
+ 1.6s B| INSERT INTO votes (poll_id, participant_id, option_id, voted_at) VALUES (1, 2, 2, now()) ON CONFLICT (poll_id, participant_id) DO UPDATE SET option_id = EXCLUDED.option_id, voted_at = EXCLUDED.voted_at WHERE votes.option_id <> EXCLUDED.option_id;
+ 3.5s A| COMMIT;
+ 3.5s A| COMMIT
+ 3.5s B| INSERT 0 1
+ 3.9s B| COMMIT;
+ 4.0s B| COMMIT
+ 4.3s A| SELECT participant_id, option_id FROM votes WHERE poll_id = 1;
+ 4.3s A|  participant_id | option_id 
+ 4.3s A| ----------------+-----------
+ 4.3s A|               2 |         2
+ 4.3s A| (1 row)
+ 4.7s A| -- ON CONFLICT を付けない素の INSERT だと、負けた側はエラーになる
+ 5.1s A| DELETE FROM votes;
+ 5.2s A| DELETE 1
+ 5.6s A| BEGIN;
+ 5.6s A| BEGIN
+ 5.9s B| BEGIN;
+ 5.9s B| BEGIN
+ 6.3s A| INSERT INTO votes (poll_id, participant_id, option_id, voted_at) VALUES (1, 2, 1, now());
+ 6.4s A| INSERT 0 1
+ 6.7s B| INSERT INTO votes (poll_id, participant_id, option_id, voted_at) VALUES (1, 2, 2, now());
+ 8.2s A| COMMIT;
+ 8.2s A| COMMIT
+ 8.2s B| ERROR:  duplicate key value violates unique constraint "votes_poll_participant_key"
+ 8.6s B| ROLLBACK;
+ 8.6s B| ROLLBACK
+ 9.5s A| \q
+ 9.5s B| \q

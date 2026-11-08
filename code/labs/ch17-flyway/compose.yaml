@@ -1,0 +1,13 @@
+# Initializr が作った compose.yaml を、教材用に書き換えたもの。
+# - postgres:latest だと版が勝手に変わるので、PostgreSQL 18 に固定する
+# - ホスト側のポートを 25417 に固定する（Initializr の既定は '5432' ＝ ランダムなホストポート）
+# 資格情報は開発用の使い捨て。本番では使わない。
+services:
+  postgres:
+    image: 'postgres:18-alpine'
+    environment:
+      POSTGRES_DB: quickvote
+      POSTGRES_USER: quickvote
+      POSTGRES_PASSWORD: quickvote
+    ports:
+      - '25417:5432'

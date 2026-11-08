@@ -1,0 +1,16 @@
+# 第26章 前半: 「読む → 書き戻す」の後勝ち(ロストアップデート)。
+A> SELECT body, version FROM lab_memos WHERE id = 1;
+B> SELECT body, version FROM lab_memos WHERE id = 1;
+A> UPDATE lab_memos SET body = '最初 + Aの追記' WHERE id = 1;
+B> UPDATE lab_memos SET body = '最初 + Bの追記' WHERE id = 1;
+A> SELECT body, version FROM lab_memos WHERE id = 1;
+A> -- ↑ Aの追記は消えた。エラーは出ていない
+A> -- 後半: 楽観ロック。「読んだときの version のままなら更新する」を WHERE に書く
+A> UPDATE lab_memos SET body = 'メモ', version = 0 WHERE id = 1;
+A> SELECT body, version FROM lab_memos WHERE id = 1;
+A> BEGIN;
+A> UPDATE lab_memos SET body = 'Aの版', version = version + 1 WHERE id = 1 AND version = 0;
+B> UPDATE lab_memos SET body = 'Bの版', version = version + 1 WHERE id = 1 AND version = 0;
+wait 1500
+A> COMMIT;
+A> SELECT body, version FROM lab_memos WHERE id = 1;
